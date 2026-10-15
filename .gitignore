@@ -19,7 +19,8 @@ build.local.bat
 build.local.sh
 
 CLAUDE.md
-AGENTS.md
+# AGENTS.md is deliberately NOT ignored in this fork: the working notes are committed so they travel
+# with the repository. See AGENTS.md, "Deliberate deviations from upstream".
 
 # graphify knowledge-graph output + extraction cache (derived, ~230 MB)
 **/graphify-out/
