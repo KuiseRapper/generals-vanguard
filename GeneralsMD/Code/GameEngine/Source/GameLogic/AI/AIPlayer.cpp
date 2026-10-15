@@ -6898,6 +6898,34 @@ static Waypoint *findFarthestWaypointOnPath( const Coord3D *from, const AsciiStr
 }
 
 //----------------------------------------------------------------------------------------------------------
+/** Which of the lanes an army can actually take, for the lane votes that read reachable[].  A lane is
+	* out of reach when the pathfinder cannot get a ground unit from from to the waypoint at the end it
+	* leads to.  Every lane reads reachable when the map has no such waypoint, or when this AI owns no
+	* ground unit yet to ask: reachability unknown leaves the vote exactly as it was.  The locomotor set
+	* is taken once, off any one walking unit, because clientSafeQuickDoesPathExist reads nothing off it
+	* but the surfaces its locomotor may cross and every ground unit answers that the same way. */
+//----------------------------------------------------------------------------------------------------------
+static void buildLaneReachability( Player *player, const Coord3D *from, Int pathSuffix, Int laneCount,
+																	 const char *const *lanes, Bool *reachable )
+{
+	const LocomotorSet *armyLocomotors = NULL;
+	player->iterateObjects( findOwnGroundLocomotorSet, &armyLocomotors );
+
+	for( Int i = 0; i < laneCount; ++i )
+	{
+		AsciiString label;
+		label.format( "%s%d", lanes[ i ], pathSuffix );
+		// the lane is judged by the end it leads to, not by the waypoint beside our own base: the near
+		// one is reachable whatever the map does, so asking about it would never exclude the ravine.
+		// The units follow the path from that end onward, so a lane whose far end cannot be reached is
+		// the one that runs into the ravine.
+		Waypoint *end = findFarthestWaypointOnPath( from, label );
+		reachable[ i ] = (end == NULL || armyLocomotors == NULL) ? TRUE :
+			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, end->getLocation() );
+	}
+}
+
+//----------------------------------------------------------------------------------------------------------
 /** B4, second attempt.  The first aimed at the enemy's most valuable cell, which is his money, and
 	* walked past his army: 7-9, twice the losses.  The roadmap asked for the approach where the defence
 	* is thinnest, and the engine's threat layer cannot say where that is - it is built from
@@ -6933,11 +6961,9 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 	// Untested in play: whether skipping an unreachable lane wins more is not claimed here, and has to
 	// be argued with a measured ai-batch.ps1 batch over seeds (win rate, match length) once game data
 	// is available.
-	const LocomotorSet *armyLocomotors = NULL;
-	m_player->iterateObjects( findOwnGroundLocomotorSet, &armyLocomotors );
-
 	Real firepower[ LANE_COUNT ];
 	Bool reachable[ LANE_COUNT ];
+	buildLaneReachability( m_player, from, pathSuffix, LANE_COUNT, LANES, reachable );
 	for( Int i = 0; i < LANE_COUNT; ++i )
 	{
 		AsciiString label;
@@ -6945,13 +6971,6 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 		// a rung that does not vote never reads the firepower, so it is not counted there
 		Waypoint *way = TheTerrainLogic->getClosestWaypointOnPath( from, label );
 		firepower[ i ] = (way == NULL || !votes) ? -1.0f : knownFirepowerAlongPath( way );
-		// the lane is judged by the end it leads to, not by the waypoint beside our own base: the near
-		// one is reachable whatever the map does, so asking about it would never exclude the ravine.
-		// The units follow the path from that end onward, so a lane whose far end cannot be reached is
-		// the one that runs into the ravine.
-		Waypoint *end = findFarthestWaypointOnPath( from, label );
-		reachable[ i ] = (end == NULL || armyLocomotors == NULL) ? TRUE :
-			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, end->getLocation() );
 	}
 
 	if( !votes )
@@ -6977,7 +6996,7 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 }
 
 //----------------------------------------------------------------------------------------------------------
-/** The quietest road that is not this one, or empty when the map has no other. */
+/** The quietest road that is not this one and that the army can reach, or empty when the map has no other. */
 //----------------------------------------------------------------------------------------------------------
 AsciiString AIPlayer::secondApproachLabel( const Coord3D *from, const AsciiString &taken, Int pathSuffix )
 {
@@ -6988,6 +7007,8 @@ AsciiString AIPlayer::secondApproachLabel( const Coord3D *from, const AsciiStrin
 	static const char *LANES[ LANE_COUNT ] = { SKIRMISH_CENTER, SKIRMISH_FLANK, SKIRMISH_BACKDOOR };
 
 	Real firepower[ LANE_COUNT ];
+	Bool reachable[ LANE_COUNT ];
+	buildLaneReachability( m_player, from, pathSuffix, LANE_COUNT, LANES, reachable );
 	for( Int i = 0; i < LANE_COUNT; ++i )
 	{
 		firepower[ i ] = -1.0f;
@@ -7000,7 +7021,9 @@ AsciiString AIPlayer::secondApproachLabel( const Coord3D *from, const AsciiStrin
 			firepower[ i ] = knownFirepowerAlongPath( way );
 	}
 
-	const Int lane = aiLeastDefendedLane( firepower, NULL, LANE_COUNT, -1 );
+	// the same mask the main vote uses: the split wave is not sent down a second road the army cannot
+	// take, however quiet it reads
+	const Int lane = aiLeastDefendedLane( firepower, reachable, LANE_COUNT, -1 );
 	return (lane < 0) ? AsciiString::TheEmptyString : AsciiString( LANES[ lane ] );
 }
 
