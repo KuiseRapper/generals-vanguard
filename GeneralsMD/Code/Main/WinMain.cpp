@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -587,6 +588,21 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT message,
 					// leaves the Windows arrow on screen (issue #54).
 					if (isWinMainActive)
 						::SetFocus(hWnd);
+					// The game's window covers the screen and is put into the topmost band by WinMain at
+					// startup, by W3DDisplay's applyWindowFrame and sizeWindowToClient on every mode change,
+					// and by DX8Wrapper's Apply_Fullscreen_Display on the way back.  Nothing ever took it out
+					// again, and a topmost window cannot be covered by another, so alt-tabbing away moved the
+					// focus and left the game's picture over the window that got it - the switch looked like
+					// it did nothing.  Borderless is the worse case: it is topmost too, and the device layer's
+					// own way out (Apply_Fullscreen_Display's SW_SHOWMINNOACTIVE) is reached only for a
+					// fullscreen device, so it was never hidden at all.
+					//
+					// Leaving the band is harmless for any window, and a window with a caption is an ordinary
+					// window that never entered it.  Coming back, only fullscreen is re-placed by
+					// Apply_Fullscreen_Display, so borderless needs the band entered again here.
+					if (!isWinMainActive || (::GetWindowLong(hWnd, GWL_STYLE) & WS_CAPTION) == 0)
+						::SetWindowPos(hWnd, isWinMainActive ? HWND_TOPMOST : HWND_NOTOPMOST,
+							0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 				}
 				return 0;
 			}

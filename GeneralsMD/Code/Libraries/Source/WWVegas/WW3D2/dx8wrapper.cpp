@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 /***********************************************************************************************
  ***              C O N F I D E N T I A L  ---  W E S T W O O D  S T U D I O S               ***
@@ -1822,7 +1823,17 @@ bool DX8Wrapper::Set_Device_Resolution(int width,int height,int bits,int windowe
 		}
 #endif
 #pragma message("TODO: support changing windowed status and changing the bit depth")
-		Apply_Fullscreen_Display(true);
+		// The guard Set_Render_Device uses (see the comment there): a resolution change made while
+		// the game is not in front - the options screen's "keep this resolution?" timer expiring
+		// after an alt-tab, a menu, a mode change - showed the topmost window over whatever the
+		// player had switched to, without activating it, and it stayed there.  The activation path
+		// puts the display up when he comes back.
+		bool inFront = true;
+#if defined(_WIN32)
+		inFront = (::GetForegroundWindow() == _Hwnd);
+#endif
+		if (inFront)
+			Apply_Fullscreen_Display(true);
 		const bool reset = Reset_Device();
 		Direct3D11_Resize(ResolutionWidth, ResolutionHeight);
 		return reset;
