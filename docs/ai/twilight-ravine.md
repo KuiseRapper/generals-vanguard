@@ -1,7 +1,26 @@
 # Twilight Flame: the AI and the ravine
 
-Findings from reading the engine (2026-10-15), for backlog item 3. Two symptoms, three causes, and
-the first of them is not in the pathfinder at all.
+Findings from reading the engine (2026-10-15), for backlog item 3. Two symptoms, two real causes, and
+neither is where it looks. The third candidate turned out to be dead code - see (b).
+
+## Status (2026-10-15): implemented, not measured
+
+Five commits on `ai/lane-reachability`. None of it has been played or measured; each needs a batch
+before it can be called an improvement.
+
+| commit | what it does |
+|---|---|
+| `b25e8a28` | an unreachable lane is kept out of the attack lane vote (`aiLeastDefendedLane` gains a mask) |
+| `dda6c909` | a lane is judged by the waypoint at its **far** end - the near one sits beside our own base and is reachable whatever the map does, so asking about it excluded nothing |
+| `9893a984` | Easy and Medium, which do not vote, take a reachable lane when the script's lane is out of reach |
+| `cb733b0d` | the same check for the split wave's "second road" (`secondApproachLabel`) |
+| `f7466a08` | `-strictgoal`, default **off**: an order to a goal the army cannot reach reports no path instead of a hand-out route to the rim |
+
+Failure mode accepted in the far-end heuristic, from the agent that wrote it: the mask judges a whole
+lane by one waypoint, so a wrong "unreachable" drops a good lane - the farthest *labelled* waypoint
+need not be the lane's true terminus, and it is Euclidean farthest, not path-order farthest. It is
+bounded, because the mask can only remove lanes from a vote and never add or reorder them, and with
+none reachable the old behaviour stands.
 
 ## (a0) The root cause: the lane vote never asks whether the road can be walked
 
@@ -55,23 +74,30 @@ nothing re-checks them. The waves are ordered along the map's own waypoint paths
 `AIPlayer::sendWave`, `AIPlayer.cpp:9363-9405`, using `<lane><enemyStart+1>` labels resolved from the
 `.map`'s waypoint objects.
 
-## (b) Units piling up at the AI's own plateau edge
+## (b) The pile at the AI's own plateau edge - and why it is not the "fist"
 
-`AIPlayer::doMass` stages the skirmish "fist" one base radius out from the base centre **straight at
-the enemy** — `AIPlayer.cpp:8061-8075`:
+The first reading of this blamed `AIPlayer::doMass`, which stages a "fist" one base radius out from
+the base centre straight at the enemy - on this map, the plateau edge facing the ravine. **That code
+does not run.** `doMass` returns at its first gate, `getSkillProfile()->m_massUnit`
+(`AIPlayer.cpp:7919`), because:
 
-```cpp
-staging.x += toward.x * m_baseRadius;
-staging.y += toward.y * m_baseRadius;
-```
+- `m_massUnit` is **false on all three rungs** of the compiled ladder (`s_defaultSkillLadder`,
+  `AI.cpp:1245-1250`); and
+- the shipped data does not override it - there is no `SkillLevel` block anywhere under
+  `GeneralsMD/Code/Data/`, and no `MassUnit` in any of its INI files.
 
-With the enemy across the ravine that point *is* the plateau edge facing it. The fist holds up to
-`MASS_FIST_MAX_UNITS = 14` units for up to `MASS_MAX_HOLD_FRAMES = 180 * LOGICFRAMES_PER_SECOND`
-(3 minutes) waiting to be "ready" — `AIPlayer.cpp:7817-7829`, `:8020-8023`. New mass units are only
-taken while `isAtHome` (`AIPlayer.cpp:7117-7120`, a two-base-radius ring).
+Upstream measured it and left it off deliberately (`AI.cpp:1192-1195`): *"massU on top shortened the
+matches and lost more for what it killed (0.70 against 0.64), so it stays off until it earns its
+place."*
 
-The staging point exists on purpose: the comment says it keeps the mass "out of the way of the
-factories' doors" (`AIPlayer.cpp:8061`), which is why moving it is not free.
+So the pile is not the fist. It is the **deliberate massing before an attack** -
+`m_massBeforeAttacking` is true on Brutal - which parks finished teams until a wave is worth enough
+(`doWaves`, `holdTeamForWave`, `m_heldTeam[]`; `WAVE_POWER` 6000, or a 90 s cap). They idle at their
+rally point, and where that is comes from the team prototypes inside the compiled
+`SkirmishScripts.scb`, not from C++. That is a design and data question rather than a pathfinding
+bug, and upstream has already tried holding finished teams for massing and reverted it - twenty
+measured brutal-vs-brutal matches went from nine decided to none (`AIPlayer.cpp:4582-4594`). It is
+left alone.
 
 ## What a mod cannot do about it
 
@@ -92,6 +118,10 @@ factories' doors" (`AIPlayer.cpp:8061`), which is why moving it is not free.
   A* and nothing about this. It also needs `pygame`, which is not installed here.
 
 ## Ranked fixes
+
+Already implemented on `ai/lane-reachability` (see Status): E2 in its far-end form, the Easy/Medium
+fallback, the second road, and E behind `-strictgoal`. H is withdrawn - (b) is a false lead. What is
+left is the measurement, and confirming the far-end heuristic on a real map.
 
 | # | Change | Fixes | Cost / risk |
 |---|---|---|---|
