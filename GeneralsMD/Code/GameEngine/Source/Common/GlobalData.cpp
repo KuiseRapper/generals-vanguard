@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -721,6 +722,7 @@ GlobalData::GlobalData()
 	m_noTacticsSlotParity = -1;
 	m_aiKnobsOffParity = -1;
 	m_aiKnobsOffMask = 0;
+	m_strictGoal = FALSE;				// an unreachable goal still gets the closest-path fallback, as it always has
 	m_autoSkirmishTeams = 0;				// 0 = not set: every slot fights every other slot
 	m_peaceTime = 0;								// no truce unless -peacetime asks for one
 	m_unitLimit = FALSE;						// no unit limit unless -unitlimit asks for one
