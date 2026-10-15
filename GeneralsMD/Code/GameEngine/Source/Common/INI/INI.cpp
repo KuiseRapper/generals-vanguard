@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -663,7 +664,7 @@ void ModNamespace::finishScan( Int mod )
 	{
 		Bool reserved = FALSE;
 		for (size_t i = 0; i < ARRAY_SIZE( Reserved ) && !reserved; ++i)
-			reserved = stricmp( it->c_str(), Reserved[ i ] ) == 0;
+			reserved = strcasecmp( it->c_str(), Reserved[ i ] ) == 0;
 		if (reserved)
 			it = names.all.erase( it );
 		else
@@ -739,7 +740,7 @@ Bool ModNamespace::isAssetField( const std::string &field )
 	};
 	for (size_t i = 0; i < ARRAY_SIZE( AssetFields ); ++i)
 	{
-		if (stricmp( field.c_str(), AssetFields[ i ] ) == 0)
+		if (strcasecmp( field.c_str(), AssetFields[ i ] ) == 0)
 			return TRUE;
 	}
 	return FALSE;
