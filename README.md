@@ -5,6 +5,8 @@
 Command & Conquer: Generals Zero Hour, rebuilt from the source EA opened and played as a game again.<br>
 64-bit, on Windows, macOS and Linux.
 
+> **EA has not endorsed and does not support this product.**
+
 <img src=".github/media/hero.jpg" alt="American tanks cross a stone bridge into a German village under an A-10 strike, long morning shadows over the stream" width="100%">
 
 [![release](https://img.shields.io/github/v/release/olcayseygan/CnCGeneralsZH-Reforged?style=for-the-badge&label=release&labelColor=161b22&color=4459b6)](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/releases/latest)
@@ -393,6 +395,24 @@ ARM64 port. Fixes taken from [TheSuperHackers/GeneralsGameCode](https://github.c
 the community's CMake port of the same source, are credited where they landed, in the code and in the
 commits. Third-party libraries are fetched at pinned versions and keep their own licences;
 [NOTICE.md](NOTICE.md) lists who wrote what and under which licence.
+
+**Generals Vanguard** is the fork of that port - forked at `e81b9f6a` - and adds its own work on top.
+Vanguard modifications © 2026 KuiseRapper, under the same licence. What the fork changed is in
+[CHANGELOG.md](CHANGELOG.md); how it is maintained is in [AGENTS.md](AGENTS.md).
+
+## Licence and required notices
+
+**EA has not endorsed and does not support this product.**
+
+Generals Vanguard is an unofficial, fan-made, non-commercial project. It is not affiliated with,
+endorsed by, or sponsored by Electronic Arts.
+
+Command & Conquer, Generals and Zero Hour are trademarks of Electronic Arts Inc. or its licensors.
+
+Requires your own legitimate copy of Command & Conquer Generals: Zero Hour. No data from that install
+is included: the art in this repository is either what EA published alongside the source or art this
+project's upstream authored. The code is GPL v3 with EA's additional terms - see
+[LICENSE.md](LICENSE.md), kept verbatim, which cannot be relicensed.
 
 ---
 
