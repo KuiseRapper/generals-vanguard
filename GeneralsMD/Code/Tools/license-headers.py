@@ -62,6 +62,18 @@ PORT_C = ["/*"] + [("**\t" + l) if l else "**" for l in BODY] + ["*/"]
 PORT_HASH = [("#\t" + l) if l else "#" for l in BODY]
 assert len(PORT_C) == 17
 
+# Generals Vanguard: a file this fork adds carries the fork's copyright line, not the port's.  The
+# port's rule is that anything added is the port author's work, which is true upstream and false
+# here - writing his name over a file he did not write would be a false credit.  The checker accepts
+# either block, and a file that starts with neither gets the fork's, because upstream's added files
+# already carry theirs and are therefore left alone.  NOTICE.md records the fork rule.
+FORK_HOLDER = "KuiseRapper"
+FORK_BODY = ["Copyright 2026 " + FORK_HOLDER + " for Generals Vanguard.",
+	"Additional terms under GNU GPL section 7 apply: see LICENSE.md.", ""] + GPL_LINES
+FORK_PORT_C = ["/*"] + [("**\t" + l) if l else "**" for l in FORK_BODY] + ["*/"]
+FORK_PORT_HASH = [("#\t" + l) if l else "#" for l in FORK_BODY]
+assert len(FORK_PORT_C) == 17
+
 MOD_MARK = "for the macOS/Linux port"
 def mod_line(holder):
 	return "// Modified 2026 by " + holder + " " + MOD_MARK + "; see NOTICE.md and the git history."
@@ -162,11 +174,12 @@ def ea_block(lines):
 
 
 def port_block_end(lines, style):
-	"""-> index of the port header's last line if the file starts with it (after a shebang), else None"""
+	"""-> index of the port's or the fork's header last line if the file starts with one, else None"""
 	first = 1 if lines and lines[0].startswith(b"#!") else 0
-	want = [l.encode() for l in (PORT_C if style == "c" else PORT_HASH)]
-	if lines[first:first + len(want)] == want:
-		return first + len(want) - 1
+	for candidate in ((PORT_C, FORK_PORT_C) if style == "c" else (PORT_HASH, FORK_PORT_HASH)):
+		want = [l.encode() for l in candidate]
+		if lines[first:first + len(want)] == want:
+			return first + len(want) - 1
 	return None
 
 
@@ -228,9 +241,9 @@ def fix_added(path, data, ea_template):
 			return None, None
 		lines = [l for i, l in enumerate(lines) if not (after <= i < after + 3 and MOD_MARK.encode() in l)]
 		return join_lines(bom, lines[:after] + [want] + lines[after:], eol, ends), None
-	header = [l.encode("utf-8") for l in (PORT_C if style == "c" else PORT_HASH)]
-	if holder != HOLDER:
-		header = [l.replace(HOLDER.encode("utf-8"), HOLDER_ASCII.encode()) for l in header]
+	# A file added in this fork gets the fork's copyright line (see FORK_HOLDER above).  Our holder is
+	# plain ASCII, so the encoding shuffle the port's İ and ı need does not apply here.
+	header = [l.encode("utf-8") for l in (FORK_PORT_C if style == "c" else FORK_PORT_HASH)]
 	credit = [upstream_line(path, style).encode("utf-8")] if path in ADAPTED_UPSTREAM else []
 	if block is not None:
 		if style != "c":

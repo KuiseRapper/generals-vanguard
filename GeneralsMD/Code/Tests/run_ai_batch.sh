@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#	Copyright 2026 İlyas Akın
+#	Copyright 2026 KuiseRapper for Generals Vanguard.
 #	Additional terms under GNU GPL section 7 apply: see LICENSE.md.
 #
 #	This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright 2026 KuiseRapper for Generals Vanguard; see the git history.
 #
 # ai-batch.sh on itself, with no game data and no game binary:
 #   1. --parse-only on a fixture prints the win-rate table a measurement is read from: the decided and

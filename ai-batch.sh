@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#	Copyright 2026 İlyas Akın
+#	Copyright 2026 KuiseRapper for Generals Vanguard.
 #	Additional terms under GNU GPL section 7 apply: see LICENSE.md.
 #
 #	This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,6 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Copyright 2026 KuiseRapper for Generals Vanguard; see the git history.
 #
 # ai-batch.sh: ai-batch.ps1's POSIX twin.  Section 0 of AI-ROADMAP.md: no AI change can be claimed
 # without a number behind it, and one match proves nothing - the same seed on the same map is

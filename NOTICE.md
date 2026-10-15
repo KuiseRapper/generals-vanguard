@@ -12,6 +12,7 @@ or sponsored by Electronic Arts Inc.
 | The released source code (commit `49843ea4`, 2025-02-27) | Electronic Arts Inc. | GPL-3.0-or-later, with EA's additional terms |
 | The upstream fork, CnCGeneralsZH-Reforged (2026) | Olcay Seygan | GPL-3.0-or-later, as a modification of EA's release |
 | The macOS and Linux port on this branch (2026) | İlyas Akın | GPL-3.0-or-later, as a modification of the above |
+| Generals Vanguard, the fork of this port (2026) | KuiseRapper | GPL-3.0-or-later, as a modification of the above |
 
 The additional terms in LICENSE.md apply to the whole program, including every modification.
 
@@ -28,6 +29,25 @@ The additional terms in LICENSE.md apply to the whole program, including every m
 - `GeneralsMD/Code/Tools/license-headers.py --check` verifies all of the above.
 
 Files that upstream added or changed carry upstream's own notices, which this port does not alter.
+
+### Generals Vanguard, the fork of this port
+
+- **A file this fork adds** carries `Copyright 2026 KuiseRapper for Generals Vanguard.` and the same
+  GPL-3.0-or-later notice the port's added files carry.
+- **A file this fork changes** carries a third line under the port's two:
+  `Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.`
+- `GeneralsMD/Code/Tools/license-headers.py --check` is the authority for it. It accepts either the
+  port's header block or the fork's on a file that was added, and writes the fork's when a new file
+  has neither.
+
+This is a deliberate deviation from the port's rule, which has every added file carry the port
+author's name. That is true upstream, where everything added is his work; it is false here, and
+writing his name over a file he did not write would be a false credit. The port's own added files
+already carry the port's block, so nothing upstream owns is rewritten.
+
+### Required statement
+
+EA has not endorsed and does not support this product.
 
 ## Trademarks
 
