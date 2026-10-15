@@ -12219,27 +12219,62 @@ TEST(the_bank_target_and_the_upgrade_the_army_pays_for)
 TEST(an_attack_takes_the_least_defended_lane)
 {
 	const Real quiet[3] = { 5000.0f, 800.0f, 2400.0f };
-	CHECK_EQ( 1, aiLeastDefendedLane( quiet, 3, 0 ) );
+	CHECK_EQ( 1, aiLeastDefendedLane( quiet, NULL, 3, 0 ) );
 
 	// nothing known anywhere: the lane the script asked for
 	const Real unknown[3] = { 0.0f, 0.0f, 0.0f };
-	CHECK_EQ( 2, aiLeastDefendedLane( unknown, 3, 2 ) );
+	CHECK_EQ( 2, aiLeastDefendedLane( unknown, NULL, 3, 2 ) );
 
 	// a tie with the asked-for lane keeps it
 	const Real tie[3] = { 800.0f, 800.0f, 2400.0f };
-	CHECK_EQ( 0, aiLeastDefendedLane( tie, 3, 0 ) );
+	CHECK_EQ( 0, aiLeastDefendedLane( tie, NULL, 3, 0 ) );
 
 	// a lane the map does not have is never taken, however quiet it reads
 	const Real missing[3] = { 3000.0f, -1.0f, 1000.0f };
-	CHECK_EQ( 2, aiLeastDefendedLane( missing, 3, 0 ) );
+	CHECK_EQ( 2, aiLeastDefendedLane( missing, NULL, 3, 0 ) );
 
 	// ... and when the asked-for lane is the missing one, the quietest that exists
 	const Real noCenter[3] = { -1.0f, 900.0f, 400.0f };
-	CHECK_EQ( 2, aiLeastDefendedLane( noCenter, 3, 0 ) );
+	CHECK_EQ( 2, aiLeastDefendedLane( noCenter, NULL, 3, 0 ) );
 
 	// no lanes at all: the script's
 	const Real none[3] = { -1.0f, -1.0f, -1.0f };
-	CHECK_EQ( 1, aiLeastDefendedLane( none, 3, 1 ) );
+	CHECK_EQ( 1, aiLeastDefendedLane( none, NULL, 3, 1 ) );
+
+}
+
+
+/** B4, third attempt.  A lane with no enemy firepower on it can be the quietest road on the map simply
+	 because the army cannot cross it: on Twilight Flame the flank waypoints run into a ravine.  A lane
+	 the pathfinder says is out of reach is passed over, exactly as one the map does not have is. */
+TEST(an_attack_skips_a_lane_the_army_cannot_reach)
+{
+	// the quietest lane is a ravine, so the quietest lane that can be crossed is taken
+	const Real firepower[3] = { 5000.0f, 0.0f, 2400.0f };
+	const Bool reachable[3] = { TRUE, FALSE, TRUE };
+	CHECK_EQ( 2, aiLeastDefendedLane( firepower, reachable, 3, 0 ) );
+
+	// the same votes with no reachability known vote exactly as before
+	CHECK_EQ( 1, aiLeastDefendedLane( firepower, NULL, 3, 0 ) );
+
+	// the lane the script asked for is not kept when it is the one out of reach
+	const Real requestedQuietest[3] = { 100.0f, 900.0f, 5000.0f };
+	const Bool requestedOutOfReach[3] = { FALSE, TRUE, TRUE };
+	CHECK_EQ( 1, aiLeastDefendedLane( requestedQuietest, requestedOutOfReach, 3, 0 ) );
+
+	// every lane out of reach: the script's lane, as when nothing is known anywhere
+	const Bool noneReachable[3] = { FALSE, FALSE, FALSE };
+	CHECK_EQ( 0, aiLeastDefendedLane( firepower, noneReachable, 3, 0 ) );
+
+	// a tie among the lanes that can be reached still keeps the asked-for one
+	const Real tie[3] = { 800.0f, 800.0f, 2400.0f };
+	const Bool tieReachable[3] = { TRUE, TRUE, TRUE };
+	CHECK_EQ( 1, aiLeastDefendedLane( tie, tieReachable, 3, 1 ) );
+
+	// a lane the map does not have stays out of the vote whether or not it reads as reachable
+	const Real missing[3] = { 3000.0f, -1.0f, 1000.0f };
+	const Bool missingReachable[3] = { TRUE, TRUE, TRUE };
+	CHECK_EQ( 2, aiLeastDefendedLane( missing, missingReachable, 3, 0 ) );
 
 }
 

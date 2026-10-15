@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -1673,12 +1674,14 @@ Int aiPickUpgrade( const Real *covered, const Int *cost, Int count, Real payoff,
 }
 
 //-------------------------------------------------------------------------------------------------
-Int aiLeastDefendedLane( const Real *laneFirepower, Int laneCount, Int requestedLane )
+Int aiLeastDefendedLane( const Real *laneFirepower, const Bool *laneReachable, Int laneCount, Int requestedLane )
 {
 	Int quietest = -1;
 	for( Int i = 0; i < laneCount; ++i )
 	{
 		if( laneFirepower[ i ] < 0.0f )
+			continue;
+		if( laneReachable != NULL && !laneReachable[ i ] )
 			continue;
 		if( quietest < 0 || laneFirepower[ i ] < laneFirepower[ quietest ] )
 			quietest = i;
@@ -1686,7 +1689,8 @@ Int aiLeastDefendedLane( const Real *laneFirepower, Int laneCount, Int requested
 	if( quietest < 0 )
 		return requestedLane;
 
-	const Bool requestedExists = requestedLane >= 0 && requestedLane < laneCount && laneFirepower[ requestedLane ] >= 0.0f;
+	const Bool requestedExists = requestedLane >= 0 && requestedLane < laneCount && laneFirepower[ requestedLane ] >= 0.0f &&
+		(laneReachable == NULL || laneReachable[ requestedLane ]);
 	if( requestedExists && laneFirepower[ requestedLane ] <= laneFirepower[ quietest ] )
 		return requestedLane;
 	return quietest;

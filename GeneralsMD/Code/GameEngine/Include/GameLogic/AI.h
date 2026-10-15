@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -578,10 +579,13 @@ Real aiUpgradeWeight( Bool fights, Real fit, Real nonCombatWeight );
 	* payoff, or half of payoff when the bank is past its target.  -1 for none.  Ties go to the first. */
 Int aiPickUpgrade( const Real *covered, const Int *cost, Int count, Real payoff, Bool overTarget );
 
-/** Which approach a team takes: the lane with the least known enemy firepower along it.  A negative
-	* entry is a lane this map does not have.  A tie, or nothing known anywhere, keeps the lane the
-	* script asked for, so an AI that has not scouted plays exactly as the script wrote it. */
-Int aiLeastDefendedLane( const Real *laneFirepower, Int laneCount, Int requestedLane );
+/** Which approach a team takes: the lane with the least known enemy firepower along it, out of the
+	* lanes the army can reach.  A negative entry is a lane this map does not have, and laneReachable
+	* FALSE is one the army cannot cross - either is passed over.  laneReachable may be NULL, which
+	* means every lane is reachable and the vote is exactly the one without the mask.  A tie, or nothing
+	* known anywhere, keeps the lane the script asked for, so an AI that has not scouted plays exactly
+	* as the script wrote it. */
+Int aiLeastDefendedLane( const Real *laneFirepower, const Bool *laneReachable, Int laneCount, Int requestedLane );
 
 /** Whether the attack teams parked at the staging point go now: when what is parked adds up to a wave,
 	* or the oldest has waited long enough.  The threshold is this AI's own force, never a fraction of

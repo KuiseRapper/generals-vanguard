@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -6850,6 +6851,24 @@ Bool AIPlayer::placeNear( const ThingTemplate *tmpl, const Coord3D *center, Real
 }
 
 //----------------------------------------------------------------------------------------------------------
+/** The locomotor set of one ground unit of ours, or NULL while we have none.  Any of them will do:
+	* clientSafeQuickDoesPathExist reads nothing off the set but the surfaces its locomotor may cross,
+	* and every unit that walks answers that the same way. */
+//----------------------------------------------------------------------------------------------------------
+static void findOwnGroundLocomotorSet( Object *obj, void *userData )
+{
+	const LocomotorSet **found = (const LocomotorSet **)userData;
+	if( *found != NULL || obj == NULL || obj->isEffectivelyDead() || obj->getAI() == NULL )
+		return;
+	if( obj->isKindOf( KINDOF_STRUCTURE ) || obj->isKindOf( KINDOF_IMMOBILE ) ||
+			obj->isKindOf( KINDOF_PROJECTILE ) || obj->isKindOf( KINDOF_AIRCRAFT ) )
+		return;
+	if( !obj->isKindOf( KINDOF_INFANTRY ) && !obj->isKindOf( KINDOF_VEHICLE ) )
+		return;
+	*found = &obj->getAI()->getLocomotorSet();
+}
+
+//----------------------------------------------------------------------------------------------------------
 /** B4, second attempt.  The first aimed at the enemy's most valuable cell, which is his money, and
 	* walked past his army: 7-9, twice the losses.  The roadmap asked for the approach where the defence
 	* is thinnest, and the engine's threat layer cannot say where that is - it is built from
@@ -6874,19 +6893,32 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 	if( requestedLane < 0 )
 		return requested;		// "Special" and whatever a map names for itself stay the script's business
 
+	// a lane with no enemy firepower on it reads as the quietest road on the map even when it ends in
+	// a ravine the army cannot cross, so a lane the pathfinder says we cannot reach is kept out of the
+	// vote.  With no ground unit of ours yet there is nothing to ask, and every lane stays open.
+	// Untested in play: whether skipping an unreachable lane wins more is not claimed here, and has to
+	// be argued with a measured ai-batch.ps1 batch over seeds (win rate, match length) once game data
+	// is available.
+	const LocomotorSet *armyLocomotors = NULL;
+	m_player->iterateObjects( findOwnGroundLocomotorSet, &armyLocomotors );
+
 	Real firepower[ LANE_COUNT ];
+	Bool reachable[ LANE_COUNT ];
 	for( Int i = 0; i < LANE_COUNT; ++i )
 	{
 		AsciiString label;
 		label.format( "%s%d", LANES[ i ], pathSuffix );
 		Waypoint *way = TheTerrainLogic->getClosestWaypointOnPath( from, label );
 		firepower[ i ] = (way == NULL) ? -1.0f : knownFirepowerAlongPath( way );
+		reachable[ i ] = (way == NULL || armyLocomotors == NULL) ? TRUE :
+			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, way->getLocation() );
 	}
 
-	const Int lane = aiLeastDefendedLane( firepower, LANE_COUNT, requestedLane );
+	const Int lane = aiLeastDefendedLane( firepower, reachable, LANE_COUNT, requestedLane );
 	if( lane != requestedLane )
-		DEBUG_LOG(("AI LANE frame %d player %d takes %s (%.0f) instead of %s (%.0f)\n", TheGameLogic->getFrame(),
-			m_player->getPlayerIndex(), LANES[ lane ], firepower[ lane ], LANES[ requestedLane ], firepower[ requestedLane ]));
+		DEBUG_LOG(("AI LANE frame %d player %d takes %s (%.0f) instead of %s (%.0f), reachable %d/%d/%d\n", TheGameLogic->getFrame(),
+			m_player->getPlayerIndex(), LANES[ lane ], firepower[ lane ], LANES[ requestedLane ], firepower[ requestedLane ],
+			reachable[ 0 ], reachable[ 1 ], reachable[ 2 ]));
 	return AsciiString( LANES[ lane ] );
 }
 
@@ -6914,7 +6946,7 @@ AsciiString AIPlayer::secondApproachLabel( const Coord3D *from, const AsciiStrin
 			firepower[ i ] = knownFirepowerAlongPath( way );
 	}
 
-	const Int lane = aiLeastDefendedLane( firepower, LANE_COUNT, -1 );
+	const Int lane = aiLeastDefendedLane( firepower, NULL, LANE_COUNT, -1 );
 	return (lane < 0) ? AsciiString::TheEmptyString : AsciiString( LANES[ lane ] );
 }
 
