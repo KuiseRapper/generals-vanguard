@@ -1,7 +1,16 @@
-﻿# Generals Vanguard changes
+# Generals Vanguard changes
 
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
+
+## 2026-10-15 - Version 0.2.0
+
+- The version line moves to 0.2.0. It covers the rename, the credits and licence notices, the fork's
+  own file-header rule, and `ai-batch.sh`. It changes nothing about how the game plays.
+- The ravine work on `ai/lane-reachability` (five commits: the lane vote, the far-end correction, the
+  Easy and Medium fallback, the split wave's second road, and `-strictgoal`) is deliberately **not**
+  in this version. It changes AI behaviour and is unmeasured, so it waits for a headless batch to
+  argue it - see `docs/ai/twilight-ravine.md`.
 
 ## 2026-10-15 - The product is Generals Vanguard
 
