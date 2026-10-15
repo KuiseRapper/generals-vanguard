@@ -1,0 +1,11 @@
+Log started: 2026-10-15 17:40:10
+INI: loading Data\INI\Default\GameData.ini
+random map seed 1: 2 players, 128 playable cells a side
+HEADLESS RESULT: frame limit reached on frame 60000 (60000 frames in 91.2s wall, 658 logic fps, 11.0x real time)
+HEADLESS PARTICLES: 0 systems, 0 particles
+HEADLESS CRC: 0x1234ABCD at frame 60000
+HEADLESS PATHFIND: queue 45000x/350 find 12001x/5 expand 90000x | nopath 4 outofcells 0 blocked 121 stuck 4 wedge 1 worst 90 escape 2 repath 6 dither 1
+HEADLESS JOBS: 0 worker threads, 0 allocations from a job
+HEADLESS PLAYER 2 'Hard AI': alive | score 5000 | money 6000 earned 5500 spent | units 20 built 8 lost 9 killed peak 22 | buildings 12 built 2 lost | slot 0 team -1
+HEADLESS PLAYER 3 'Hard AI': alive | score 5300 | money 5900 earned 5600 spent | units 19 built 9 lost 8 killed peak 21 | buildings 11 built 2 lost | slot 1 team -1
+Log closed: 2026-10-15 17:41:41

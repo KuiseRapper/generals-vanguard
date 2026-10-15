@@ -150,8 +150,9 @@ setup step for this project.
   comparing two builds needs nothing installed; `-logPrefix` keeps each run's log separate;
   `-nodevice` runs with no graphics device at all.
 - `ai-batch.ps1` drives batches of headless matches over seeds and prints the win rate per seat.
-  **No AI change is claimed without a number behind it.** It is PowerShell — `brew install powershell`
-  on macOS, or reimplement the loop.
+  **No AI change is claimed without a number behind it.** `ai-batch.sh` at the root is its POSIX twin
+  (same flags, same table, `--parse-only` on a fixture needs no game data); the Windows script still
+  needs PowerShell, `brew install powershell` on macOS.
 - `ScenarioDrill` writes one `HEADLESS ARRIVE` line per arrive action: how many watched units got
   within the goal. That is the instrument for "units ordered somewhere they never reach".
 

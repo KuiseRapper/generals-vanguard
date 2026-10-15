@@ -1,0 +1,12 @@
+Log started: 2026-10-15 17:39:53
+INI: loading Data\INI\Default\GameData.ini
+random map seed 0: 2 players, 96 playable cells a side
+AI BUILT frame 120 player 2 'Hard AI' builds 'AmericaPowerPlant' at (100,200)
+HEADLESS RESULT: decided on frame 8123 (8123 frames in 12.4s wall, 655 logic fps, 10.9x real time)
+HEADLESS PARTICLES: 0 systems, 0 particles
+HEADLESS CRC: 0x86988377 at frame 8123
+HEADLESS PATHFIND: queue 6000x/47 find 2313x/0 closest 4x/0 patch 0x/0 attack 12x/0 expand 11414x | nopath 0 outofcells 0 blocked 17 stuck 0 wedge 0 worst 0 escape 0 repath 0 dither 0
+HEADLESS JOBS: 0 worker threads, 0 allocations from a job
+HEADLESS PLAYER 2 'Hard AI': WON | score 9600 | money 4000 earned 3800 spent | units 13 built 0 lost 1 killed peak 16 | buildings 10 built 0 lost | slot 0 team -1
+HEADLESS PLAYER 3 'Hard AI': eliminated | score 1200 | money 3000 earned 3000 spent | units 4 built 12 lost 3 killed peak 6 | buildings 2 built 5 lost | slot 1 team -1
+Log closed: 2026-10-15 17:40:06

@@ -2873,6 +2873,8 @@ Main/resource.h
 RTS.dsp
 RTS.dsw
 Stubs/NullAudioManager.h
+Tests/ai_batch_sample_limited.txt
+Tests/ai_batch_sample_won.txt
 Tests/arch_diff/arch_probe.cpp
 Tests/arch_diff/known_differences.txt
 Tests/arch_diff/run_arch_diff.sh
@@ -2903,6 +2905,7 @@ Tests/lan_broadcast_probe.cpp
 Tests/miles_listen.cpp
 Tests/miles_smoke.cpp
 Tests/replay_wide_oracle.cpp
+Tests/run_ai_batch.sh
 Tests/run_data_gone_check.sh
 Tests/run_generals_smoke.sh
 Tests/run_ini_crlf_check.sh

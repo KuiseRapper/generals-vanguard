@@ -2040,6 +2040,11 @@ if(ZH_PLATFORM_POSIX)
   # (Tests/test_workfolder_guard.sh): a lint of every tracked script, and the farm harnesses run with
   # TMPDIR=/nonexistent.
   add_test(NAME workfolder_guard_check COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Tests/test_workfolder_guard.sh)
+  # ai-batch.sh (the POSIX twin of ai-batch.ps1, at the repository root) on itself: the parser that turns
+  # the game's HEADLESS lines into the win-rate table a measurement is read from, checked on a fixture,
+  # plus the two paths that need no data (--dryrun and the 77 skip).  No game data, no game binary.
+  add_test(NAME ai_batch_parse
+           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_ai_batch.sh ${CMAKE_CURRENT_SOURCE_DIR}/../../ai-batch.sh)
   # Decision 2 for the GPU: a first launch chooses the top detail preset (High), a later one keeps it, and
   # -noshaders (a Voodoo2, below every preset) chooses Low.  Read from Options.ini after real runs.
   add_test(NAME lod_first_run_check
