@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -1261,6 +1262,23 @@ Int parseAIKnobsOff(char *args[], int num)
 		TheWritableGlobalData->m_aiKnobsOffMask = mask;
 	}
 	return 3;
+}
+
+/** -strictgoal: an order to a goal a ground unit cannot reach reports no path, instead of being handed
+	* a route to the nearest cell it can reach - which, at a ravine, is the rim of the ravine, and the
+	* unit is then ordered to walk at the wall.  Off, AIUpdateInterface::computePath keeps its
+	* closest-path fallback, which is what a "move onto or beside a blocked cell" order needs, so this
+	* is the only way in and nothing else changes.  On, the fallback is still taken when the goal itself
+	* is reachable, and for the blocked-and-stuck rescue, which patches the old route rather than
+	* rewriting the destination.  Nothing has been measured: turning it on is a decision for an
+	* ai-batch.ps1 batch over seeds, not a fix to take on faith. */
+Int parseStrictGoal(char *args[], int num)
+{
+	if (TheWritableGlobalData)
+	{
+		TheWritableGlobalData->m_strictGoal = TRUE;
+	}
+	return 1;
 }
 
 Int parseObserver(char *args[], int num)
@@ -2855,6 +2873,7 @@ static CommandLineParam params[] =
 	{ "-aidiff2", parseAIDifficulty2 },
 	{ "-notactics", parseNoTactics },
 	{ "-aiknobsoff", parseAIKnobsOff },
+	{ "-strictgoal", parseStrictGoal },
 	{ "-observer", parseObserver },
 	{ "-headless", parseHeadless },
 	/* -noaudio was in the Debug/Internal block above, so a Release build ignored it and a windowed run

@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -2222,9 +2223,19 @@ Bool AIUpdateInterface::computePath( PathfindServicesInterface *pathServices, Co
 	}
 	if (theNewPath==NULL && m_path==NULL) {
 		Real pathCostFactor = 0.0f;	
-		theNewPath = pathServices->findClosestPath( getObject(), m_locomotorSet, getObject()->getPosition(), 
-			destination, m_isBlockedAndStuck, pathCostFactor, FALSE );
-		m_retryPath = true;
+		/* findClosestPath's contract is to succeed for a goal the unit cannot reach - a building
+			 interior - by rewriting the destination to the nearest cell it can reach.  That is what a
+			 "move onto or beside a blocked cell" order needs; at a ravine the nearest cell is the rim of
+			 the ravine, and the unit is then ordered to walk at the wall.  So with -strictgoal the
+			 fallback is taken only when the goal itself is reachable; when it is not, the path stays
+			 NULL and the reporting below ends the move.  The blocked-and-stuck rescue keeps the fallback
+			 either way: it patches the old route rather than rewriting the destination. */
+		if (!TheGlobalData->m_strictGoal || m_isBlockedAndStuck ||
+				TheAI->pathfinder()->clientSafeQuickDoesPathExist( m_locomotorSet, getObject()->getPosition(), destination )) {
+			theNewPath = pathServices->findClosestPath( getObject(), m_locomotorSet, getObject()->getPosition(), 
+				destination, m_isBlockedAndStuck, pathCostFactor, FALSE );
+			m_retryPath = true;
+		}
 	}
 	TheAI->pathfinder()->setIgnoreObstacleID( INVALID_ID );
 	TheAI->pathfinder()->setIgnoreUnderConstruction( FALSE );

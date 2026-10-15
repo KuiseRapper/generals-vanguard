@@ -10824,6 +10824,25 @@ TEST(nologo_and_novideo_skip_videos_in_every_build)
 	TheWritableGlobalData = savedData;
 }
 
+/* -strictgoal is the switch for the other half of the ravine: off, computePath keeps today's
+   closest-path fallback for a goal the unit cannot reach; on, it only falls back for a goal the unit
+   can reach.  Off is the default, because nothing measured yet says to change it. */
+TEST(strictgoal_switch_is_off_unless_the_command_line_asks_for_it)
+{
+	GlobalData *saved = TheWritableGlobalData;
+	TheWritableGlobalData = NEW GlobalData;
+	CHECK( !TheGlobalData->m_strictGoal );
+
+	char exe[] = "generals.exe";
+	char strictGoal[] = "-strictgoal";
+	char *argv[] = { exe, strictGoal };
+	parseCommandLine( 2, argv );
+	CHECK( TheGlobalData->m_strictGoal );
+
+	delete TheWritableGlobalData;
+	TheWritableGlobalData = saved;
+}
+
 TEST(a_netgame_slot_list_is_the_player_order_on_every_machine)
 {
 	/* -netgame carries what the LAN lobby otherwise agrees on: who plays, at which address, in
