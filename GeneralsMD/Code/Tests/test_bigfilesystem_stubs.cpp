@@ -15,6 +15,7 @@
 **	You should have received a copy of the GNU General Public License
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 /*
  * Link-time stand-ins for test_bigfilesystem (and, before it, test_posixlocalfilesystem, whose list
  * this extends), which is built from the real GameMemory,
@@ -28,6 +29,8 @@
  *    subsystem through it.
  *  - TheFileSystem, FileSystem::openFile: RAMFile::open(const char*) opens through the whole file
  *    system; the test opens files through PosixLocalFileSystem directly.
+ *  - FileSystem::isMapPath: this one IS reached - ArchiveFileSystem::getFileListInDirectory asks it
+ *    of every name in an archive - so it is the real one-line test on the string, not a trap.
  */
 #include <stdarg.h>
 #include <stdio.h>
@@ -65,6 +68,15 @@ void INI::load(AsciiString, INILoadType, Xfer *) { unreachable("INI::load"); }
 
 FileSystem *TheFileSystem = NULL;
 File *FileSystem::openFile(const Char *, Int) { unreachable("FileSystem::openFile"); return NULL; }
+
+// FileSystem::isMapPath (Common/FileSystem.h).  Reached from ArchiveFileSystem::getFileListInDirectory,
+// so it is the real test on the string and not an unreachable trap.  FileSystem.cpp is not in this
+// target: it reaches GlobalData, which nothing else here needs.  Drop this when gameengine links and
+// the test links that source instead.
+Bool FileSystem::isMapPath(const AsciiString &filename)
+{
+	return strncasecmp(filename.str(), "maps", 4) == 0 && (filename.str()[4] == '\\' || filename.str()[4] == '/');
+}
 
 // GameDataGone (Common/Debug.h): an archive read failed because its drive went away.  Every archive this
 // test opens is on the local install and stays there, so that never happens here.
