@@ -1697,6 +1697,22 @@ Int aiLeastDefendedLane( const Real *laneFirepower, const Bool *laneReachable, I
 }
 
 //-------------------------------------------------------------------------------------------------
+Int aiReachableLaneFallback( const Bool *laneReachable, Int laneCount, Int requestedLane )
+{
+	if( requestedLane < 0 || requestedLane >= laneCount )
+		return requestedLane;		// a lane the map does not have stays the script's business
+	if( laneReachable == NULL || laneReachable[ requestedLane ] )
+		return requestedLane;		// reachable, or unknown: nothing to change
+
+	for( Int i = 0; i < laneCount; ++i )
+	{
+		if( laneReachable[ i ] )
+			return i;							// the first lane the army can actually take
+	}
+	return requestedLane;				// nothing is reachable: as before
+}
+
+//-------------------------------------------------------------------------------------------------
 Bool aiReleaseWave( Real heldPower, Real wavePower, UnsignedInt heldFrames, UnsignedInt maxHoldFrames )
 {
 	if( heldPower <= 0.0f )

@@ -12246,7 +12246,8 @@ TEST(an_attack_takes_the_least_defended_lane)
 
 /** B4, third attempt.  A lane with no enemy firepower on it can be the quietest road on the map simply
 	 because the army cannot cross it: on Twilight Flame the flank waypoints run into a ravine.  A lane
-	 the pathfinder says is out of reach is passed over, exactly as one the map does not have is. */
+	 the pathfinder says is out of reach is passed over, exactly as one the map does not have is; the
+	 fallback below is what the rungs that do not weigh the enemy use to pick another road. */
 TEST(an_attack_skips_a_lane_the_army_cannot_reach)
 {
 	// the quietest lane is a ravine, so the quietest lane that can be crossed is taken
@@ -12275,6 +12276,25 @@ TEST(an_attack_skips_a_lane_the_army_cannot_reach)
 	const Real missing[3] = { 3000.0f, -1.0f, 1000.0f };
 	const Bool missingReachable[3] = { TRUE, TRUE, TRUE };
 	CHECK_EQ( 2, aiLeastDefendedLane( missing, missingReachable, 3, 0 ) );
+
+	// Every rung that does not weigh the enemy uses the fallback instead: the script's lane is kept
+	// unless the army cannot take it, and then the first lane it can is used.
+	const Bool centerCut[3] = { FALSE, TRUE, TRUE };
+	CHECK_EQ( 1, aiReachableLaneFallback( centerCut, 3, 0 ) );	// asked-for lane out of reach: the first that is not
+	CHECK_EQ( 1, aiReachableLaneFallback( centerCut, 3, 1 ) );	// asked-for lane reachable: unchanged
+	CHECK_EQ( 2, aiReachableLaneFallback( centerCut, 3, 2 ) );
+
+	// only the last lane can be reached, so that is the one taken
+	const Bool backdoorOnly[3] = { FALSE, FALSE, TRUE };
+	CHECK_EQ( 2, aiReachableLaneFallback( backdoorOnly, 3, 0 ) );
+
+	// every lane out of reach, and no reachability known: both keep the script's lane
+	CHECK_EQ( 0, aiReachableLaneFallback( noneReachable, 3, 0 ) );
+	CHECK_EQ( 1, aiReachableLaneFallback( NULL, 3, 1 ) );
+
+	// a lane the map does not have is returned untouched, never chosen and never replaced
+	CHECK_EQ( -1, aiReachableLaneFallback( centerCut, 3, -1 ) );
+	CHECK_EQ( 3, aiReachableLaneFallback( centerCut, 3, 3 ) );
 
 }
 
