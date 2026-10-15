@@ -12277,6 +12277,11 @@ TEST(an_attack_skips_a_lane_the_army_cannot_reach)
 	const Bool missingReachable[3] = { TRUE, TRUE, TRUE };
 	CHECK_EQ( 2, aiLeastDefendedLane( missing, missingReachable, 3, 0 ) );
 
+	// the split wave's second road is voted with no asked-for lane at all (-1): the quietest lane the
+	// army can reach, and when nothing is known the quietest lane exactly as before
+	CHECK_EQ( 2, aiLeastDefendedLane( firepower, reachable, 3, -1 ) );
+	CHECK_EQ( 1, aiLeastDefendedLane( firepower, NULL, 3, -1 ) );
+
 	// Every rung that does not weigh the enemy uses the fallback instead: the script's lane is kept
 	// unless the army cannot take it, and then the first lane it can is used.
 	const Bool centerCut[3] = { FALSE, TRUE, TRUE };
