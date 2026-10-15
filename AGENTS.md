@@ -57,7 +57,7 @@ onto `main` instead. `CONTRIBUTING.md` has the long version.
 - A file we add that holds code taken from an EA file keeps EA's header and names the EA file.
 
 **The build fingerprint tracks paths.** `GeneralsMD/Code/BuildFingerprint.manifest` lists every
-tracked file under `GeneralsMD/Code` that the fingerprint hashes (currently 4018 entries; files at
+tracked file under `GeneralsMD/Code` that the fingerprint hashes (currently 4021 entries; files at
 the repository root are not in it). **Adding, removing or renaming a file under `GeneralsMD/Code`
 means re-running** `GeneralsMD/Code/Tools/fingerprint-manifest.sh`, or the
 `build_fingerprint_manifest` test fails. Editing an existing file's contents does not change the list
@@ -74,12 +74,13 @@ does legitimately contain is the art EA released inside the source tree
 Decided 2026-10-15. Read the "Naming, credits and licensing" entry in [CHANGELOG.md](CHANGELOG.md)
 before changing any of it.
 
-- **Display name: `Generals Vanguard`.** Artifacts use `Vanguard` (`Vanguard.exe`, `Vanguard.big`).
-  Our own version line **starts at 0.1.0**, independent of upstream's 3.x.
+- **Display name: `Generals Vanguard`.** Our own version line is independent of upstream's 3.x: it
+  started at 0.1.0 and stands at 0.2.0. The executable target is still `generals`; the rename
+  paragraph below says why.
 - The name carries an EA mark, which is the project owner's accepted decision. The trade-off is that
   the disclaimers must stay: never remove them.
-- **EA's required sentence is currently missing from this tree** and must be added and kept in
-  `README.md` and `NOTICE.md`:
+- **EA's required sentence is in this tree and must stay** - at the top of `README.md` and in
+  `NOTICE.md`, both root-level files:
   `EA has not endorsed and does not support this product.`
   EA's [Franchise Modding Guidelines](https://www.ea.com/games/command-and-conquer/news/modding-faq)
   require it in at least one root-level licence file. They also forbid using EA marks, logos or
