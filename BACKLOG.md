@@ -33,6 +33,12 @@ win rate per seat and match length, and look for matches that end by hitting `-m
 literally the games the AI cannot close out. Then read the skirmish AI's decision loop
 (`AISkirmishPlayer`) and find where a plan is chosen, and whether anything ever re-evaluates it.
 
+*Analysis done (2026-10-15):* the decision loop is mapped, and the answer is that **nothing**
+re-evaluates it — there is no plan state and no memory of an attack at all. The mechanism, the ranked
+fixes (E1/E2 first) and the ideas upstream already measured worse are written up in
+[docs/ai/skirmish-ai.md](docs/ai/skirmish-ai.md). Only the measurement is left, and it needs the game
+data from item 5.
+
 ### 3. Twilight Flame: units pile into a dead-end ravine
 On the stock Twilight Flame map the AI sends units into the ravine between the two plateaus, toward a
 base it cannot reach that way, instead of taking the way around. It also stockpiles units at the edge
@@ -45,6 +51,13 @@ description of it.
 a point that never get within it. `Tools/PathLab` tests the pathfinder in isolation, so the map data,
 the pathfinder and the AI's target choice can be separated before patching any of them.
 
+*Analysis done (2026-10-15):* three causes, in a chain, and the first is not in the pathfinder — the
+lane vote scores roads by enemy firepower only, so an untraversable ravine looks like the quietest road
+on the map and wins. Then the closest-path fallback hands out a route to the rim, and attack move
+grinds at it for 5 x 3 s. See [docs/ai/twilight-ravine.md](docs/ai/twilight-ravine.md). Note that
+`Tools/PathLab` cannot reproduce this — it is a reimplementation with no map reader, no cliffs and no
+AI layer — so the measurement is the headless one.
+
 ### 4. An honest review of the AI's decision-making
 The owner asked for an assessment rather than a change: is the AI's strategy and decision-making
 actually good, and where is it weak?
@@ -54,6 +67,10 @@ want drastic changes to an AI he already enjoys.
 *First step:* write it from evidence — the match logs from item 2's baseline, the building list and
 attack behaviour, and what the AI never does (re-evaluate, switch, expand, tech). Rank the fixes and
 say which are not worth making.
+
+*Partly done (2026-10-15):* [docs/ai/skirmish-ai.md](docs/ai/skirmish-ai.md) is the written review —
+how it decides, why the late game repeats, the ranked fixes, and the list of changes upstream already
+tried and measured worse. What is missing is the numbers behind the late-game claim.
 
 ---
 
