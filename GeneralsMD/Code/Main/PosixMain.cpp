@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2026 by İlyas Akın for the macOS/Linux port: parts come from GeneralsMD/Code/Main/WinMain.cpp, the rest is new code, copyright 2026 İlyas Akın; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 // FILE: PosixMain.cpp ////////////////////////////////////////////////////////////////////////////
 // Desc:   The game's entry point off Windows (C2): WinMain's start-up sequence without the Windows.
@@ -179,7 +180,7 @@ static bool inSteamGameMode()
 
 /// What Game Mode says when the Zero Hour folder is found nowhere; the package's README.txt says the same
 static const char GAME_MODE_NO_ROOT[] =
-	"Zero Hour Reforged could not find your Command & Conquer Generals Zero Hour folder.\n\n"
+	"Generals Vanguard could not find your Command & Conquer Generals Zero Hour folder.\n\n"
 	"In Steam, open this game's Properties and enter under Launch Options:\n\n"
 	"-root \"/home/you/Games/Command & Conquer Generals Zero Hour\"\n\n"
 	"with the path of your own Zero Hour folder (the one with INIZH.big in it) between the quotes. Or start "
@@ -198,7 +199,7 @@ static bool chooseFolderWithSdl( PosixInstallQuestion question, const std::strin
 	}
 	activateThisApp();
 	if (!why.empty())
-		SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_WARNING, "Zero Hour Reforged", why.c_str(), NULL );
+		SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_WARNING, "Generals Vanguard", why.c_str(), NULL );
 
 	FolderAnswer answer;
 	answer.state = 0;
@@ -332,7 +333,7 @@ static Bool chooseInstallRoot( int argc, char *argv[], const std::vector<std::st
 		if (request.insideAppBundle && !unattended && !scripted)
 		{
 			activateThisApp();
-			SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR, "Zero Hour Reforged", problem.c_str(), NULL );
+			SDL_ShowSimpleMessageBox( SDL_MESSAGEBOX_ERROR, "Generals Vanguard", problem.c_str(), NULL );
 		}
 		return FALSE;
 	}
@@ -369,7 +370,7 @@ static void appendUserArtOverlay( std::vector<std::string> &overlays )
 /** The fork's overlay (P1, decision 9): read roots searched before the install for every relative path
 	* that is read.  "-overlay <dir>", repeatable, in the order given; with none, the one a package puts
 	* beside the executable: "<exe>/../Resources/Overlay" in a macOS app bundle, or
-	* "<exe>/../share/zero-hour-reforged/overlay" in a Linux package, and after it the package's upscaled
+	* "<exe>/../share/generals-vanguard/overlay" in a Linux package, and after it the package's upscaled
 	* art, which lives in the user data folder, never in the package, and is read from
 	* "<user data>/ReforgedArt" when it is there (appendUserArtOverlay).  An unpacked build has neither and
 	* runs on the install alone, as before.  Resolved to real paths here, before the chdir to the root,
@@ -396,7 +397,7 @@ static Bool chooseOverlays( int argc, char *argv[], std::vector<std::string> &ov
 
 	char exe[ 4096 ];
 	getExecutableDirectory( exe, sizeof( exe ), FALSE );
-	static const char *const packaged[] = { "/../Resources/Overlay", "/../share/zero-hour-reforged/overlay" };
+	static const char *const packaged[] = { "/../Resources/Overlay", "/../share/generals-vanguard/overlay" };
 	for (size_t i = 0; exe[0] != 0 && i < sizeof( packaged ) / sizeof( packaged[0] ); ++i)
 	{
 		const std::string candidate = std::string( exe ) + packaged[i];

@@ -739,7 +739,7 @@ def page_name(mod):
 
 def game_title(mod):
     if mod is None:
-        return "Zero Hour Reforged"
+        return "Generals Vanguard"
     info = json.loads((mod / "mod.json").read_text(encoding="utf-8")) if (mod / "mod.json").is_file() else {}
     return ("%s %s" % (info.get("name", mod.name), info.get("version", ""))).strip()
 
@@ -775,7 +775,7 @@ def main():
     parser.add_argument("--out", type=Path, help="where to write the HTML page")
     parser.add_argument("--mod", help="a mod folder, or its name under %s" % MODS_DIR)
     parser.add_argument("--all", type=Path, metavar="DIR",
-                        help="write the page for Zero Hour Reforged and for every installed mod into DIR")
+                        help="write the page for Generals Vanguard and for every installed mod into DIR")
     parser.add_argument("--selfcheck", action="store_true", help="check the frames-to-kill arithmetic and stop")
     args = parser.parse_args()
     if args.selfcheck:

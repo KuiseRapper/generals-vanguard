@@ -1,4 +1,24 @@
-﻿# Command and Conquer: Generals: Zero Hour: Reforged
+﻿# Generals Vanguard changes
+
+What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
+this line.  Upstream's own history is below, under its own title, and is not ours to edit.
+
+## 2026-10-15 - The product is Generals Vanguard
+
+- The name is `Generals Vanguard` on every surface that is ours: the README title, the macOS app
+  (`Generals Vanguard.app`, bundle id `io.github.kuiserapper.GeneralsVanguard`), the Linux application
+  id and its two package files, the Linux package name and installed paths (`generals-vanguard`), the
+  game's window title, and the Chroma keyboard metadata.  User-facing text that names the product
+  carries the descriptive line `for Command & Conquer: Generals Zero Hour`.
+- Deliberately left alone: the executable target `generals`, the version numbers, upstream's data
+  names (`*Reforged.ini`, `Reforged*.tga`/`.dds`, the `Reforged*.big` art and the `ReforgedArt`
+  folder) and every EA identity string - the registry key, the `Command and Conquer Generals Zero Hour
+  Data` folder, the `.csf` labels and the save and replay paths - because the game finds its data by
+  them.
+
+---
+
+# Command and Conquer: Generals: Zero Hour: Reforged
 
 EA opened the source of Generals and Zero Hour, the game that is still on sale and still runs on
 Steam. This build is that source with the bugs the game shipped with fixed and everything below added.

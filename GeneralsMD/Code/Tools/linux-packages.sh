@@ -14,18 +14,18 @@
 #
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# linux-packages.sh: Zero Hour Reforged's Linux release files, from one command.  Each is the engine only: the
+# linux-packages.sh: Generals Vanguard's Linux release files, from one command.  Each is the engine only: the
 # player's own Zero Hour is found or asked for on the first start, and the upscaled art is read from their
 # user data folder's ReforgedArt when something has put it there.  Every one carries the same
 # binary: the portable folder Tools/linux-portable.sh --no-art builds in Valve's sniper SDK and checks (glibc
 # 2.31, libstdc++, SDL3, FFmpeg's LGPL build and the rest static, the licences against the link line).
 #
-#   <out>/zero-hour-reforged-<version>-x86_64.AppImage        the folder as one AppImage
-#   <out>/zero-hour-reforged_<version>_amd64.deb              Debian and Ubuntu (CPack: Tools/linux-packages/)
-#   <out>/zero-hour-reforged-<version>-1.x86_64.rpm           Fedora and openSUSE (CPack)
-#   <out>/zero-hour-reforged-<version>-1-x86_64.pkg.tar.zst   Arch (makepkg: Tools/linux-packages/PKGBUILD)
-#   <out>/io.github.olcayseygan.ZeroHourReforged.flatpak      a single-file Flatpak bundle (flatpak-builder)
-#   <out>/ZeroHourReforged-linux-x86_64.tar.zst               the folder itself
+#   <out>/generals-vanguard-<version>-x86_64.AppImage        the folder as one AppImage
+#   <out>/generals-vanguard_<version>_amd64.deb              Debian and Ubuntu (CPack: Tools/linux-packages/)
+#   <out>/generals-vanguard-<version>-1.x86_64.rpm           Fedora and openSUSE (CPack)
+#   <out>/generals-vanguard-<version>-1-x86_64.pkg.tar.zst   Arch (makepkg: Tools/linux-packages/PKGBUILD)
+#   <out>/io.github.kuiserapper.GeneralsVanguard.flatpak      a single-file Flatpak bundle (flatpak-builder)
+#   <out>/GeneralsVanguard-linux-x86_64.tar.zst               the folder itself
 #   <out>/SHA256SUMS
 #
 # Usage: linux-packages.sh --build <folder> --out <folder> --cmake <cmake> --appimagetool <tool> --runtime <file>
@@ -67,18 +67,18 @@ MAINTAINER="${ZH_PACKAGE_MAINTAINER:-$(git -C "$CODE" config user.name) <$(git -
 case "$MAINTAINER" in *"<>"*|" <"*) fail "set ZH_PACKAGE_MAINTAINER, or a git identity";; esac
 
 # ---- 1. the folder, engine only (and the AppImage), checked by linux-portable.sh -------------------------
-portable=( --build "$BUILD" --out "$W/ZeroHourReforged-linux-x86_64" --no-art $NOBUILD )
+portable=( --build "$BUILD" --out "$W/GeneralsVanguard-linux-x86_64" --no-art $NOBUILD )
 [ -n "$CMAKE" ] && portable+=( --cmake "$CMAKE" )
 [ -n "$JOBS" ] && portable+=( --jobs "$JOBS" )
 wants appimage && portable+=( --appimage "$APPIMAGETOOL" --runtime "$RUNTIME" )
 bash "$CODE/Tools/linux-portable.sh" "${portable[@]}" || fail "linux-portable.sh failed"
-F="$W/ZeroHourReforged-linux-x86_64"
-VERSION="$(sed -n 's/^Zero Hour Reforged \([0-9.]*\) for Linux.*/\1/p' "$F/VERSION")"
+F="$W/GeneralsVanguard-linux-x86_64"
+VERSION="$(sed -n 's/^Generals Vanguard \([0-9.]*\) for Linux.*/\1/p' "$F/VERSION")"
 [ -n "$VERSION" ] || fail "no version in $F/VERSION"
 TARBALL_SHA="$(sha256sum "$F.tar.zst" | cut -d ' ' -f 1)"
 cp "$F.tar.zst" "$OUT/" || fail "cannot copy the tarball"
 if wants appimage; then
-	cp "$F.AppImage" "$OUT/zero-hour-reforged-$VERSION-x86_64.AppImage" || fail "cannot copy the AppImage"
+	cp "$F.AppImage" "$OUT/generals-vanguard-$VERSION-x86_64.AppImage" || fail "cannot copy the AppImage"
 fi
 in_image() {	# in_image <image> <extra docker args> <command>: as root in a throwaway container, $W mounted
 	docker run --rm $2 -v "$W:$W" -v "$P:$P:ro" -w "$W" "$1" bash -c "$3"
@@ -93,8 +93,8 @@ if wants deb || wants rpm; then
 			'-DZH_PACKAGE_MAINTAINER=$MAINTAINER' > '$W/cpack.log' 2>&1 \
 		&& cd '$W/cpack' && cpack -G '$gens' >> '$W/cpack.log' 2>&1; status=\$?; chown -R $owner '$W'; exit \$status" \
 		|| { tail -n 20 "$W/cpack.log" >&2; fail "CPack failed (the log: $W/cpack.log)"; }
-	if wants deb; then cp "$W/cpack/zero-hour-reforged_${VERSION}_amd64.deb" "$OUT/" || fail "no .deb"; fi
-	if wants rpm; then cp "$W/cpack/zero-hour-reforged-$VERSION-1.x86_64.rpm" "$OUT/" || fail "no .rpm"; fi
+	if wants deb; then cp "$W/cpack/generals-vanguard_${VERSION}_amd64.deb" "$OUT/" || fail "no .deb"; fi
+	if wants rpm; then cp "$W/cpack/generals-vanguard-$VERSION-1.x86_64.rpm" "$OUT/" || fail "no .rpm"; fi
 fi
 
 # ---- 3. Arch: makepkg over the PKGBUILD, as an unprivileged user (makepkg refuses root) ------------------
@@ -105,12 +105,12 @@ if wants arch; then
 		&& su builder -c 'cd $W/arch && ZH_PACKAGE_VERSION=$VERSION ZH_TARBALL_SHA256=$TARBALL_SHA PKGDEST=$W/arch makepkg --nodeps --noconfirm' \
 			> '$W/makepkg.log' 2>&1; status=\$?; chown -R $owner '$W'; exit \$status" \
 		|| { tail -n 20 "$W/makepkg.log" >&2; fail "makepkg failed (the log: $W/makepkg.log)"; }
-	cp "$W/arch/zero-hour-reforged-$VERSION-1-x86_64.pkg.tar.zst" "$OUT/" || fail "no Arch package"
+	cp "$W/arch/generals-vanguard-$VERSION-1-x86_64.pkg.tar.zst" "$OUT/" || fail "no Arch package"
 fi
 
 # ---- 4. Flatpak: flatpak-builder in a privileged container, its runtime cached in the build folder -------
 if wants flatpak; then
-	id=io.github.olcayseygan.ZeroHourReforged
+	id=io.github.kuiserapper.GeneralsVanguard
 	mkdir -p "$W/flatpak" "$BUILD/flatpak-cache" || fail "cannot make the Flatpak's folders"
 	cp -a "$F" "$P/$id.yml" "$P/$id.metainfo.xml" "$W/flatpak/" || fail "cannot stage the Flatpak's sources"
 	# the container's system installation (flatpak refuses a user one as root), kept in the build folder
@@ -128,5 +128,5 @@ fi
 
 ( cd "$OUT" && rm -f SHA256SUMS && sha256sum -- *.tar.zst $(ls *.AppImage *.deb *.rpm *.flatpak 2>/dev/null) > SHA256SUMS ) \
 	|| fail "cannot write SHA256SUMS"
-echo "linux-packages: Zero Hour Reforged $VERSION in $OUT:"
+echo "linux-packages: Generals Vanguard $VERSION in $OUT:"
 ( cd "$OUT" && ls -l -- $(awk '{print $2}' SHA256SUMS) | awk '{printf "  %s  %s\n", $5, $9}' )

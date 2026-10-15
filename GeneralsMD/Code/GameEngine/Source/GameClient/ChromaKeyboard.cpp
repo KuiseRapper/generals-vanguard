@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 // FILE: ChromaKeyboard.cpp ///////////////////////////////////////////////////
 
@@ -101,9 +102,9 @@ static const char *CHROMA_HOST = "localhost";
 static const INTERNET_PORT CHROMA_PORT = 54235;
 static const char *CHROMA_INIT_PATH = "/razer/chromasdk";
 static const char *CHROMA_INIT_BODY =
-	"{\"title\":\"Zero Hour Reforged\","
+	"{\"title\":\"Generals Vanguard\","
 	"\"description\":\"The state of the match on the hardware\","
-	"\"author\":{\"name\":\"Zero Hour Reforged\",\"contact\":\"https://github.com/olcayseygan/CnCGeneralsZH-Reforged\"},"
+	"\"author\":{\"name\":\"Generals Vanguard\",\"contact\":\"https://github.com/KuiseRapper/generals-vanguard\"},"
 	"\"device_supported\":[\"keyboard\",\"mouse\",\"mousepad\"],"
 	"\"category\":\"application\"}";
 
@@ -987,7 +988,7 @@ static DWORD WINAPI chromaWorkerMain( LPVOID )
 	Int sent[ CHROMA_CELLS ];
 	Int cells[ CHROMA_CELLS ];
 
-	HINTERNET internet = InternetOpenA( "ZeroHourReforged", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0 );
+	HINTERNET internet = InternetOpenA( "GeneralsVanguard", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0 );
 	if( internet == NULL )
 		return 0;
 

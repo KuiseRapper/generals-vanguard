@@ -117,7 +117,7 @@ RenderResult PosixDirect3D9::GetAdapterIdentifier( unsigned int adapter, RenderU
 		return D3DERR_INVALIDCALL;
 	memset( identifier, 0, sizeof( *identifier ) );
 	strncpy( identifier->Driver, "posixd3d9", sizeof( identifier->Driver ) - 1 );
-	strncpy( identifier->Description, "Zero Hour Reforged D3D9 (SDL3 GPU)", sizeof( identifier->Description ) - 1 );
+	strncpy( identifier->Description, "Generals Vanguard D3D9 (SDL3 GPU)", sizeof( identifier->Description ) - 1 );
 	strncpy( identifier->DeviceName, "posixd3d9", sizeof( identifier->DeviceName ) - 1 );
 	identifier->DriverVersion = 1;		// nothing reads it but getChipset, which only stores it
 	identifier->VendorId = 0;					// no vendor: see the file's head

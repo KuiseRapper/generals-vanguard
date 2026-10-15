@@ -97,11 +97,18 @@ before changing any of it.
 - No donation restriction applies to this base. (That came from TheSuperHackers' *data-patch* repo,
   which this tree does not use. EA's guidelines allow donations, with conditions.)
 
-**Stage the rename.** Surface branding first — `README.md`, `NOTICE.md`, the window title and the
-version string. The deep rename is deliberate and separate: Linux package IDs
-(`io.github.olcayseygan.ZeroHourReforged.*` under `GeneralsMD/Code/Tools/linux-packages/`), the macOS
-`.app` name, executable names and `BuildFingerprint`. Changing version identity is what stops our
-builds sharing a LAN game with upstream's, so it should be a decision, not a side effect.
+**The rename is done (2026-10-15).** The display name, the README title, the macOS app
+(`Generals Vanguard.app`, `io.github.kuiserapper.GeneralsVanguard`), the Linux application id and the
+two package files under `GeneralsMD/Code/Tools/linux-packages/`, the Linux package name and installed
+paths (`generals-vanguard`), the window title and the Chroma metadata all say `Generals Vanguard`, with
+the descriptive line `for Command & Conquer: Generals Zero Hour` in user-facing text. Deliberately
+*not* renamed, and the reasons: the executable target stays `generals` (about a third of the tree's
+scripts, tests and harnesses name it, and upstream's Windows binary is `generals.exe`); the version
+numbers stay where they are; upstream's data names (`*Reforged.ini`, `Reforged*.tga`/`.dds`, the
+`Reforged*.big`/`ReforgedArt` art folders) stay; and every EA identity string (the registry key, the
+`Command and Conquer Generals Zero Hour Data` user folder, the `.csf` labels, the save and replay
+paths) stays, because that is how the game finds its data. Renaming the executable or the fingerprint
+identity is a separate, riskier decision.
 
 ## Layout
 

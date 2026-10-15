@@ -1,4 +1,4 @@
-# Zero Hour Reforged on macOS, Linux and Windows on ARM64
+# Generals Vanguard on macOS, Linux and Windows on ARM64
 
 This branch ports the Zero Hour engine off Windows without changing what the game computes. A match
 recorded on one platform plays back to the same world checksum on every other, and the Windows x64 build
@@ -10,7 +10,7 @@ with its verification status, in [docs/porting/windows-impact.md](docs/porting/w
 
 | Platform | Toolchain | Renderer | Status |
 |:--|:--|:--|:--|
-| macOS arm64 (Apple silicon) | AppleClang, macOS 13 or later | the port's D3D9-shaped device on SDL3 GPU, Metal underneath | playable; packaged as `Zero Hour Reforged.app` |
+| macOS arm64 (Apple silicon) | AppleClang, macOS 13 or later | the port's D3D9-shaped device on SDL3 GPU, Metal underneath | playable; packaged as `Generals Vanguard.app` |
 | macOS x86_64 | AppleClang (Intel Macs, or Rosetta) | the same, on Metal | builds and runs; a universal2 app can be made at release time |
 | Linux x86_64, including the Steam Deck | GCC or Clang, glibc 2.31 or later for the portable package | the same device, Vulkan underneath | playable; engine-only AppImage, `.deb`, `.rpm`, Arch package and Flatpak, and a portable folder |
 | Linux arm64 | GCC or Clang | Vulkan | builds and passes ctest; no packaging yet |
@@ -34,8 +34,8 @@ and a second run does nothing. The build scripts call them for you.
 is missing, runs `vendor.sh`, configures with Ninja, builds, runs ctest when asked and stages the game.
 
 ```sh
-./build-macos.sh                    # Release into build-mac/, then build-mac/Zero Hour Reforged.app
-./build-linux.sh                    # Release into build-linux/, then build-linux/ZeroHourReforged/bin/generals
+./build-macos.sh                    # Release into build-mac/, then build-mac/Generals Vanguard.app
+./build-linux.sh                    # Release into build-linux/, then build-linux/GeneralsVanguard/bin/generals
 ./build-linux.sh Release test       # the same, with ctest before the staging
 ./build-linux.sh Debug              # another configuration (Release, RelWithDebInfo, Debug)
 ./build-linux.sh Release generals   # one target and nothing else
@@ -68,8 +68,8 @@ sudo apt-get install cmake ninja-build g++ git curl unzip xz-utils make pkg-conf
 `spirv-tools` is optional: `test_shader_sdl` validates every generated program with `spirv-val` and says
 SKIPPED without it.
 
-`build-linux/ZeroHourReforged/` has the Linux package's layout: `bin/generals` and the staged overlay at
-`share/zero-hour-reforged/overlay`, a link back into the build tree, so it runs where it is and is not a folder
+`build-linux/GeneralsVanguard/` has the Linux package's layout: `bin/generals` and the staged overlay at
+`share/generals-vanguard/overlay`, a link back into the build tree, so it runs where it is and is not a folder
 to hand to anyone. `GeneralsMD/Code/Tools/linux-check.sh` builds and tests the tree in containers ({gcc,
 clang} x {arm64, amd64}) from a Mac or a Linux host with Docker.
 
@@ -96,9 +96,9 @@ GeneralsMD/Code/Tools/linux-packages.sh --build <build folder> --out <out folder
   and the rest static; the licences checked against the link line. The `.deb` and `.rpm` depend only on glibc
   and fontconfig. What SDL and miniaudio load at run time (Vulkan, X11 or Wayland, ALSA or PulseAudio, D-Bus)
   is recommended, not required.
-- **Layout.** The `.deb`, `.rpm` and Arch package install the folder unchanged in `/usr/lib/zero-hour-reforged`,
-  with `/usr/bin/zero-hour-reforged`, a menu entry, icons and the licences. The Flatpak
-  (`io.github.olcayseygan.ZeroHourReforged`, on org.freedesktop.Platform 25.08) has no filesystem permission.
+- **Layout.** The `.deb`, `.rpm` and Arch package install the folder unchanged in `/usr/lib/generals-vanguard`,
+  with `/usr/bin/generals-vanguard`, a menu entry, icons and the licences. The Flatpak
+  (`io.github.kuiserapper.GeneralsVanguard`, on org.freedesktop.Platform 25.08) has no filesystem permission.
 - **No game files.** The first start finds the player's Zero Hour or asks for it. In the Flatpak it asks through
   the desktop portal's folder chooser, which shares only the folder chosen. A Zero Hour whose Generals is not
   inside or beside it is followed by a second question, for the Generals folder. That covers CD and First
@@ -107,11 +107,11 @@ GeneralsMD/Code/Tools/linux-packages.sh --build <build folder> --out <out folder
   upscaled `Reforged*.big` from `ReforgedArt/` in the user data folder when they are there, searched after the
   package's own overlay: `~/Library/Application Support/Command and Conquer Generals Zero Hour Data/ReforgedArt`
   on macOS, `$XDG_DATA_HOME/Command and Conquer Generals Zero Hour Data/ReforgedArt` on Linux (`~/.local/share`
-  without `XDG_DATA_HOME`, and `~/.var/app/io.github.olcayseygan.ZeroHourReforged/data` inside the Flatpak).
+  without `XDG_DATA_HOME`, and `~/.var/app/io.github.kuiserapper.GeneralsVanguard/data` inside the Flatpak).
   Whatever installs the art puts it there. Without it the game plays at the original textures.
 
 `Tools/linux-packages-check.sh` proves the files on clean containers:
-- **E1 at the three pins**, through the installed `/usr/bin/zero-hour-reforged`, on an install with only the
+- **E1 at the three pins**, through the installed `/usr/bin/generals-vanguard`, on an install with only the
   required dependencies and no network;
 - **one software-rendered frame** (Xvfb and Mesa's lavapipe) on a default install.
 
@@ -311,7 +311,7 @@ MSVC's own casts on Windows), `license-headers.py --check`, `fingerprint-manifes
   textures unless the `Reforged*.big` are copied into `ReforgedArt/` in the user data folder by hand.
 - **The Flatpak in the Steam Deck's Game Mode**: there is no folder dialog there, and `-root` names a folder the
   sandbox cannot see. Start it once in Desktop Mode to choose the folder, or grant it:
-  `flatpak override --user --filesystem=<folder> io.github.olcayseygan.ZeroHourReforged`. The app ID is a default,
+  `flatpak override --user --filesystem=<folder> io.github.kuiserapper.GeneralsVanguard`. The app ID is a default,
   open to the maintainers' choice, as the macOS bundle identifier is.
 - **The portal's folder dialog itself is untested**: it needs a person to click it. The chooser logic behind it
   is tested headless, the Generals question included.

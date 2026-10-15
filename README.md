@@ -1,24 +1,24 @@
 <div align="center">
 
-# Zero Hour Reforged
+# Generals Vanguard
 
-Command & Conquer: Generals Zero Hour, rebuilt from the source EA opened and played as a game again.<br>
+for Command & Conquer: Generals Zero Hour - rebuilt from the source EA opened and played as a game again.<br>
 64-bit, on Windows, macOS and Linux.
 
 > **EA has not endorsed and does not support this product.**
 
 <img src=".github/media/hero.jpg" alt="American tanks cross a stone bridge into a German village under an A-10 strike, long morning shadows over the stream" width="100%">
 
-[![release](https://img.shields.io/github/v/release/olcayseygan/CnCGeneralsZH-Reforged?style=for-the-badge&label=release&labelColor=161b22&color=4459b6)](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/releases/latest)
-[![last commit](https://img.shields.io/github/last-commit/olcayseygan/CnCGeneralsZH-Reforged/main?style=for-the-badge&label=last%20commit&labelColor=161b22&color=4459b6)](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/commits/main)
-[![stars](https://img.shields.io/github/stars/olcayseygan/CnCGeneralsZH-Reforged?style=for-the-badge&labelColor=161b22&color=4459b6)](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/stargazers)
+[![release](https://img.shields.io/github/v/release/KuiseRapper/generals-vanguard?style=for-the-badge&label=release&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/releases/latest)
+[![last commit](https://img.shields.io/github/last-commit/KuiseRapper/generals-vanguard/main?style=for-the-badge&label=last%20commit&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/commits/main)
+[![stars](https://img.shields.io/github/stars/KuiseRapper/generals-vanguard?style=for-the-badge&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/stargazers)
 [![license](https://img.shields.io/badge/license-GPL--3.0%20%2B%20EA%20terms-0d1117?style=for-the-badge&labelColor=161b22)](LICENSE.md)
 
 ![platforms](https://img.shields.io/badge/runs%20on-Windows%20x64%20%7C%20macOS%20%7C%20Linux%20%7C%20Steam%20Deck-0d1117?style=for-the-badge&labelColor=161b22)
 ![renderers](https://img.shields.io/badge/draws%20with-Direct3D%2011%20%7C%20Direct3D%209%20%7C%20Metal%20%7C%20Vulkan-0d1117?style=for-the-badge&labelColor=161b22)
 ![languages](https://img.shields.io/badge/text-English%20%7C%20T%C3%BCrk%C3%A7e%20%7C%20Deutsch-0d1117?style=for-the-badge&labelColor=161b22)
 
-[zerohour.gg](https://zerohour.gg) · [Play it](#play-it) · [Every change](CHANGELOG.md) · [Build it](#build-it) · [How it is tested](#how-it-is-tested) · [Help out](#help-out) · [Discussions](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/discussions)
+[Play it](#play-it) · [Every change](CHANGELOG.md) · [Build it](#build-it) · [How it is tested](#how-it-is-tested) · [Help out](#help-out) · [Discussions](https://github.com/KuiseRapper/generals-vanguard/discussions)
 
 </div>
 
@@ -27,7 +27,7 @@ Command & Conquer: Generals Zero Hour, rebuilt from the source EA opened and pla
 EA published the source of Generals and Zero Hour in February 2025, for preservation. The game itself
 never left the shelf: it is still sold, and it still runs on Steam.
 
-Reforged is that source worked on as a game. About 580 engine source files were ported to Visual
+Generals Vanguard is that source worked on as a game. About 580 engine source files were ported to Visual
 Studio 2022 and to 64-bit, and in October 2026 the same tree learned SDL3, for Macs and Linux. Around sixty bugs that EA shipped in 2003
 were found and fixed, most of them by a test before anyone read the code. The computer opponent builds
 a base now. It never could.
@@ -42,9 +42,9 @@ No game data ships here. You need your own copy of Zero Hour.
 
 | Platform | Draws through | Where it stands |
 |:--|:--|:--|
-| Windows x64 | Direct3D 11, or Direct3D 9 with `-d3d9` | the build the launcher installs |
+| Windows x64 | Direct3D 11, or Direct3D 9 with `-d3d9` | the build `build.bat` makes |
 | Windows ARM64 | the same, with the port's own texture loader in place of `d3dx9_43.dll`, which has no ARM64 build | builds; the same code forced on x64 draws what x64 draws, and it has not yet run on an ARM64 machine |
-| macOS, Apple silicon | Metal, through SDL3 | playable, as `Zero Hour Reforged.app` (ad-hoc signed, not notarised) |
+| macOS, Apple silicon | Metal, through SDL3 | playable, as `Generals Vanguard.app` (ad-hoc signed, not notarised) |
 | macOS, Intel | Metal, through SDL3 | builds and runs |
 | Linux x86_64 and the Steam Deck | Vulkan, through SDL3 | playable; makes an AppImage, `.deb`, `.rpm`, Arch package and Flatpak, none of them carrying EA's files |
 | Linux arm64 | Vulkan, through SDL3 | builds and passes ctest, no package yet |
@@ -54,7 +54,7 @@ to the same checksum, and a Mac and a Linux PC have played a LAN match without o
 
 ## Then and now
 
-| | The source EA released | Reforged |
+| | The source EA released | Vanguard |
 |:--|:--|:--|
 | Program | 32-bit, stalls and dies past 4 GB | 64-bit, no ceiling |
 | Frame rate | the picture waits on the game's clock | uncapped, and the rules keep their own |
@@ -69,7 +69,7 @@ to the same checksum, and a Mac and a Linux PC have played a LAN match without o
 | Base game textures | Zero Hour's downscaled copies | 481 originals at four times the resolution |
 | Infantry shadows | a flat blob | cast from the pose |
 | Language | English | English, Türkçe or Deutsch |
-| A crash | silence | a report with file and line, sent by the launcher |
+| A crash | silence | a report with file and line, written to a log |
 
 ## What a match feels like now
 
@@ -178,15 +178,11 @@ played a full check match on a Steam Deck. A match between Windows and a Mac has
 ### Windows
 
 1. Have Zero Hour installed from Steam or the EA app.
-2. Download the Reforged launcher from [zerohour.gg](https://zerohour.gg) and run it. The installer
-   is not code signed, so Windows SmartScreen asks once before it starts.
-3. The launcher finds your Zero Hour folder and lists every file it is about to write before it writes
-   any. Each file it replaces is backed up first. Press Install, then Play.
+2. This fork has no launcher of its own: build it from this repository with one command (see
+   [Build it](#build-it)) and start the `generals.exe` it leaves in `GeneralsMD/Run/`.
 
-The launcher carries no game files of its own. It downloads the build and checks every file against
-a signed list, then keeps the game and itself up to date. A Steam copy still starts
-through Steam. Uninstall on the launcher's settings page puts back the files your game had before.
-When the game crashes, the launcher sends the report without asking you for anything.
+The build carries no game files of its own: it finds your Zero Hour folder and reads your `*.big`
+where they are. A Steam copy still starts through Steam.
 
 ### macOS and Linux
 
@@ -231,8 +227,8 @@ configuration to run the tests too, as in `./build-linux.sh Release test`.
 |:--|:--|:--|:--|
 | Windows x64 | `build.bat` | Visual Studio 2022 with the Desktop C++ workload | the `*.big` next to `GeneralsMD/Run/generals.exe`, the base game's in `Run/ZH_Generals/` |
 | Windows ARM64 | `build.bat` on an ARM64 machine, or `windows-ci.ps1 -Platform ARM64` on x64 (into `build-arm64`) | the same, with the ARM64 build tools | as x64 |
-| macOS | `./build-macos.sh` | the Xcode command line tools, then `brew install cmake ninja` | left where they are installed; `build-mac/Zero Hour Reforged.app` finds them |
-| Linux | `./build-linux.sh` | a C++ compiler, CMake, Ninja and the X11, Wayland, EGL and Vulkan headers SDL3 builds against; the script prints the apt, dnf or pacman line for anything missing | left where they are installed; `build-linux/ZeroHourReforged/bin/generals` finds them |
+| macOS | `./build-macos.sh` | the Xcode command line tools, then `brew install cmake ninja` | left where they are installed; `build-mac/Generals Vanguard.app` finds them |
+| Linux | `./build-linux.sh` | a C++ compiler, CMake, Ninja and the X11, Wayland, EGL and Vulkan headers SDL3 builds against; the script prints the apt, dnf or pacman line for anything missing | left where they are installed; `build-linux/GeneralsVanguard/bin/generals` finds them |
 
 All four take the same arguments:
 
@@ -369,7 +365,7 @@ them, and any source change separates them.
 ## Not there yet
 
 - Internet play. LAN works between separate PCs; matches over the internet wait on a lobby server of
-  Reforged's own, which is still on paper.
+  Vanguard's own, which is still on paper.
 - A Direct3D 11 frame still costs a little more than a Direct3D 9 one, 7.6 ms against 6.3 ms on a
   screen full of Inferno Cannon fire. `-d3d9` is the way back.
 - No gamepad, and no Direct3D 12.
@@ -381,16 +377,17 @@ them, and any source change separates them.
 
 Two PCs and an evening are still the most useful thing anyone can give this: a LAN match between two
 real machines, Windows against Windows or Windows against a Mac, reported as an
-[issue](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/issues). A clean match counts as much as
+[issue](https://github.com/KuiseRapper/generals-vanguard/issues). A clean match counts as much as
 a broken one.
 
 Pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) has the commit format and the check
-every pull request runs, and [Discussions](https://github.com/olcayseygan/CnCGeneralsZH-Reforged/discussions)
+every pull request runs, and [Discussions](https://github.com/KuiseRapper/generals-vanguard/discussions)
 is open for anything that is not an issue yet.
 
 ## Credits
 
-Electronic Arts released the source in 2025. İlyas Akın (ilyasakin) wrote the macOS, Linux and Windows
+Electronic Arts released the source in 2025. Olcay Seygan's Zero Hour Reforged is the base this fork
+started from. İlyas Akın (ilyasakin) wrote the macOS, Linux and Windows
 ARM64 port. Fixes taken from [TheSuperHackers/GeneralsGameCode](https://github.com/TheSuperHackers/GeneralsGameCode),
 the community's CMake port of the same source, are credited where they landed, in the code and in the
 commits. Third-party libraries are fetched at pinned versions and keep their own licences;

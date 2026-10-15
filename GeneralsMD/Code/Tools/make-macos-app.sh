@@ -15,7 +15,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# make-macos-app.sh: builds "Zero Hour Reforged.app" (P1 step 5), the
+# make-macos-app.sh: builds "Generals Vanguard.app" (P1 step 5), the
 # macos_app CMake target's one step.
 #
 #   Contents/Info.plist, PkgInfo       with ZHReforgedCommit and ZHReforgedBuildDate: which build this is
@@ -38,7 +38,7 @@
 # --no-art is still taken, and changes nothing.
 #
 # Usage: make-macos-app.sh --generals <exe> --overlay <staged overlay> --build <build dir>
-#          --out <.../Zero Hour Reforged.app> --bundle-id <id> --min-macos <version> [--no-art]
+#          --out <.../Generals Vanguard.app> --bundle-id <id> --min-macos <version> [--no-art]
 #          [--link-ninja <build.ninja>]
 #   --min-macos   LSMinimumSystemVersion, and the newest minimum any shipped object may carry (the build's
 #                 CMAKE_OSX_DEPLOYMENT_TARGET)
@@ -174,13 +174,13 @@ cat > "$C/Info.plist" <<PLIST_EOF
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>		<string>en</string>
-	<key>CFBundleDisplayName</key>			<string>Zero Hour Reforged</string>
+	<key>CFBundleDisplayName</key>			<string>Generals Vanguard</string>
 	<key>CFBundleExecutable</key>			<string>generals</string>
-	<key>CFBundleGetInfoString</key>		<string>Zero Hour Reforged $version, $commit, built $built</string>
+	<key>CFBundleGetInfoString</key>		<string>Generals Vanguard $version, $commit, built $built</string>
 	<key>CFBundleIconFile</key>			<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>			<string>$BUNDLE_ID</string>
 	<key>CFBundleInfoDictionaryVersion</key>	<string>6.0</string>
-	<key>CFBundleName</key>				<string>Zero Hour Reforged</string>
+	<key>CFBundleName</key>				<string>Generals Vanguard</string>
 	<key>CFBundlePackageType</key>			<string>APPL</string>
 	<key>CFBundleShortVersionString</key>		<string>$version</string>
 	<key>CFBundleVersion</key>			<string>$version</string>

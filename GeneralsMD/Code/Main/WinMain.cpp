@@ -910,7 +910,7 @@ static Bool initializeAppWindows( HINSTANCE hInstance, Int nCmdShow, Bool runWin
 	const RECT screen = findMonitor( savedMonitor ).rect;
 
   HWND hWnd = CreateWindow( TEXT("Game Window"),
-                            TEXT("Command and Conquer Generals"),
+                            TEXT("Generals Vanguard"),
                             windowStyle,
 														(screen.left + screen.right) / 2 - (startWidth / 2), // original position X
 														(screen.top + screen.bottom) / 2 - (startHeight / 2),// original position Y
@@ -1296,7 +1296,7 @@ Int APIENTRY WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			findEarlyCommandLineOption( L"-multiInstance" ) == NULL &&
 			!isUnattendedProcess())
 	{
-		::MessageBoxA( NULL, "Please start Zero Hour Reforged from its launcher.", "Zero Hour Reforged", MB_OK | MB_ICONINFORMATION );
+		::MessageBoxA( NULL, "Please start Generals Vanguard from its launcher.", "Generals Vanguard", MB_OK | MB_ICONINFORMATION );
 		return 1;
 	}
 

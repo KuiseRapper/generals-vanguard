@@ -55,7 +55,7 @@ trap 'rm -rf -- "${T:?}"' EXIT
 failed=0
 check() { if eval "$1"; then echo "ok: $2"; else echo "FAIL: $2"; failed=1; fi; }
 ID=io.github.example.check
-APP="$T/one/Zero Hour Reforged.app"
+APP="$T/one/Generals Vanguard.app"
 
 # 1. the bundle
 out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$APP" --bundle-id "$ID" --min-macos "$TARGET" --no-art 2>&1)"; status=$?
@@ -82,7 +82,7 @@ check 'file "$APP/Contents/Resources/AppIcon.icns" | grep -q "icon"' "the icon"
 check '[ -f "$APP/Contents/Resources/Overlay/Install_Final.bmp" ] && [ -d "$APP/Contents/Resources/Overlay/Data/INI" ] && [ -z "$(find "$APP" -type l)" ]' \
 	"the overlay, with no symbolic link anywhere in the bundle"
 nlic=$(ls "$APP/Contents/Resources/Licenses" | wc -l | tr -d ' ')
-check '[ "$nlic" -ge 13 ] && [ -f "$APP/Contents/Resources/Licenses/Zero-Hour-Reforged-LICENSE.md" ] && [ -f "$APP/Contents/Resources/Licenses/FFmpeg-SOURCE.txt" ] && grep -q "may not be removed" "$APP/Contents/Resources/Licenses/zlib-LICENSE.txt"' \
+check '[ "$nlic" -ge 13 ] && [ -f "$APP/Contents/Resources/Licenses/Generals-Vanguard-LICENSE.md" ] && [ -f "$APP/Contents/Resources/Licenses/FFmpeg-SOURCE.txt" ] && grep -q "may not be removed" "$APP/Contents/Resources/Licenses/zlib-LICENSE.txt"' \
 	"the licences ($nlic files: the game, FFmpeg with its source pointer, zlib from its header, ...)"
 check 'grep -q "this notice may not be removed or altered" "$APP/Contents/Resources/Licenses/LZH-Light-LICENSE.txt" && grep -q "GNU GPL option, version 2 or later" "$APP/Contents/Resources/Licenses/FreeType-OPTION.txt" && [ -f "$APP/Contents/Resources/Licenses/FreeType-GPLv2.txt" ]' \
 	"LZH-Light's notice, and FreeType's GPLv2-or-later option with its GPLv2 text"
@@ -99,22 +99,22 @@ text = open(sys.argv[1]).read()
 text = re.sub(r"(^build generals: CXX_EXECUTABLE_LINKER.*?\n  LINK_LIBRARIES = )", r"\1Libraries/libnolicence.a ", text, count=1, flags=re.S | re.M)
 open(sys.argv[2], "w").write(text)
 NINJA_EOF
-out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/three/Zero Hour Reforged.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --link-ninja "$T/build.ninja" 2>&1)"; status=$?
-check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "does not cover: nolicence" && [ ! -e "$T/three/Zero Hour Reforged.app" ]' \
+out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/three/Generals Vanguard.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --link-ninja "$T/build.ninja" 2>&1)"; status=$?
+check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "does not cover: nolicence" && [ ! -e "$T/three/Generals Vanguard.app" ]' \
 	"a linked library without a licence entry is refused, naming it, and leaves no bundle (exit $status)"
 
 # 4. the oldest macOS
 check 'otool -l "$APP/Contents/MacOS/generals" | awk "/LC_BUILD_VERSION/ {f=1} f && \$1 == \"minos\" {print \$2; exit}" | grep -qx "$TARGET"' \
 	"the executable is stamped for $TARGET"
-out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/four/Zero Hour Reforged.app" --bundle-id "$ID" --min-macos 11.0 --no-art 2>&1)"; status=$?
-check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "linked libraries built for a newer macOS than 11.0" && printf "%s" "$out" | grep -q "libgameengine.a: minimum macOS $TARGET" && [ ! -e "$T/four/Zero Hour Reforged.app" ]' \
+out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/four/Generals Vanguard.app" --bundle-id "$ID" --min-macos 11.0 --no-art 2>&1)"; status=$?
+check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "linked libraries built for a newer macOS than 11.0" && printf "%s" "$out" | grep -q "libgameengine.a: minimum macOS $TARGET" && [ ! -e "$T/four/Generals Vanguard.app" ]' \
 	"a minimum below the build's is refused, naming the libraries, and leaves no bundle (exit $status)"
 printf 'int main(void) { return 0; }\n' > "$T/newer.c"
 mkdir -p "$T/overlay"
 for e in "$OVERLAY"/*; do case "$e" in *.big) ;; *) cp -R -L "$e" "$T/overlay/";; esac; done
 if cc -mmacosx-version-min=26.0 -o "$T/overlay/newer-tool" "$T/newer.c" 2>/dev/null; then
-	out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$T/overlay" --build "$BUILD" --out "$T/five/Zero Hour Reforged.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art 2>&1)"; status=$?
-	check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "the bundle.s executables built for a newer macOS" && printf "%s" "$out" | grep -q "newer-tool: minimum macOS 26.0" && [ ! -e "$T/five/Zero Hour Reforged.app" ]' \
+	out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$T/overlay" --build "$BUILD" --out "$T/five/Generals Vanguard.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art 2>&1)"; status=$?
+	check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "the bundle.s executables built for a newer macOS" && printf "%s" "$out" | grep -q "newer-tool: minimum macOS 26.0" && [ ! -e "$T/five/Generals Vanguard.app" ]' \
 		"a Mach-O for a newer macOS inside the bundle is refused, naming it (exit $status)"
 else
 	check 'false' "cc could not build the control's newer-macOS Mach-O"
@@ -125,21 +125,21 @@ printf 'int main(void) { return 0; }\n' > "$T/x86.c"
 cc -arch x86_64 -mmacosx-version-min="$TARGET" -o "$T/x86-ok" "$T/x86.c" 2>/dev/null
 cc -arch x86_64 -mmacosx-version-min=26.0 -o "$T/x86-newer" "$T/x86.c" 2>/dev/null
 cc -arch arm64 -mmacosx-version-min="$TARGET" -o "$T/not-x86" "$T/x86.c" 2>/dev/null
-U="$T/six/Zero Hour Reforged.app"
+U="$T/six/Generals Vanguard.app"
 out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$U" --bundle-id "$ID" --min-macos "$TARGET" --no-art --x86-64-generals "$T/x86-ok" 2>&1)"; status=$?
 archs="$(lipo -archs "$U/Contents/MacOS/generals" 2>/dev/null | tr ' ' '\n' | sort | tr '\n' ' ')"
 check '[ $status -eq 0 ] && [ "$archs" = "arm64 x86_64 " ] && codesign --verify --deep --strict "$U" 2>/dev/null' \
 	"an x86_64 slice for $TARGET makes a universal executable ($archs) that verifies (exit $status)"
 check '[ "$(otool -arch all -l "$U/Contents/MacOS/generals" | awk "\$1 == \"minos\" {print \$2}" | sort -u | tr "\n" " ")" = "$TARGET " ]' \
 	"and both slices are stamped for $TARGET"
-out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/seven/Zero Hour Reforged.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --x86-64-generals "$T/x86-newer" 2>&1)"; status=$?
-check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "the x86_64 executable built for a newer macOS" && [ ! -e "$T/seven/Zero Hour Reforged.app" ]' \
+out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/seven/Generals Vanguard.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --x86-64-generals "$T/x86-newer" 2>&1)"; status=$?
+check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "the x86_64 executable built for a newer macOS" && [ ! -e "$T/seven/Generals Vanguard.app" ]' \
 	"an x86_64 slice for macOS 26 is refused before a bundle exists (exit $status)"
-out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/eight/Zero Hour Reforged.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --x86-64-generals "$T/not-x86" 2>&1)"; status=$?
+out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$T/eight/Generals Vanguard.app" --bundle-id "$ID" --min-macos "$TARGET" --no-art --x86-64-generals "$T/not-x86" 2>&1)"; status=$?
 check '[ $status -eq 1 ] && printf "%s" "$out" | grep -q "is not an x86_64 executable"' "an arm64 file passed as the x86_64 slice is refused (exit $status)"
 
 # 6. the art, never bundled, read from the user data folder
-N="$T/nine/Zero Hour Reforged.app"
+N="$T/nine/Generals Vanguard.app"
 out="$(bash "$SCRIPT" --generals "$GENERALS" --overlay "$OVERLAY" --build "$BUILD" --out "$N" --bundle-id "$ID" --min-macos "$TARGET" 2>&1)"; status=$?
 check '[ $status -eq 0 ] && [ -z "$(find "$N" -name "Reforged*.big")" ]' \
 	"a bundle holds no Reforged*.big (the staged overlay links $(find -L "$OVERLAY" -maxdepth 1 -name 'Reforged*.big' | wc -l | tr -d ' ')) (exit $status)"

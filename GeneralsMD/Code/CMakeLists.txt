@@ -1945,15 +1945,15 @@ if(ZH_PLATFORM_POSIX)
     COMMENT "Staging the development-only overlay (P1)" VERBATIM)
   add_custom_target(zh_overlay_dev ALL DEPENDS ${CMAKE_BINARY_DIR}/overlay-dev.staged)
 
-  # P1 step 5: the macOS app, "Zero Hour Reforged.app" beside the executable, its dSYM beside it
+  # P1 step 5: the macOS app, "Generals Vanguard.app" beside the executable, its dSYM beside it
   # (Tools/make-macos-app.sh: Info.plist, the icon, the staged overlay without the art, which the game reads from
   # the user data folder's ReforgedArt when something has put it there, the licences checked against generals'
   # link line, the HUD directive, an ad-hoc signature, verified).  Outside ALL: build it with `ninja macos_app`.
   # The bundle id belongs to whoever ships; the default is the project's home (the README's).
   if(APPLE)
-    set(ZH_APP_BUNDLE_ID "io.github.olcayseygan.zero-hour-reforged" CACHE STRING "CFBundleIdentifier of the macOS app")
+    set(ZH_APP_BUNDLE_ID "io.github.kuiserapper.GeneralsVanguard" CACHE STRING "CFBundleIdentifier of the macOS app")
     set(ZH_APP_ARGS --generals $<TARGET_FILE:generals> --overlay ${CMAKE_BINARY_DIR}/overlay
-        --build ${CMAKE_BINARY_DIR} --out "${CMAKE_BINARY_DIR}/Zero Hour Reforged.app" --bundle-id ${ZH_APP_BUNDLE_ID}
+        --build ${CMAKE_BINARY_DIR} --out "${CMAKE_BINARY_DIR}/Generals Vanguard.app" --bundle-id ${ZH_APP_BUNDLE_ID}
         --min-macos ${CMAKE_OSX_DEPLOYMENT_TARGET})
     # P2 universal2, option A (release time, E2): an x86_64 build's generals, lipo'd into the bundle's
     set(ZH_X86_64_GENERALS "" CACHE FILEPATH "An x86_64 build's generals, to make the macOS app universal2 (P2)")
@@ -1963,7 +1963,7 @@ if(ZH_PLATFORM_POSIX)
     add_custom_target(macos_app
       COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Tools/make-macos-app.sh ${ZH_APP_ARGS}
       DEPENDS generals zh_overlay
-      COMMENT "Building Zero Hour Reforged.app (P1 step 5)" VERBATIM)
+      COMMENT "Building Generals Vanguard.app (P1 step 5)" VERBATIM)
     # the bundle script on itself: a bundle from this build's inputs (no art) holds what it should and
     # verifies, and a HUD-off INI, an unlicensed library and a write after signing are each caught
     add_test(NAME macos_app_check
@@ -1974,7 +1974,7 @@ if(ZH_PLATFORM_POSIX)
     # `ninja macos_app` first (outside ALL), and says so when it skips.
     add_test(NAME replay_check_app
              COMMAND bash -c "if [ ! -x \"$1/Contents/MacOS/generals\" ]; then echo \"skip: no bundle at $1 - build it with ninja macos_app\"; exit 77; fi; exec \"$0\" --app \"$1\" --seeds 0 --maxframes 1200"
-                     ${CMAKE_CURRENT_SOURCE_DIR}/Tools/replay-check.sh "${CMAKE_BINARY_DIR}/Zero Hour Reforged.app")
+                     ${CMAKE_CURRENT_SOURCE_DIR}/Tools/replay-check.sh "${CMAKE_BINARY_DIR}/Generals Vanguard.app")
     set_tests_properties(replay_check_app PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600)
     if(ZH_GAME_DATA)
       set_tests_properties(replay_check_app PROPERTIES ENVIRONMENT "ZH_DATA_DIR=${ZH_GAME_DATA}")

@@ -214,7 +214,7 @@ void SdlGameEngine::createWindow( void )
 		height = bounds.h;
 	}
 
-	m_window = SDL_CreateWindow( "Command and Conquer Generals Zero Hour", width, height, flags );
+	m_window = SDL_CreateWindow( "Generals Vanguard", width, height, flags );
 	if (m_window == NULL)
 	{
 		char why[ 512 ];

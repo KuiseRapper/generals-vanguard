@@ -51,7 +51,7 @@ void getLogDirectory( char *buf, size_t size, Bool keepTrailingSeparator );
 Bool isExecutableInAppBundle( void );
 
 /* Whether the running executable is in a Linux package (P3): <package>/bin/generals, with the overlay at
-	 <package>/share/zero-hour-reforged/overlay. */
+	 <package>/share/generals-vanguard/overlay. */
 Bool isExecutableInLinuxPackage( void );
 
 /* Either of the two: what decides where the logs go and whether PosixMain may look for the player's

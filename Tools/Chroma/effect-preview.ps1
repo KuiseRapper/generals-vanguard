@@ -365,8 +365,8 @@ public static class ChromaPreview
         StringBuilder log = new StringBuilder();
         using (HttpClient client = new HttpClient())
         {
-            string init = "{\"title\":\"Zero Hour Reforged effect preview\",\"description\":\"Superweapon effect preview\","
-                        + "\"author\":{\"name\":\"Zero Hour Reforged\",\"contact\":\"local\"},"
+            string init = "{\"title\":\"Generals Vanguard effect preview\",\"description\":\"Superweapon effect preview\","
+                        + "\"author\":{\"name\":\"Generals Vanguard\",\"contact\":\"local\"},"
                         + "\"device_supported\":[\"keyboard\",\"mouse\",\"mousepad\"],\"category\":\"application\"}";
             string reply = client.PostAsync("http://localhost:54235/razer/chromasdk",
                 new StringContent(init, Encoding.UTF8, "application/json")).Result.Content.ReadAsStringAsync().Result;

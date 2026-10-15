@@ -105,7 +105,7 @@ Bool isExecutableInLinuxPackage( void )
 {
 	char exe[ 4096 ];
 	getExecutableDirectory( exe, sizeof( exe ), FALSE );
-	if (exe[0] == 0 || strlcat( exe, "/../share/zero-hour-reforged/overlay", sizeof( exe ) ) >= sizeof( exe ))
+	if (exe[0] == 0 || strlcat( exe, "/../share/generals-vanguard/overlay", sizeof( exe ) ) >= sizeof( exe ))
 		return FALSE;
 	struct stat status;
 	return stat( exe, &status ) == 0 && S_ISDIR( status.st_mode );

@@ -24,9 +24,9 @@
 # fetches the third-party sources EA stripped and the fork's own art (vendor.sh), configures, builds,
 # runs ctest when asked, and stages a game that runs:
 #
-#   macOS   build-mac/Zero Hour Reforged.app (the macos_app target)
-#   Linux   build-linux/ZeroHourReforged/, the layout of the Linux package: bin/generals, and the staged
-#           overlay at share/zero-hour-reforged/overlay, a link into the build tree
+#   macOS   build-mac/Generals Vanguard.app (the macos_app target)
+#   Linux   build-linux/GeneralsVanguard/, the layout of the Linux package: bin/generals, and the staged
+#           overlay at share/generals-vanguard/overlay, a link into the build tree
 #
 # Either one finds the player's Zero Hour by itself, or asks for its folder on the first start. The
 # *.big stay where the install has them.
@@ -176,13 +176,13 @@ fi
 # --- the game, staged where it runs ---
 if [ "$PLATFORM" = macos ]; then
   "$CMAKE" --build "$BUILD" --target macos_app || fail "the app bundle failed."
-  echo "[build] done: open \"$BUILD/Zero Hour Reforged.app\""
+  echo "[build] done: open \"$BUILD/Generals Vanguard.app\""
 else
-  package="$BUILD/ZeroHourReforged"
+  package="$BUILD/GeneralsVanguard"
   rm -rf "$package"
-  mkdir -p "$package/bin" "$package/share/zero-hour-reforged"
+  mkdir -p "$package/bin" "$package/share/generals-vanguard"
   cp "$BUILD/generals" "$package/bin/generals"
-  ln -s ../../../overlay "$package/share/zero-hour-reforged/overlay"
+  ln -s ../../../overlay "$package/share/generals-vanguard/overlay"
   echo "[build] done: run $package/bin/generals"
 fi
 echo "[build] It finds your Zero Hour in the usual places, or asks for its folder on the first start: the one"

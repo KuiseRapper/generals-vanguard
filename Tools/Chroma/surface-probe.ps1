@@ -19,9 +19,9 @@ $BLUE = 16711680
 $MAGENTA = 16711935
 
 $init = @{
-    title            = 'Zero Hour Reforged probe'
+    title            = 'Generals Vanguard probe'
     description      = 'One-off surface probe'
-    author           = @{ name = 'Zero Hour Reforged'; contact = 'local' }
+    author           = @{ name = 'Generals Vanguard'; contact = 'local' }
     device_supported = @('keyboard', 'mouse', 'mousepad', 'keypad', 'headset', 'chromalink')
     category         = 'application'
 } | ConvertTo-Json -Depth 5 -Compress

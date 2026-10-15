@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 // FILE: GameConsole.cpp ////////////////////////////////////////////////////////////////////////
 // Desc: The drop-down console.  Drawn with drawFillRect and DisplayStrings the way GraphDraw is,
@@ -416,7 +417,7 @@ GameConsole::GameConsole()
 	}
 	m_lineStringCount = CONSOLE_MAX_ROWS;
 
-	printLine( AsciiString( "Zero Hour Reforged console.  'help' lists what there is." ) );
+	printLine( AsciiString( "Generals Vanguard console.  'help' lists what there is." ) );
 }
 
 //-------------------------------------------------------------------------------------------------

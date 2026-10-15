@@ -55,7 +55,7 @@ package_license_entries() {
 license_entry() {
 	local L="$2" s="$CODE/Libraries/Source"
 	case "$1" in
-		game) cp "$REPO/LICENSE.md" "$L/Zero-Hour-Reforged-LICENSE.md";;
+		game) cp "$REPO/LICENSE.md" "$L/Generals-Vanguard-LICENSE.md";;
 		ffmpeg)
 			cp "$BUILD/ffmpeg/LICENSE.txt" "$L/FFmpeg-LICENSE.txt" || return 1
 			local v; v="$(awk -F= '/^version=/ {print $2; exit}' "$CODE/Tools/ffmpeg-build-posix.sh")"
@@ -64,7 +64,7 @@ license_entry() {
 				"GeneralsMD/Code/Libraries/Source/FFmpeg/ffmpeg-$v.tar.xz, configured by" \
 				"GeneralsMD/Code/Tools/ffmpeg-build-posix.sh (its configure line is the build's)." \
 				"To relink the game against another FFmpeg, build it from this game's source:" \
-				"https://github.com/olcayseygan/CnCGeneralsZH-Reforged" > "$L/FFmpeg-SOURCE.txt";;
+				"https://github.com/KuiseRapper/generals-vanguard" > "$L/FFmpeg-SOURCE.txt";;
 		sdl3) cp "$s/SDL3/LICENSE.txt" "$L/SDL3-LICENSE.txt";;
 		shadercross) cp "$s/SDL_shadercross/LICENSE.txt" "$L/SDL_shadercross-LICENSE.txt";;
 		freetype)		# dual-licensed; this game takes the GNU GPL (version 2 or later) option, as NOTICE.md says

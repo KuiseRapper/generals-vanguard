@@ -18,12 +18,12 @@
 # linux-portable.sh: the portable Linux build (P3) - one folder that runs
 # on the Steam Deck's SteamOS and any desktop Linux of the last five years, with nothing installed.
 #
-#   <out>/zero-hour-reforged.sh                   the launcher: runs bin/generals with the player's arguments (a .sh:
+#   <out>/generals-vanguard.sh                   the launcher: runs bin/generals with the player's arguments (a .sh:
 #                                                 Steam's Add a Non-Steam Game picker takes .sh, .exe, .application
 #                                                 or an AppImage, never a bare executable)
 #   <out>/bin/generals                            stripped; bin/generals.debug beside it (a GNU debuglink)
-#   <out>/share/zero-hour-reforged/overlay/       the staged overlay (zh_overlay), its art copied in
-#   <out>/share/zero-hour-reforged/licenses/      from macos-app-licenses.txt, checked against the link line
+#   <out>/share/generals-vanguard/overlay/       the staged overlay (zh_overlay), its art copied in
+#   <out>/share/generals-vanguard/licenses/      from macos-app-licenses.txt, checked against the link line
 #   <out>/share/applications/, share/icons/       a .desktop file and the icon (Main/Generals.ico's 48 px, and 128 px)
 #   <out>/VERSION, <out>/README.txt               which build this is; how to install it and point it at Zero Hour
 #   <out>.tar.zst                                 the folder, packed (not with --no-tar)
@@ -45,7 +45,7 @@
 #          [--image <sdk image>] [--jobs <n>] [--no-art] [--no-tar] [--no-build]
 #          [--appimage <appimagetool> --runtime <type-2 runtime>]
 #   --build     the build folder (made if missing); kept between runs, so a second build is incremental
-#   --out       the folder to make; its name is the package's (e.g. .../ZeroHourReforged-linux-x86_64)
+#   --out       the folder to make; its name is the package's (e.g. .../GeneralsVanguard-linux-x86_64)
 #   --cmake     a Linux CMake of 3.29 or later that runs inside the container: the SDK's own 3.25 cannot
 #               configure this project, and a distribution's CMake needs its distribution's glibc.
 #               Kitware's release tarball (cmake-3.31.6-linux-x86_64, or -aarch64 on arm64) is what P3 uses
@@ -148,7 +148,7 @@ STARTED=1
 mkdir -p "$OUT" || fail "cannot create $OUT"
 OUT="$(cd "$OUT" && pwd)"
 mounts+=( -v "$(dirname "$OUT"):$(dirname "$OUT")" )
-S="$OUT/share/zero-hour-reforged"
+S="$OUT/share/generals-vanguard"
 mkdir -p "$OUT/bin" "$S/overlay" "$S/licenses" "$OUT/share/applications" "$OUT/share/icons/hicolor/48x48/apps" \
 	"$OUT/share/icons/hicolor/128x128/apps" \
 	|| fail "cannot create $OUT"
@@ -164,18 +164,18 @@ for e in $ENTRIES; do
 	license_entry "$e" "$S/licenses" || fail "cannot write the licence entry '$e'"
 done
 
-cat > "$OUT/zero-hour-reforged.sh" <<'LAUNCHER'
+cat > "$OUT/generals-vanguard.sh" <<'LAUNCHER'
 #!/bin/sh
-# Zero Hour Reforged's launcher (P3): the game finds its overlay beside it and the player's Zero Hour by itself
+# Generals Vanguard's launcher (P3): the game finds its overlay beside it and the player's Zero Hour by itself
 # (Registry.ini, then ~/Games, the Steam libraries and the rest; see README.txt).  Arguments pass through,
 # so Steam's launch options reach the game: -root "<your Zero Hour folder>" names the install.
 here="$(dirname "$(readlink -f "$0")")"
 exec "$here/bin/generals" "$@"
 LAUNCHER
-chmod +x "$OUT/zero-hour-reforged.sh"
+chmod +x "$OUT/generals-vanguard.sh"
 
-python3 - "$CODE/Main/Generals.ico" "$OUT/share/icons/hicolor/48x48/apps/zero-hour-reforged.png" \
-	"$OUT/share/icons/hicolor/128x128/apps/zero-hour-reforged.png" <<'ICON_EOF' || fail "cannot make the icon"
+python3 - "$CODE/Main/Generals.ico" "$OUT/share/icons/hicolor/48x48/apps/generals-vanguard.png" \
+	"$OUT/share/icons/hicolor/128x128/apps/generals-vanguard.png" <<'ICON_EOF' || fail "cannot make the icon"
 # the .ico's largest 24-bit image (48 px), its AND mask as alpha, written as a PNG; and the same scaled to 128 px
 # (bilinear, over premultiplied alpha), because AppStream, which the Flatpak's metadata goes through, wants 64 or more
 import struct, sys, zlib
@@ -232,13 +232,13 @@ write_png(sys.argv[2], rgba)
 write_png(sys.argv[3], scaled(rgba, 128))
 ICON_EOF
 
-cat > "$OUT/share/applications/zero-hour-reforged.desktop" <<'DESKTOP'
+cat > "$OUT/share/applications/generals-vanguard.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
-Name=Zero Hour Reforged
-Comment=Command & Conquer Generals Zero Hour, reforged
-Exec=zero-hour-reforged.sh
-Icon=zero-hour-reforged
+Name=Generals Vanguard
+Comment=for Command & Conquer: Generals Zero Hour
+Exec=generals-vanguard.sh
+Icon=generals-vanguard
 # a template: to use it, put the folder's path in Exec and copy this file to ~/.local/share/applications
 Categories=Game;StrategyGame;
 Terminal=false
@@ -251,7 +251,7 @@ image_id="$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE" 2>
 compiler="$(in_sdk "g++-14 --version | head -1")"
 version="$(awk '/#define VERSION_MAJOR/ {a=$3} /#define VERSION_MINOR/ {b=$3} /#define VERSION_BUILDNUM/ {c=$3} END {print a"."b"."c}' "$BUILD/generated/BuildVersion.h")"
 cat > "$OUT/VERSION" <<VERSION_EOF
-Zero Hour Reforged $version for Linux ($ARCH)
+Generals Vanguard $version for Linux ($ARCH)
 commit $commit
 built $built
 built in $image_id
@@ -260,17 +260,17 @@ needs glibc $glibc or newer, and fontconfig; art $( [ "$ART" -eq 1 ] && echo inc
 VERSION_EOF
 
 cat > "$OUT/README.txt" <<'README_EOF'
-Zero Hour Reforged for Linux and the Steam Deck
+Generals Vanguard for Linux and the Steam Deck
 ===============================================
 
 This folder is the whole game engine; nothing is installed. It needs your own copy of Command & Conquer
 Generals Zero Hour (Steam, EA App, CD or First Decade), with the original Generals it builds on.
 
 INSTALL
-  Unpack the folder anywhere you can write, e.g. ~/Games/ZeroHourReforged. To start it, run
-  zero-hour-reforged.sh in the folder.
+  Unpack the folder anywhere you can write, e.g. ~/Games/GeneralsVanguard. To start it, run
+  generals-vanguard.sh in the folder.
 
-  In Steam: Games > Add a Non-Steam Game to My Library > Browse, choose zero-hour-reforged.sh.
+  In Steam: Games > Add a Non-Steam Game to My Library > Browse, choose generals-vanguard.sh.
 
 WHERE YOUR ZERO HOUR IS
   The game finds it by itself when it is in one of these places:
@@ -296,7 +296,7 @@ FILES
   Settings, saves, replays and logs:  ~/.local/share/Command and Conquer Generals Zero Hour Data/
                                      ($XDG_DATA_HOME's, when that is set)
   Which build this is:               VERSION
-  Licences:                          share/zero-hour-reforged/licenses/
+  Licences:                          share/generals-vanguard/licenses/
 
 UNINSTALL
   Delete this folder. Your settings and saves stay in ~/.local/share/Command and Conquer Generals Zero
@@ -313,9 +313,9 @@ if [ -n "$APPIMAGETOOL" ]; then
 	rm -rf -- "$A" "$OUT.AppImage"
 	cp -al "$OUT" "$A" 2>/dev/null || cp -R "$OUT" "$A" || fail "cannot make $A"
 	rm -f "$A/bin/generals.debug"		# the AppImage is for playing; the debug file stays in the folder and its tarball
-	cp "$OUT/zero-hour-reforged.sh" "$A/AppRun" && cp "$OUT/share/applications/zero-hour-reforged.desktop" "$A/" \
-		&& cp "$OUT/share/icons/hicolor/128x128/apps/zero-hour-reforged.png" "$A/zero-hour-reforged.png" \
-		&& ln -s zero-hour-reforged.png "$A/.DirIcon" || fail "cannot complete $A"
+	cp "$OUT/generals-vanguard.sh" "$A/AppRun" && cp "$OUT/share/applications/generals-vanguard.desktop" "$A/" \
+		&& cp "$OUT/share/icons/hicolor/128x128/apps/generals-vanguard.png" "$A/generals-vanguard.png" \
+		&& ln -s generals-vanguard.png "$A/.DirIcon" || fail "cannot complete $A"
 	ARCH="$ARCH" "$APPIMAGETOOL" --no-appstream --runtime-file "$RUNTIME" "$A" "$OUT.AppImage" > "$OUT.appimagetool.log" 2>&1 \
 		|| { tail -5 "$OUT.appimagetool.log" >&2; rm -rf -- "$A"; fail "appimagetool failed"; }
 	rm -rf -- "$A"

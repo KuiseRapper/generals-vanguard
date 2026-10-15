@@ -18,7 +18,7 @@
 # distribution.  Per distribution, two containers:
 #
 #   minimal   the package installed with only what it Depends/Requires (no recommended or weak dependencies),
-#             then cut off the network: E1 (Tools/replay-check.sh --installed) through /usr/bin/zero-hour-reforged,
+#             then cut off the network: E1 (Tools/replay-check.sh --installed) through /usr/bin/generals-vanguard,
 #             its launcher and its own overlay discovery, at the pins: seed 0 at 2400 frames, seeds 0 and 1 at
 #             24000.  The game data is mounted read-only (rule 9 as ever: the runs root at a farm of it);
 #   drawn     the package installed as a player gets it (recommended dependencies on; on Arch, the Vulkan and
@@ -56,8 +56,8 @@ command -v docker > /dev/null || { echo "skip: no docker"; exit 77; }
 CODE="$(cd "$(dirname "$0")/.." && pwd)"
 PKGS="$(cd "$PKGS" && pwd -P)"; DATA="$(cd "$DATA" && pwd -P)"
 file_of() { ls "$PKGS"/$1 2>/dev/null | head -1; }
-DEB="$(file_of 'zero-hour-reforged_*_amd64.deb')"; RPM="$(file_of 'zero-hour-reforged-*.x86_64.rpm')"
-ARCHPKG="$(file_of 'zero-hour-reforged-*-x86_64.pkg.tar.zst')"; APPIMAGE="$(file_of 'zero-hour-reforged-*-x86_64.AppImage')"
+DEB="$(file_of 'generals-vanguard_*_amd64.deb')"; RPM="$(file_of 'generals-vanguard-*.x86_64.rpm')"
+ARCHPKG="$(file_of 'generals-vanguard-*-x86_64.pkg.tar.zst')"; APPIMAGE="$(file_of 'generals-vanguard-*-x86_64.AppImage')"
 PIN_2400=0x67F86891 PIN_0=0x6404352D PIN_1=0x90B6D230	# E1's pins since the logic went to 60 Hz (measured on Windows x64)
 failed=0 pulled=""
 say() { echo "linux-packages-check: $*"; }
@@ -113,7 +113,7 @@ check_distribution() {	# check_distribution <label> <image> <format>
 exec docker exec -i -u $(id -u):$(id -g) -e HOME -e ZH_USER_DATA_DIR -e ZH_UNATTENDED -e APPIMAGE_EXTRACT_AND_RUN=1 -e TMPDIR=$T/tmp -w "\$PWD" $name timeout 900 "\$@"
 RUNNER
 	chmod +x "$T/runner"
-	local target=( --installed /usr/bin/zero-hour-reforged ) e1a e1b
+	local target=( --installed /usr/bin/generals-vanguard ) e1a e1b
 	[ "$format" = appimage ] && target=( --appimage "$APPIMAGE" )
 	e1a="$(TMPDIR="$T/tmp" REPLAY_CHECK_RUNNER="$T/runner" bash "$CODE/Tools/replay-check.sh" "${target[@]}" --data "$DATA" --seeds 0 --maxframes 2400 2>&1)"
 	e1b="$(TMPDIR="$T/tmp" REPLAY_CHECK_RUNNER="$T/runner" bash "$CODE/Tools/replay-check.sh" "${target[@]}" --data "$DATA" --seeds "0 1" --maxframes 24000 2>&1)"
@@ -132,7 +132,7 @@ RUNNER
 		if ! as_root "$name" "$(install_cmd "$label" drawn)" > "$T/install-drawn.log" 2>&1; then
 			say "$label: the default install failed:"; tail -5 "$T/install-drawn.log"; docker rm -f "$name" > /dev/null; return 1
 		fi
-		local run=/usr/bin/zero-hour-reforged shot
+		local run=/usr/bin/generals-vanguard shot
 		[ "$format" = appimage ] && run="$APPIMAGE"
 		mkdir -p "$T/draw-user" "$T/draw-home"
 		docker exec -u "$(id -u):$(id -g)" -e HOME="$T/draw-home" -e ZH_USER_DATA_DIR="$T/draw-user/" -e ZH_UNATTENDED=1 \

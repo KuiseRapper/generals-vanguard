@@ -15,7 +15,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Build Zero Hour Reforged on Linux, from a fresh clone, in one command. build.bat's arguments:
+# Build Generals Vanguard on Linux, from a fresh clone, in one command. build.bat's arguments:
 #
 #   ./build-linux.sh                    check the toolchain, fetch, configure, build Release, stage the game
 #   ./build-linux.sh Debug              another configuration (Release|RelWithDebInfo|Debug)
@@ -24,7 +24,7 @@
 #   ./build-linux.sh clean              delete build-linux/ and start again
 #
 # Needs a C++ compiler, CMake, Ninja and SDL3's X11, Wayland and Vulkan headers; it prints the apt, dnf
-# or pacman command when something is missing. The result is build-linux/ZeroHourReforged/bin/generals.
+# or pacman command when something is missing. The result is build-linux/GeneralsVanguard/bin/generals.
 # GeneralsMD/Code/Tools/build-posix.sh does the work, shared with build-macos.sh. The release packages
 # (AppImage, .deb, .rpm, Arch, Flatpak) are GeneralsMD/Code/Tools/linux-packages.sh's.
 

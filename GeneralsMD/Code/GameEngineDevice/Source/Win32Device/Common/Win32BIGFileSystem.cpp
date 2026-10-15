@@ -17,6 +17,7 @@
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 // Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -109,14 +110,14 @@ static void reportMissingBaseGame(void)
 		"Zero Hour shares most of its artwork, sound effects and music with Command & Conquer Generals, "
 		"and none of the base game's .big files could be found.\n\n"
 		"Install Generals, or copy its .big files into a folder named ZH_Generals next to generals.exe.",
-		"Zero Hour Reforged",
+		"Generals Vanguard",
 		MB_OK | MB_ICONWARNING | MB_TASKMODAL);
 #else
 	MessageBoxWrapper(
 		"Zero Hour shares most of its artwork, sound effects and music with Command & Conquer Generals, "
 		"and none of the base game's .big files could be found.\n\n"
 		"Install Generals, or copy its .big files into a folder named ZH_Generals beside the game.",
-		"Zero Hour Reforged",
+		"Generals Vanguard",
 		MSGBOX_OK | MSGBOX_ICONWARNING | MSGBOX_TASKMODAL);
 #endif
 }

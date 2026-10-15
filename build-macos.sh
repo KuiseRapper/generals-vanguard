@@ -15,7 +15,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# Build Zero Hour Reforged on macOS, from a fresh clone, in one command. build.bat's arguments:
+# Build Generals Vanguard on macOS, from a fresh clone, in one command. build.bat's arguments:
 #
 #   ./build-macos.sh                    check the toolchain, fetch, configure, build Release, make the app
 #   ./build-macos.sh Debug              another configuration (Release|RelWithDebInfo|Debug)
@@ -24,7 +24,7 @@
 #   ./build-macos.sh clean              delete build-mac/ and start again
 #
 # Needs the Xcode command line tools and Homebrew's cmake and ninja; it says what to install when one is
-# missing. The result is build-mac/Zero Hour Reforged.app. GeneralsMD/Code/Tools/build-posix.sh does
+# missing. The result is build-mac/Generals Vanguard.app. GeneralsMD/Code/Tools/build-posix.sh does
 # the work, shared with build-linux.sh.
 
 exec "$(dirname "$0")/GeneralsMD/Code/Tools/build-posix.sh" macos "$@"

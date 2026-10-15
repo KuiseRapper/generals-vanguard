@@ -3839,8 +3839,8 @@ Tools/linux-packages-check.sh
 Tools/linux-packages.sh
 Tools/linux-packages/CMakeLists.txt
 Tools/linux-packages/PKGBUILD
-Tools/linux-packages/io.github.olcayseygan.ZeroHourReforged.metainfo.xml
-Tools/linux-packages/io.github.olcayseygan.ZeroHourReforged.yml
+Tools/linux-packages/io.github.kuiserapper.GeneralsVanguard.metainfo.xml
+Tools/linux-packages/io.github.kuiserapper.GeneralsVanguard.yml
 Tools/linux-portable.sh
 Tools/lobbyroom_layout.py
 Tools/lobbysettings_layout.py

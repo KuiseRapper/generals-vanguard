@@ -1,4 +1,4 @@
-# The .deb and .rpm of Zero Hour Reforged (Tools/linux-packages.sh): CPack over install rules that install the
+# The .deb and .rpm of Generals Vanguard (Tools/linux-packages.sh): CPack over install rules that install the
 # portable folder Tools/linux-portable.sh made and checked (glibc 2.31, libstdc++ and every library static but
 # glibc's and fontconfig, the licences against the link line), so every package carries the same binary.  Not a
 # part of the game's own build: a distribution's compiler would give a binary none of those checks were run on.
@@ -7,21 +7,21 @@
 #         [-DZH_PACKAGE_MAINTAINER="Name <address>"]
 #   cpack --config <dir>/CPackConfig.cmake -G "DEB;RPM"
 #
-# The layout: the folder, unchanged, in /usr/lib/zero-hour-reforged (the game finds its overlay from its own
-# executable's place); /usr/bin/zero-hour-reforged, a link to its launcher; the .desktop file and the icon
+# The layout: the folder, unchanged, in /usr/lib/generals-vanguard (the game finds its overlay from its own
+# executable's place); /usr/bin/generals-vanguard, a link to its launcher; the .desktop file and the icon
 # where desktops look; the licences in /usr/share/doc (Debian's copyright file) and /usr/share/licenses.
 # No game files: the player's Zero Hour is found or asked for on the first start, and the upscaled art is
 # read from the user data folder's ReforgedArt when something has put it there.
 cmake_minimum_required(VERSION 3.25)
-project(zero-hour-reforged-packages NONE)
+project(generals-vanguard-packages NONE)
 
-if(NOT IS_DIRECTORY "${ZH_PORTABLE_DIR}/bin" OR NOT EXISTS "${ZH_PORTABLE_DIR}/zero-hour-reforged.sh")
+if(NOT IS_DIRECTORY "${ZH_PORTABLE_DIR}/bin" OR NOT EXISTS "${ZH_PORTABLE_DIR}/generals-vanguard.sh")
   message(FATAL_ERROR "ZH_PORTABLE_DIR must name the folder Tools/linux-portable.sh made")
 endif()
 if(NOT ZH_PACKAGE_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
   message(FATAL_ERROR "ZH_PACKAGE_VERSION must be x.y.z (the game's VERSION file has it)")
 endif()
-file(GLOB _zh_art "${ZH_PORTABLE_DIR}/share/zero-hour-reforged/overlay/Reforged*.big")
+file(GLOB _zh_art "${ZH_PORTABLE_DIR}/share/generals-vanguard/overlay/Reforged*.big")
 if(_zh_art)
   message(FATAL_ERROR "the packages carry the engine only: make the folder with linux-portable.sh --no-art")
 endif()
@@ -37,57 +37,57 @@ endif()
 # SPDX: the game, then what is built into it (the copyright file below says which is which); glslang brings BSD-2,
 # MIT and Apache-2.0 parts beside its BSD-3 core, miniaudio is the Unlicense or MIT-0, LZH-Light has its own notice
 set(ZH_PACKAGE_LICENSE "GPL-3.0-or-later AND LGPL-2.1-or-later AND GPL-2.0-or-later AND Zlib AND BSD-3-Clause AND BSD-2-Clause AND MIT AND Apache-2.0 AND (Unlicense OR MIT-0) AND CC0-1.0 AND LicenseRef-LZH-Light")
-set(_zh_lib lib/zero-hour-reforged)
+set(_zh_lib lib/generals-vanguard)
 # the folder; its debug file stays in the tarball (a GNU debuglink that finds nothing is harmless)
 install(DIRECTORY "${ZH_PORTABLE_DIR}/" DESTINATION ${_zh_lib} USE_SOURCE_PERMISSIONS
   PATTERN "generals.debug" EXCLUDE PATTERN "README.txt" EXCLUDE
   PATTERN "share/applications" EXCLUDE PATTERN "share/icons" EXCLUDE)
-file(CREATE_LINK ../${_zh_lib}/zero-hour-reforged.sh "${CMAKE_CURRENT_BINARY_DIR}/zero-hour-reforged" SYMBOLIC)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/zero-hour-reforged" DESTINATION bin)
+file(CREATE_LINK ../${_zh_lib}/generals-vanguard.sh "${CMAKE_CURRENT_BINARY_DIR}/generals-vanguard" SYMBOLIC)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generals-vanguard" DESTINATION bin)
 # the menu entry: the portable folder's template names its launcher by path; installed, it is on PATH
-file(READ "${ZH_PORTABLE_DIR}/share/applications/zero-hour-reforged.desktop" _zh_desktop)
-string(REGEX REPLACE "Exec=[^\n]*" "Exec=zero-hour-reforged" _zh_desktop "${_zh_desktop}")
+file(READ "${ZH_PORTABLE_DIR}/share/applications/generals-vanguard.desktop" _zh_desktop)
+string(REGEX REPLACE "Exec=[^\n]*" "Exec=generals-vanguard" _zh_desktop "${_zh_desktop}")
 string(REGEX REPLACE "# a template[^\n]*\n" "" _zh_desktop "${_zh_desktop}")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/zero-hour-reforged.desktop" "${_zh_desktop}")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/zero-hour-reforged.desktop" DESTINATION share/applications)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/generals-vanguard.desktop" "${_zh_desktop}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/generals-vanguard.desktop" DESTINATION share/applications)
 foreach(_zh_size 48x48 128x128)
-  install(FILES "${ZH_PORTABLE_DIR}/share/icons/hicolor/${_zh_size}/apps/zero-hour-reforged.png"
+  install(FILES "${ZH_PORTABLE_DIR}/share/icons/hicolor/${_zh_size}/apps/generals-vanguard.png"
     DESTINATION share/icons/hicolor/${_zh_size}/apps)
 endforeach()
-install(FILES "${ZH_PORTABLE_DIR}/README.txt" "${ZH_PORTABLE_DIR}/VERSION" DESTINATION share/doc/zero-hour-reforged)
+install(FILES "${ZH_PORTABLE_DIR}/README.txt" "${ZH_PORTABLE_DIR}/VERSION" DESTINATION share/doc/generals-vanguard)
 # Debian's copyright file: what each part is under, and where the full texts are
-file(GLOB _zh_licenses RELATIVE "${ZH_PORTABLE_DIR}/share/zero-hour-reforged/licenses"
-  "${ZH_PORTABLE_DIR}/share/zero-hour-reforged/licenses/*")
+file(GLOB _zh_licenses RELATIVE "${ZH_PORTABLE_DIR}/share/generals-vanguard/licenses"
+  "${ZH_PORTABLE_DIR}/share/generals-vanguard/licenses/*")
 list(SORT _zh_licenses)
 list(JOIN _zh_licenses "\n  " _zh_license_list)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/copyright"
-"Zero Hour Reforged, the Command & Conquer Generals Zero Hour engine for Linux.
-Source: https://github.com/olcayseygan/CnCGeneralsZH-Reforged
+"Generals Vanguard, the Command & Conquer Generals Zero Hour engine for Linux.
+Source: https://github.com/KuiseRapper/generals-vanguard
 
-The game: GPL-3.0-or-later, with additional terms under its section 7 (Zero-Hour-Reforged-LICENSE.md).
+The game: GPL-3.0-or-later, with additional terms under its section 7 (Generals-Vanguard-LICENSE.md).
 Built into it, each under its own licence: FFmpeg (LGPL-2.1-or-later, an LGPL-only build), SDL3, FreeType
 (its GPL-2.0-or-later option), glslang, SPIRV-Cross, SDL_shadercross, miniaudio, zlib,
 LZH-Light and the GameSpy SDK.  The full texts are in
-/usr/lib/zero-hour-reforged/share/zero-hour-reforged/licenses/ and /usr/share/licenses/zero-hour-reforged/:
+/usr/lib/generals-vanguard/share/generals-vanguard/licenses/ and /usr/share/licenses/generals-vanguard/:
   ${_zh_license_list}
 
 No game data is included: the game needs the player's own Command & Conquer Generals Zero Hour.
 ")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/copyright" DESTINATION share/doc/zero-hour-reforged)
-install(DIRECTORY "${ZH_PORTABLE_DIR}/share/zero-hour-reforged/licenses/" DESTINATION share/licenses/zero-hour-reforged)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/copyright" DESTINATION share/doc/generals-vanguard)
+install(DIRECTORY "${ZH_PORTABLE_DIR}/share/generals-vanguard/licenses/" DESTINATION share/licenses/generals-vanguard)
 
-set(CPACK_PACKAGE_NAME zero-hour-reforged)
+set(CPACK_PACKAGE_NAME generals-vanguard)
 set(CPACK_PACKAGE_VERSION ${ZH_PACKAGE_VERSION})
-set(CPACK_PACKAGE_VENDOR "Zero Hour Reforged")
+set(CPACK_PACKAGE_VENDOR "Generals Vanguard")
 set(CPACK_PACKAGE_CONTACT "${ZH_PACKAGE_MAINTAINER}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Command & Conquer Generals Zero Hour engine (needs your own copy of the game)")
-set(CPACK_PACKAGE_DESCRIPTION "Zero Hour Reforged runs Command & Conquer Generals Zero Hour natively, from the
+set(CPACK_PACKAGE_DESCRIPTION "Generals Vanguard runs Command & Conquer Generals Zero Hour natively, from the
 player's own copy of the game (Steam, EA App, CD or The First Decade), which it finds or asks for on its first
 start.  No game files are included, and no upscaled art.")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/olcayseygan/CnCGeneralsZH-Reforged")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/KuiseRapper/generals-vanguard")
 set(CPACK_PACKAGING_INSTALL_PREFIX /usr)
 set(CPACK_STRIP_FILES OFF)				# stripped already, with its debuglink
-set(CPACK_PACKAGE_FILE_NAME "zero-hour-reforged-${ZH_PACKAGE_VERSION}-x86_64")
+set(CPACK_PACKAGE_FILE_NAME "generals-vanguard-${ZH_PACKAGE_VERSION}-x86_64")
 
 # Debian and Ubuntu: glibc 2.31 and fontconfig are needed; the rest SDL and miniaudio load when they are there
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
