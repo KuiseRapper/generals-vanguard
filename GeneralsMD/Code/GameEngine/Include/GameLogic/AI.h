@@ -587,6 +587,13 @@ Int aiPickUpgrade( const Real *covered, const Int *cost, Int count, Real payoff,
 	* as the script wrote it. */
 Int aiLeastDefendedLane( const Real *laneFirepower, const Bool *laneReachable, Int laneCount, Int requestedLane );
 
+/** Which lane to take when the rung does not vote on the enemy at all: the lane the script asked for,
+	* unless the army cannot reach it - then the first lane it can reach, lowest index first, so an AI
+	* that has never scouted still plays as the script wrote it.  laneReachable may be NULL, which means
+	* every lane is reachable, and a requestedLane the map does not have is returned untouched.  When no
+	* lane can be reached at all the script's lane is kept, which is today's behaviour. */
+Int aiReachableLaneFallback( const Bool *laneReachable, Int laneCount, Int requestedLane );
+
 /** Whether the attack teams parked at the staging point go now: when what is parked adds up to a wave,
 	* or the oldest has waited long enough.  The threshold is this AI's own force, never a fraction of
 	* the enemy's, because two AIs each waiting to outnumber the other never move. */

@@ -6868,7 +6868,7 @@ static Waypoint *findFarthestWaypointOnPath( const Coord3D *from, const AsciiStr
 //----------------------------------------------------------------------------------------------------------
 AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiString &requested, Int pathSuffix )
 {
-	if( !isSkirmishAI() || !getSkillProfile()->m_useInfluenceMapForAttackLane || from == NULL )
+	if( !isSkirmishAI() || from == NULL )
 		return requested;
 
 	const Int LANE_COUNT = 3;
@@ -6882,6 +6882,11 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 	}
 	if( requestedLane < 0 )
 		return requested;		// "Special" and whatever a map names for itself stay the script's business
+
+	// the influence-map vote is off on Easy and Medium, and those rungs keep the script's lane.  Every
+	// rung still has to know the lane is one the army can take, so the mask is built either way and
+	// only the choosing below differs.
+	const Bool votes = getSkillProfile()->m_useInfluenceMapForAttackLane;
 
 	// a lane with no enemy firepower on it reads as the quietest road on the map even when it ends in
 	// a ravine the army cannot cross, so a lane the pathfinder says we cannot reach is kept out of the
@@ -6898,8 +6903,9 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 	{
 		AsciiString label;
 		label.format( "%s%d", LANES[ i ], pathSuffix );
+		// a rung that does not vote never reads the firepower, so it is not counted there
 		Waypoint *way = TheTerrainLogic->getClosestWaypointOnPath( from, label );
-		firepower[ i ] = (way == NULL) ? -1.0f : knownFirepowerAlongPath( way );
+		firepower[ i ] = (way == NULL || !votes) ? -1.0f : knownFirepowerAlongPath( way );
 		// the lane is judged by the end it leads to, not by the waypoint beside our own base: the near
 		// one is reachable whatever the map does, so asking about it would never exclude the ravine.
 		// The units follow the path from that end onward, so a lane whose far end cannot be reached is
@@ -6907,6 +6913,20 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 		Waypoint *end = findFarthestWaypointOnPath( from, label );
 		reachable[ i ] = (end == NULL || armyLocomotors == NULL) ? TRUE :
 			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, end->getLocation() );
+	}
+
+	if( !votes )
+	{
+		// Easy and Medium weigh no enemy, so the script's lane is kept unless it is one the army cannot
+		// take, and then the first lane it can is used.  That unreachable case is the only one where
+		// these rungs differ from before this mask existed.  Untested in play, as above: whether it
+		// wins more needs a measured ai-batch.ps1 batch over seeds.
+		const Int lane = aiReachableLaneFallback( reachable, LANE_COUNT, requestedLane );
+		if( lane == requestedLane )
+			return requested;
+		DEBUG_LOG(("AI LANE frame %d player %d takes %s instead of %s, which the army cannot reach\n", TheGameLogic->getFrame(),
+			m_player->getPlayerIndex(), LANES[ lane ], LANES[ requestedLane ]));
+		return AsciiString( LANES[ lane ] );
 	}
 
 	const Int lane = aiLeastDefendedLane( firepower, reachable, LANE_COUNT, requestedLane );
