@@ -6830,6 +6830,35 @@ static void findOwnGroundLocomotorSet( Object *obj, void *userData )
 }
 
 //----------------------------------------------------------------------------------------------------------
+/** The waypoint carrying a lane's label that is farthest from from: the end of the lane the wave is
+	* being sent towards.  TerrainLogic::getClosestWaypointOnPath returns the nearest one, which sits
+	* beside our own base and is reachable whatever the map does, so it can never tell a lane that runs
+	* into a ravine from one that does not.  Matches the same three path labels, and scans the same
+	* list through getFirstWaypoint, as getClosestWaypointOnPath does.  NULL when no waypoint carries
+	* the label. */
+//----------------------------------------------------------------------------------------------------------
+static Waypoint *findFarthestWaypointOnPath( const Coord3D *from, const AsciiString &label )
+{
+	Waypoint *farthest = NULL;
+	Real farthestSqr = 0.0f;
+	for( Waypoint *way = TheTerrainLogic->getFirstWaypoint(); way != NULL; way = way->getNext() )
+	{
+		if( label.compareNoCase( way->getPathLabel1() ) != 0 &&
+				label.compareNoCase( way->getPathLabel2() ) != 0 &&
+				label.compareNoCase( way->getPathLabel3() ) != 0 )
+			continue;
+		const Coord3D *at = way->getLocation();
+		const Real distSqr = sqr( at->x - from->x ) + sqr( at->y - from->y );
+		if( farthest == NULL || distSqr > farthestSqr )
+		{
+			farthest = way;
+			farthestSqr = distSqr;
+		}
+	}
+	return farthest;
+}
+
+//----------------------------------------------------------------------------------------------------------
 /** B4, second attempt.  The first aimed at the enemy's most valuable cell, which is his money, and
 	* walked past his army: 7-9, twice the losses.  The roadmap asked for the approach where the defence
 	* is thinnest, and the engine's threat layer cannot say where that is - it is built from
@@ -6871,8 +6900,13 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 		label.format( "%s%d", LANES[ i ], pathSuffix );
 		Waypoint *way = TheTerrainLogic->getClosestWaypointOnPath( from, label );
 		firepower[ i ] = (way == NULL) ? -1.0f : knownFirepowerAlongPath( way );
-		reachable[ i ] = (way == NULL || armyLocomotors == NULL) ? TRUE :
-			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, way->getLocation() );
+		// the lane is judged by the end it leads to, not by the waypoint beside our own base: the near
+		// one is reachable whatever the map does, so asking about it would never exclude the ravine.
+		// The units follow the path from that end onward, so a lane whose far end cannot be reached is
+		// the one that runs into the ravine.
+		Waypoint *end = findFarthestWaypointOnPath( from, label );
+		reachable[ i ] = (end == NULL || armyLocomotors == NULL) ? TRUE :
+			TheAI->pathfinder()->clientSafeQuickDoesPathExist( *armyLocomotors, from, end->getLocation() );
 	}
 
 	const Int lane = aiLeastDefendedLane( firepower, reachable, LANE_COUNT, requestedLane );
