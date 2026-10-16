@@ -21,7 +21,8 @@
 #      frame-limited counts, the average length, both seats' win rates, the per-match winner and frame
 #      (with the CRC), and the pathfinder totals.  The fixture is a hand-written pair of logs in the
 #      engine's own HEADLESS format, so the seam is checked here rather than against a live match.
-#   2. --dryrun prints the commands a batch would issue, and needs no data.
+#   2. --dryrun prints the commands a batch would issue, and needs no data; --extra's switches are
+#      appended to them verbatim.
 #   3. A real run with no game data skips in the house style and exits 77, which ctest reports as
 #      Skipped rather than failed.
 #
@@ -74,6 +75,15 @@ check 'printf "%s" "$out" | grep -q -- "-randommap 1 2 128"' "the second is seed
 check 'printf "%s" "$out" | grep -q -- "-autoskirmish 2 -aidiff brutal -seed 0 -logPrefix ai_000"' \
 	"and the seat count, rung, seed and log prefix"
 check 'printf "%s" "$out" | grep -q -- "-logPrefix ai_001"' "the second run's log has its own name"
+
+# --extra: switches for the engine that this driver does not know, appended to every command line
+out="$(bash "$BATCH" --runs 1 --extra "-strictgoal -nodevice" --dryrun 2>&1)"
+status=$?
+check '[ "$status" -eq 0 ]' "--extra is accepted (exit $status)"
+check 'printf "%s" "$out" | grep -q -- "-logPrefix ai_000 -strictgoal -nodevice$"' \
+	"and its switches are appended verbatim, after the driver's own"
+out="$(bash "$BATCH" --runs 1 --dryrun 2>&1)"
+check '! printf "%s" "$out" | grep -q -- "-strictgoal"' "with no --extra nothing is appended"
 
 # ---- 3. no game data skips cleanly --------------------------------------------------------------------
 out="$(bash "$BATCH" --runs 1 --data "$NOWHERE" 2>&1)"

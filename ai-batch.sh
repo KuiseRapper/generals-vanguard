@@ -66,6 +66,7 @@ EXE=""
 DATA="${ZH_DATA_DIR:-}"
 OVERLAY=""
 TIMEOUT=20
+EXTRA=""
 DRYRUN=0
 PARSEONLY=0
 LOGFILES=()
@@ -87,6 +88,7 @@ Usage: ai-batch.sh [options]
   --data <dir>           a folder holding zerohour/ (default $ZH_DATA_DIR)
   --overlay <dir>        the fork's data, passed as -overlay (default <exe dir>/overlay if it exists)
   --timeout <min>        kill a run wedged past this (default 20)
+  --extra "<args>"       extra engine switches, appended verbatim to every run's command line
   --dryrun               print the commands a run would issue, run nothing, need no game data
   --parse-only <log>...  print the table from logs already written, need no game data
   --help
@@ -116,6 +118,7 @@ while [ $# -gt 0 ]; do
 		-data|--data) [ $# -ge 2 ] || die "$1 needs a value"; DATA="$2"; shift 2;;
 		-overlay|--overlay) [ $# -ge 2 ] || die "$1 needs a value"; OVERLAY="$2"; shift 2;;
 		-timeout|--timeout) [ $# -ge 2 ] || die "$1 needs a value"; TIMEOUT="$2"; shift 2;;
+		-extra|--extra) [ $# -ge 2 ] || die "$1 needs a value"; EXTRA="$2"; shift 2;;
 		-dryrun|--dryrun) DRYRUN=1; shift;;
 		-parse-only|--parse-only) PARSEONLY=1; shift; LOGFILES=("$@"); break;;
 		-help|--help|-h) usage; exit 0;;
@@ -348,6 +351,9 @@ build_args() {
 		ARGS+=(-randommap "$SEED_NOW" "$PLAYERS" "$CELLS_NOW")
 	fi
 	ARGS+=(-autoskirmish "$PLAYERS" -aidiff "$DIFFICULTY" -seed "$SEED_NOW" -logPrefix "$prefix")
+	# --extra: one string of switches, split here so a caller can pass several at once.  Appended
+	# last, so the game's own parser sees them after everything this driver set.
+	if [ -n "$EXTRA" ]; then ARGS+=($EXTRA); fi
 }
 
 nth_cell() {		# nth_cell <index>: MAPCELLS cycled, as ai-batch.ps1 cycles $MapCells
