@@ -16,8 +16,8 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #
-# ai-batch.sh: ai-batch.ps1's POSIX twin.  Section 0 of AI-ROADMAP.md: no AI change can be claimed
-# without a number behind it, and one match proves nothing - the same seed on the same map is
+# ai-batch.sh: ai-batch.ps1's POSIX twin.  The rule in ROADMAP.md and AGENTS.md: no AI change can be
+# claimed without a number behind it, and one match proves nothing - the same seed on the same map is
 # repeatable, but a different seed is a different game.  This plays the same configuration over a
 # spread of seeds and map sizes, one headless process at a time, bounded by --maxframes so a match the
 # AI cannot close out still ends, and names each run's log with -logPrefix so runs never clobber each
