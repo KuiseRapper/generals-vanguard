@@ -2,157 +2,141 @@
 
 Ideas for where this fork could go, roughly in the order I would try them. Each entry says what it
 fixes, what it costs, and how it would be checked. **Nothing here is a commitment** - it is a menu.
-Ordered work lives in [BACKLOG.md](BACKLOG.md); this file explains the thinking behind the options.
+Ordered work lives in [BACKLOG.md](BACKLOG.md); this file explains the thinking.
 
-Everything below assumes the two rules this project already follows: no AI claim without a headless
-batch behind it (`ai-batch.sh`), and no change to `LICENSE.md`, upstream's data names or EA's own
-game strings.
+Two rules the project already follows: no AI claim without a headless batch behind it
+(`ai-batch.sh`), and no change to `LICENSE.md`, upstream's data names or EA's own game strings.
 
----
-
-## 1. The endgame hunt (the stealth-general problem)
-
-**The complaint.** Against a reduced GLA Stealth opponent, the game stops being a fight and becomes a
-search. You are the last player alive, the AI has a handful of camouflaged units, tunnels or workers
-scattered somewhere, and you sweep the map to find them. It is tedious, and it is the single most
-annoying thing reported so far.
-
-**It has two separate causes**, which is why there is no single fix:
-
-1. The AI has no *reason* to show itself. Its surviving teams sit in the hold-for-wave logic
-   (`doWaves`, `holdTeamForWave`, `WAVE_POWER`) and its units idle where they stand. Nothing tells it
-   that hiding is now pointless.
-2. The player has no *information*. Nothing says how much is left or roughly where.
-
-**Options.**
-
-| # | Idea | What it fixes | Cost | Check |
-|---|---|---|---|---|
-| 1 | **Last-stand aggression.** When an AI has no production buildings left (or is the last opponent and below a strength floor), stop holding: release every team at once, ignore the wave threshold, and attack the nearest enemy structure. | Cause 1, and turns the hunt into a final battle - the fun version. | One rule in the team-release path plus a difficulty knob. The mechanism is the one the lane work already uses. | Headless: teams released, waves sent, match length. Feel: play-test. |
-| 2 | **Endgame reveal.** Once one human player is left, AI structures are revealed permanently and AI units periodically (a sweep, not permanent). Guarantees the hunt is finite. | Cause 2, generically - it also covers a China AI with one hidden building. | Needs a spike: find the per-player visibility path and whether objects can be revealed, not just map cells. Script actions already reveal map areas, so the machinery exists. | Headless: reveal events fire only in the remnant state. |
-| 3 | **"Enemy forces remaining" readout.** When enemy strength drops below a threshold, show units and buildings left - the scoreboard already tracks built/lost/killed per player. | Cause 2, cheaply: you know *whether* to keep hunting. | Small UI change; it leaks information, so gate it to the remnant state or make it an option. | Visual. |
-| 4 | **Restrict generals for the AI.** The skirmish menu builds your and the AI's choices from `PlayerTemplate`s, so a "fair-play pool" for the AI is a data/UI change. | Nothing, really. | Moderate. | - |
-
-**What I would do: 1 + 2, with 3 as a cheap bonus.**
-
-Why not 4 first: it does not fix hiding by *other* armies (any faction can leave one building in a
-corner), it removes a faction's identity, and it makes the AI worse at the game. Keep it as an
-optional toggle if you want it for your own games - and note that in a skirmish you already choose
-the AI's general by hand, so if the annoyance only appears when you or a random pick hands it GLA
-Stealth, the smallest fix is a filter on the *random* pool, not a ban.
-
-**What not to do:** make the AI stop using stealth in normal play. Camouflage and tunnels are that
-faction's identity, and this fork's selling point is an AI that does not cheat. Restrict the
-behaviour to the remnant state, where it is a mercy rather than a strategy.
+Performance is parked at the owner's request (2026-10-16) - it is item 7 in the backlog, and section
+3b here is only the reasoning.
 
 ---
 
-## 2. More fun
+## 1. Closing out a game against a spreading AI
 
-| Idea | Why it is worth it | Cost |
+**What actually happens.** Solo against two GLA AI. GLA builds cheap structures all over the map, so
+with two of them the map fills up, and the game cannot be closed by sweeping - you cannot patrol an
+entire map while probing for the last few buildings. It is not really *stealth*: it is **structure
+spam**, made worse by the fact that there are two of them.
+
+There is no "build anywhere" flag in the engine - GLA spreads because its structures are cheap, its
+workers are free, and the AI placement logic happily fills space. So this is a decision problem, not a
+flag to turn off.
+
+**Three separate causes:**
+
+1. The AI keeps **expanding and rebuilding while it is losing**. Nothing tells it to stop.
+2. Its structures are **scattered**, so finding the last ones is a search rather than a fight.
+3. The player has **no idea how much is left**, so there is no moment where the game feels closeable.
+
+**Fixes, in the order I would do them:**
+
+| # | Idea | Why | Cost |
+|---|---|---|---|
+| 1 | **Stop the proliferation.** When an AI is beaten - no production buildings left, or below a strength floor - it stops placing new structures, stops rebuilding destroyed ones, and its workers stop roaming. | Cause 1, and it is the root: a losing AI should consolidate, not colonise. | One rule in the AI's build path (the economy-build list and `findBuildLocation`), plus a difficulty knob. |
+| 2 | **Reveal what remains.** Once one human is left, remaining AI structures are revealed permanently. | Cause 2, directly. Structures are what you must kill; a hidden *unit* is a fight, a hidden *building* is a chore. Units can stay hidden. | Needs a spike on the per-player visibility path; script actions already reveal map areas, so the machinery exists. |
+| 3 | **Count it.** "Enemy structures: N" once the enemy is reduced. | Cause 3, very cheaply. The scoreboard already tracks built/lost per player. | Small UI change. |
+| 4 | *Optional*: **surrender rule** - no production and fewer than N units for M seconds, and the AI surrenders. | Ends the game without the sweep. | Small, but it can feel abrupt; take it only if 1+2 are not enough. |
+| 5 | *Not recommended as the fix*: **disable generals for the AI**. | It does not fix a China AI doing the same thing, it removes a faction's identity, and it makes the AI worse. | Keep as an optional toggle only. |
+
+**What not to do:** nerf stealth or GLA's cheap buildings in *normal* play. Spreading and hiding are
+those factions' identities; the problem is only that a beaten AI keeps doing it forever.
+
+## 2. GLA is the strongest AI
+
+**Report.** GLA wins every AI game; "random" seemed to pick GLA four times in a row. Two separate
+questions, both checkable:
+
+- **Balance.** GLA's cheap structures, free workers and strong early units may simply be better in an
+  AI's hands. The levers are data: build times, costs, structure HP, worker build rate, income. Use
+  `Tools/Balance` first - numbers, not opinions - and record every change.
+- **The random pick.** The skirmish menu seeds its generator from the match seed
+  (`InitRandom(TheSkirmishGameInfo->getSeed())`), so the army choice is seeded rather than biased.
+  Four GLA in a row has roughly a 4% chance for *some* faction to do that, so it is plausible
+  coincidence - and a two-minute check of the selection code settles it.
+
+**The measurement problem, honestly.** Our own 162-match run had **zero decided matches** at 60,000
+frames on Twilight Flame, so win rate currently says nothing about anything. Before any balance claim:
+**find a configuration where matches actually decide** (a smaller map, a higher cap, or fewer
+players), then run faction against faction.
+
+## 3. More fun
+
+| Idea | Why it is fun | Cost |
 |---|---|---|
-| **Wave memory (E1)** - the AI remembers how its last few waves went and changes lane, composition or target instead of repeating itself. | The "late game it does the same thing forever" complaint. Designed already in [docs/ai/skirmish-ai.md](docs/ai/skirmish-ai.md); never written. The biggest single fun win available. | Moderate. Gate it, then measure with `ai-batch.sh`. |
-| **A post-game stats screen** built from telemetry the engine already collects (`searches`, `expansions`, `nopath`, `blocked` unit-frames, kills, spent). | Nobody else's C&C shows this. It is nearly free - the numbers are already written to every headless log. | Small. |
-| **Difficulty you can read.** The rungs differ across 33 knobs; players cannot see how. | "Hard counters what it scouts and masses before attacking, and cheats at nothing" is a selling point you currently have to read the source to discover. | Small: menu or loading-screen text. |
-| **Opening variety.** A few distinct build orders per faction, chosen per match, so game one does not look like game five. | Cheap variety without new systems. | Small-to-moderate, data plus AI. |
-| **The endgame hunt** (section 1). | Removes the worst experience reported. | See above. |
+| **Wave memory** - the AI remembers how its last waves went and changes lane, composition or target. | The "late game it repeats itself" complaint, and the biggest single AI win available. Already designed. | Moderate; gate and measure. |
+| **Per-match AI doctrines** - aggressive, defensive, economic, air-heavy, chosen at match start and visible to the player. | Makes opponents recognisable, and turns "the AI" into "that AI again". | Moderate: a doctrine field plus build-list selection. |
+| **Random maps in skirmish** - `Tools/RandomMapLab` already generates maps, and `-randommap` already works headless. | Infinite replayability for near-zero art cost. | Small-to-moderate: expose it in the menu. |
+| **Skirmish rule presets** - starting cash, no superweapons, fast build, sudden death, unit caps. | Big variety from a small UI; every preset changes how the game feels. | Small. |
+| **Post-game stats screen** from telemetry we already write to every log (kills, spent, pathfinder searches, blocked unit-frames). | Nobody else's C&C shows this, and it is nearly free. | Small. |
+| **A General's Challenge ladder** - a run of AI opponents with escalating rosters and their own doctrines. | Campaign-lite replay value from data plus existing systems. | Moderate. |
+| **Difficulty you can read** - the rung's character stated in the menu ("counters what it scouts, masses before attacking, cheats at nothing"). | Your best selling point is currently only visible in the source. | Small. |
+| **QoL pass** - control-group persistence, stances, rally points, match speed, windowed and resolution options. | Small annoyances compound over hundreds of matches. | Small each. |
+| **The endgame fixes** (section 1). | Removes the worst experience reported so far. | See above. |
 
-## 2b. More performance
+## 3b. Performance (parked - backlog item 7)
 
-Measured facts first, because these decide the order: a 60,000-frame 1v1 on Twilight Flame costs
-**~5-6 million pathfinder cell expansions per match**, and the AI's own thinking is the top CPU
-consumer. The overlay's upscaled art is the top memory consumer: `ReforgedTextures.big` is **1.07 GB**
-(5,539 files) and `ReforgedTerrain.big` **227 MB**.
+For when it comes back: the upscaled overlay art is the dominant memory cost
+(`ReforgedTextures.big` 1.07 GB, `ReforgedTerrain.big` 227 MB), so a "classic art" option is the best
+win per hour. Then the re-path storms (a 60,000-frame match costs ~5-6 million pathfinder cell
+expansions), persisting the BIG archive index, shipping a precompiled shader cache, and job-system
+tuning.
 
-| Idea | Effect | Cost |
+## 4. New content: three generals, then one new faction
+
+### The three generals (start with USA)
+
+One new general per existing side, each a build list plus a couple of units and one signature power.
+Cheap, because they reuse art, and they exercise the whole pathway.
+
+1. **USA - "Vanguard"** (first): prototype technology - railgun, directed energy, drones. The mod's
+   own identity, and the most natural fit for the name.
+2. **China**: an attrition general - conscripts, heavy artillery, slow and relentless.
+3. **GLA**: an insurgent general - ambush, sabotage, salvage; the opposite pole to Vanguard.
+
+### The new faction
+
+Owner's candidates: **Russia, Germany, Japan**. My recommendation: **Russia first**, then Germany as
+part of a broader European or coalition army, and Japan last (most art-heavy and the biggest risk of
+drifting into science fiction).
+
+Why Russia first:
+
+- The strongest identity of the three, and the clearest contrast with China. China is already the
+  cheap-swarm side; Russia can be the opposite - heavy, slow, durable, artillery-led, no air force.
+- The most natural model reuse: tank hulls, artillery, SAMs and heavy infantry can be adapted from
+  China and USA shapes with new silhouettes, which matches the "reuse and change them" plan.
+- It gives the AI a genuinely different playstyle to learn, which is worth as much as the player
+  content.
+
+Suggested mechanical identities - differentiation must be **mechanical**, not just stats, or the
+faction feels like a reskin:
+
+| | Identity | Signature mechanics |
 |---|---|---|
-| **A "classic art" option** that skips the upscaled overlay art. | Up to ~1.3 GB less texture data: faster loads, far less VRAM, better on modest hardware and integrated GPUs. | Small - packaging and INI, no engine change. The single best performance-per-effort item. |
-| **Pathfinding: cut the re-path storms.** Attack-move retries 5 times, 3 s apart, per unit; Hard re-decides every 1.5 s. | Our `-strictgoal` work already cut expansions ~11% by refusing orders that cannot succeed. More is available: path reuse, and not re-planning a route that has not changed. | Moderate; measured with the existing telemetry. |
-| **Persist the BIG archive index.** 22 archives, ~4 GB, re-indexed on every launch. | Faster startup. | Moderate. |
-| **Ship a precompiled shader cache** (`dx11shaders.cache`) instead of compiling on first run. | Removes first-run hitches. | Small. |
-| **Job system tuning** - 13 worker threads; check that pathfinding actually parallelises and that the count suits the machine. | Free FPS on multicore. | Small, but measure - it is easy to make this worse. |
+| Russia | Ground war, no air force | Slow high-HP armour; long-range artillery with a creeping-barrage power; cheap large conscript squads; strong static AA; slower but cheaper economy. |
+| Germany / EU | Precision and recovery | Fast mobile armour; recon drones that spot (an anti-hiding faction by design); repair and reclaim of wrecks; strong defensive turrets. |
+| Japan | Networks and drones | Unmanned units, ECM that disables enemy units briefly, strong stealth; expensive, fragile, high-tech. |
 
-## 2c. Better (quality and hygiene)
+**What a faction actually costs.** Art is the real bill: models, textures, animations, voices, UI
+palette and side icon. Technically it is data - `PlayerTemplate` (with `m_side`, `m_sideIconImage`), a
+`CommandSet`, units and powers, strings - plus teams in the compiled `SkirmishScripts.scb` so the AI
+can play it, which the in-tree `Tools/ScbTool` can edit.
 
-- **A launcher.** The README currently says "build it yourself". A small launcher is the difference
-  between a repository and something a friend can install. Upstream's exists but installs *their*
-  build; ours would be ours.
-- **The four known failing tests** (`widechar_check`, `install_guard_check`, and the two POSIX path
-  tests that need a case-sensitive filesystem) plus the remaining lint. Not glamorous; it is the
-  floor that keeps the green signal meaningful.
-- **Windows play-test items still unverified**: the Alt-Tab focus fix and the D3D11 device path.
-- **QoL pass**: control-group and rally persistence, build-queue behaviour, unit stances, match
-  speed, windowed/borderless and resolution options.
-- **A map validator** (we already have `Tools/PathLab`): flag any map whose attack lanes run into
-  impassable terrain. This is the ravine bug as a *check*, applicable to every custom map, and the
-  logic is already written - the far-end reachability test in the lane work.
+**Read this first:** upstream has a `feature/turkey-faction` branch - a working reference for adding a
+whole side to this engine. Study it before designing anything of our own.
 
----
+**Spike before promising it:** a fourth *side* touches the skirmish UI layout, side icons, colours and
+any three-side assumptions in menus and score screens. A new *general* avoids all of that, which is
+why the generals come first.
 
-## 3. New factions
+## 5. What I would do first
 
-**What a faction actually is here.** A `PlayerTemplate` in INI (side and general), a build list
-(`CommandSet`), unit and building definitions, `Science` and special powers, strings, UI art - and
-for skirmish, teams in the compiled `SkirmishScripts.scb`, which the in-tree `Tools/ScbTool` can
-edit.
-
-Three facts that shape the plan:
-
-1. **Our INI defines no `PlayerTemplate`s at all** - they come from the game's data. The fork's
-   overlay is searched *before* the install, so adding one is a data change, not an engine change.
-2. **The skirmish menu builds its choices from the player templates** (it includes
-   `PlayerTemplate.h`), so a new template shows up as a new army or general on its own.
-3. **The expensive part is art**, not code: models, textures, animations, voices and UI. The second
-   expensive part is the AI actually playing it well.
-
-**A caution to check before promising a fourth *side*:** `MAX_PLAYER_COUNT` is 16 (players, not
-sides) so there is no obvious hard cap, but the skirmish UI layout, flag/logo art and any
-three-side assumptions in menus and score screens need a spike. A new *general inside an existing
-side* sidesteps all of that - which is why it is stage 1.
-
-### Stage 1 - a general (days to weeks, no new side)
-
-Take an existing side and add a general to it: **"Vanguard" as a USA general.** Existing art, a
-distinct build list, one or two units reusing existing models with new stats and weapons, one
-signature power.
-
-This exercises the whole pathway - template, command set, science tree, strings, AI build lists - at
-a fraction of the cost, gives the mod its own identity, and is testable headless. It is also the
-honest way to find out how much work stage 2 really is before committing to it.
-
-### Stage 2 - one full army (months)
-
-New art and new AI teams. Concepts, in the order I would pick them:
-
-1. **Coalition / Task Force** - a European or UN-flavoured army built on reconnaissance and
-   precision: drones, shared vision between units, long-range fire, defensive. Its identity is also
-   a *counter to the hiding problem*: an army that finds things.
-2. **Salvage / PMC** - cheap conscripts and captured hardware, a salvage economy, ambush tactics.
-   Asymmetric like GLA without copying it: no tunnels, instead a mobile repair-and-reclaim loop that
-   rewards fighting over wrecks.
-3. **Prototype-tech USA** - railguns, directed energy, stealth drones: stage 1 grown into a full
-   army, and the most natural fit for the name.
-
-### Stage 3 - the second faction
-
-Only after the first one ships, is balanced, and the AI plays it properly.
-
-**What I need from you to start stage 1:** which fantasy or identity you want, and whether the new
-units may reuse existing models (fast) or need new art (slow). Everything else I can stage.
-
----
-
-## 4. What I would do first
-
-1. Finish the ravine work: the play-test decides it, then merge it or drop it. It is already written
-   and its mechanism is confirmed; only its outcome is unproven.
-2. **The endgame hunt** (section 1) - the worst experience reported, and cheap.
-3. **Wave memory** - the AI variety win, already designed.
-4. **The map validator** - turns a whole class of bug into a check, using logic that already exists.
-5. **The "classic art" option** - best performance per hour of work.
-6. The four failing tests and a launcher - hygiene and shippability.
-7. **Stage 1 faction** - the first real content, and the rehearsal for stage 2.
-
-Two things worth remembering while reading this list: every AI change gets *measured* before it is
-believed, and nothing here is worth doing if the answer is already decided by a play-test you can
-run in ten minutes.
+1. **Close out the ravine work**: the play-test decides, then merge or drop it.
+2. **The endgame fixes** (section 1): stop the proliferation, reveal what remains, count it.
+3. **Find a decisive measurement setup** so balance and AI claims can be settled on outcome.
+4. **GLA balance** (section 2), with `Tools/Balance` and a faction-vs-faction batch.
+5. **Wave memory** - the AI variety win.
+6. **The USA general** - the first real content, and the rehearsal for the new faction.
+7. **Fun batch** (section 3): doctrines, random maps, rule presets, post-game stats.
+8. **Russia** (section 4), after the generals have proven the pipeline.
