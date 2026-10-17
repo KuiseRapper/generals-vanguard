@@ -80,3 +80,14 @@ whatever the content project is eventually called.
 The four known failing tests (`widechar_check`, `install_guard_check`, and the two POSIX path tests
 that need a case-sensitive filesystem). A launcher - the README currently says "build it yourself".
 Keep `docs/porting/windows-impact.md` honest about what was and was not verified.
+
+## Found while measuring
+
+### 11. A misspelled `-side` hangs the run
+`parseSide` (CommandLine.cpp:2112) refuses a name that is not a player template, and
+`startSkirmish` (GameEngine.cpp:690) then returns - but the process keeps spinning an idle loop for
+ever instead of exiting. A batch waits out its entire timeout, and the same silent hang would hit
+anyone who typo'd a faction name. Every other unattended guard in this tree exits with a reason on
+stderr.
+*First step:* exit with a status and a stderr line, the way the base-game guards at
+`Win32BIGFileSystem.cpp:100` and `GameEngine.cpp:1024` already do.

@@ -12,6 +12,39 @@ Performance is parked at the owner's request (2026-10-16) - it is item 7 in the 
 
 ---
 
+## Decisions and measured facts (2026-10-16)
+
+Owner's rulings since this was first written:
+
+- **No automatic reveal.** It becomes a **skirmish setting** (a toggle), off by default. The
+  "reveal only when one AI and one human are left, and the match started above 1v1" rule is the fallback
+  worth considering if a toggle proves too manual.
+- **Stop the proliferation** - confirmed. One wrinkle to respect: GLA's **Supply Stash is itself a
+  production building**, because it builds workers, and those workers rebuild everything. So "no
+  production left" will never fire for GLA. The remnant test has to count worker production, or use a
+  strength floor plus a structure budget instead.
+- **GLA balance without punishing the AI.** No handicap; adjust the data - a few GLA structures
+  slightly costlier or weaker - and measure the result.
+- **Japan is dropped for now.** Germany becomes the **EU / Coalition** faction.
+- **Performance stays parked** (backlog item 7).
+- **Content order**: the three generals start with USA ("Vanguard"), then the new faction, Russia.
+
+**The measurement problem is solved (2026-10-16).** A 1v1 on a 96-cell map with `--maxframes 200000`
+decides: two matches finished at frames 27,639 and 115,448, at about **15 seconds of wall time each**,
+because headless runs unpaced. The earlier "0 of 162 decided" result was the 60,000-frame cap, not the
+AI. So the standing recipe is:
+
+```
+./ai-batch.sh --data <dir> --runs 20 --maxframes 200000 --mapcells 96
+```
+
+Faction matchups can also be pinned. The engine already carries `-side <slot> <template>` and
+`-team <slot> <n>` (so 1v1 and 2v2 both work), and `--extra` passes them through. Template names are
+the INI block names: `FactionAmerica`, `FactionChina`, `FactionGLA`, plus the per-general variants.
+**Careful:** a misspelled `-side` is refused and the engine then runs an idle loop for ever instead of
+exiting, so always give a batch a short `--timeout`.
+---
+
 ## 1. Closing out a game against a spreading AI
 
 **What actually happens.** Solo against two GLA AI. GLA builds cheap structures all over the map, so
@@ -34,7 +67,7 @@ flag to turn off.
 | # | Idea | Why | Cost |
 |---|---|---|---|
 | 1 | **Stop the proliferation.** When an AI is beaten - no production buildings left, or below a strength floor - it stops placing new structures, stops rebuilding destroyed ones, and its workers stop roaming. | Cause 1, and it is the root: a losing AI should consolidate, not colonise. | One rule in the AI's build path (the economy-build list and `findBuildLocation`), plus a difficulty knob. |
-| 2 | **Reveal what remains.** Once one human is left, remaining AI structures are revealed permanently. | Cause 2, directly. Structures are what you must kill; a hidden *unit* is a fight, a hidden *building* is a chore. Units can stay hidden. | Needs a spike on the per-player visibility path; script actions already reveal map areas, so the machinery exists. |
+| 2 | **Reveal what remains - as a setting, not a rule.** A skirmish toggle, off by default, that reveals remaining AI structures to the last human. If it proves too manual, the fallback is automatic but narrow: only when one AI and one human are left, and only in a match that started above 1v1. | Cause 2, by consent. Structures are what you must kill; a hidden *unit* is a fight, a hidden *building* is a chore. | Needs a spike on the per-player visibility path, plus a control in the skirmish menu (`.wnd` layout). |
 | 3 | **Count it.** "Enemy structures: N" once the enemy is reduced. | Cause 3, very cheaply. The scoreboard already tracks built/lost per player. | Small UI change. |
 | 4 | *Optional*: **surrender rule** - no production and fewer than N units for M seconds, and the AI surrenders. | Ends the game without the sweep. | Small, but it can feel abrupt; take it only if 1+2 are not enough. |
 | 5 | *Not recommended as the fix*: **disable generals for the AI**. | It does not fix a China AI doing the same thing, it removes a faction's identity, and it makes the AI worse. | Keep as an optional toggle only. |
@@ -96,9 +129,10 @@ Cheap, because they reuse art, and they exercise the whole pathway.
 
 ### The new faction
 
-Owner's candidates: **Russia, Germany, Japan**. My recommendation: **Russia first**, then Germany as
-part of a broader European or coalition army, and Japan last (most art-heavy and the biggest risk of
-drifting into science fiction).
+Owner's candidates were Russia, Germany and Japan. **Japan is dropped** - too art-heavy and the biggest
+risk of drifting into science fiction - and Germany becomes the **EU / Coalition** faction. **Russia
+stays first.** The Japanese "networks and drones" idea can return later as a general's theme rather
+than as a whole army.
 
 Why Russia first:
 
@@ -115,8 +149,7 @@ faction feels like a reskin:
 | | Identity | Signature mechanics |
 |---|---|---|
 | Russia | Ground war, no air force | Slow high-HP armour; long-range artillery with a creeping-barrage power; cheap large conscript squads; strong static AA; slower but cheaper economy. |
-| Germany / EU | Precision and recovery | Fast mobile armour; recon drones that spot (an anti-hiding faction by design); repair and reclaim of wrecks; strong defensive turrets. |
-| Japan | Networks and drones | Unmanned units, ECM that disables enemy units briefly, strong stealth; expensive, fragile, high-tech. |
+| EU / Coalition (Germany-led) | Precision and recovery | Fast mobile armour; recon drones that spot (an anti-hiding faction by design); repair and reclaim of wrecks; strong defensive turrets. |
 
 **What a faction actually costs.** Art is the real bill: models, textures, animations, voices, UI
 palette and side icon. Technically it is data - `PlayerTemplate` (with `m_side`, `m_sideIconImage`), a
