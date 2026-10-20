@@ -10693,6 +10693,25 @@ Path *Pathfinder::findClosestPath( Object *obj, const LocomotorSet& locomotorSet
 		return NULL;
 	}
 
+	/* A goal the unit cannot reach at all is not a "closest" goal.
+		*
+		* findClosestPath's contract is to rewrite a goal the unit cannot stand on - a building's
+		* interior, so that a "move onto or beside it" order arrives - to the nearest cell it can reach.
+		* At a ravine the nearest cell is the rim, and the unit is then ordered to walk at a wall it can
+		* never pass: on Twilight Flame that is 818 blocked unit-frames per 1000 logic frames, against
+		* 2-4 on the generated maps.  The zone screen is the question "is there terrain between here and
+		* there", and it already treats a goal inside a structure as reachable (it compares the terrain
+		* zones, which the building stands in), so the building-interior case keeps its answer.  What is
+		* refused here is a goal in a different terrain zone - across a cliff, into a ravine, or up a
+		* mountain - where no route exists and the closest one ends at the wall.
+		*
+		* blocked is the blocked-and-stuck rescue: it patches the route the unit already has instead of
+		* rewriting the destination, so it keeps the old behaviour. */
+	if (!blocked && !clientSafeQuickDoesPathExist(locomotorSet, from, rawTo)) {
+		m_isTunneling = false;
+		return NULL;
+	}
+
 	if (m_isMapReady == false) return NULL;
 
 	m_isTunneling = false;
