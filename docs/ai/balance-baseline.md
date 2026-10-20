@@ -72,3 +72,76 @@ the pinned arms, on 3-7 matches per pairing, so it is corroboration rather than 
    the 1v2 that started this can be measured.
 3. Only then touch GLA's numbers - and prefer structure cost or HP, which the owner suggested, over any
    AI-side handicap.
+
+---
+
+# Round 2 (2026-10-17) - 70 mixed matches, then 50 strict 2v2
+
+The owner asked for volume, variety and teams that never share a faction. Every match got **its own
+seed** (so its own map) and a map size cycling 96/128/160, `--maxframes 200000`, the hard rung, and a
+deterministically drawn combination that never repeats. Generals are included, not just base factions -
+all twelve playable templates.
+
+## 1v1 with generals (20 matches, 17 decided)
+
+By base faction: **China 8-5, USA 5-7, GLA 4-5.**
+
+By general (samples are 1-5 each, so read the ordering as a hint):
+
+| general | W-L | | general | W-L |
+|---|---|---|---|---|
+| **AmericaSuperWeaponGeneral** | **5-3** | | ChinaInfantryGeneral | 2-2 |
+| **ChinaTankGeneral** | **4-0** | | GLAStealthGeneral | 2-2 |
+| China (base) | 2-1 | | GLA (base) | 0-2 |
+| GLADemolitionGeneral | 2-1 | | ChinaNukeGeneral | 0-2 |
+| AmericaAirForceGeneral | 0-2 | | America / AmericaLaser | 0-1 / 0-1 |
+
+## 2v2 - two batches, two rules
+
+**Batch A (50 matches, 43 decided): different generals within a team, same faction allowed.**
+Winning seats: **GLA 36, China 29, USA 21** of 86 (even would be ~29).
+
+**Batch B (50 matches, 35 decided): different factions within a team** - the rule the owner actually
+asked for. Winning seats: **GLA 28, China 22, USA 20** of 70 (even ~23).
+
+| team faction pair | W-L | win% |
+|---|---|---|
+| **China + GLA** | 15-8 | **65%** |
+| GLA + USA | 13-13 | 50% |
+| **China + USA** | 7-14 | **33%** |
+
+Teams with 3+ decisions, by template: GLA (base) 10-6, AmericaAirForce 9-10, ChinaNuke 7-6,
+AmericaLaser 6-7, GLADemolition 7-6, ChinaTank 6-6, GLAStealth 5-6, China (base) 7-4,
+GLAToxin 6-3, **AmericaSuperWeapon 2-8**, ChinaInfantry 2-6, America (base) 3-2.
+
+## What this says
+
+1. **USA is the weak faction in AI hands, in both formats** - 5-7 in 1v1 and 41 of 156 winning 2v2 seats
+   (26%, against 33% expected). This is the opposite of the owner's impression of GLA, and it is the
+   most consistent signal in the data.
+2. **GLA is over-represented in 2v2 wins** - 36/86 (42%) and 28/70 (40%) across two independent
+   batches, both above the 33% share. Having GLA on your team helps; **China+GLA is the best pairing at
+   65%**, **China+USA the worst at 33%.**
+3. **No single ordering holds across formats.** GLA was average in 1v1 (4-5) and strong in 2v2; China
+   was the best 1v1 faction and mid in 2v2. Faction strength is not one number.
+4. **Per-general swings are bigger than per-faction ones, and they do not carry across formats.**
+   AmericaSuperWeapon went 5-3 in 1v1 and 2-8 in strict 2v2; ChinaTank went 4-0 in 1v1 and 6-6 in 2v2;
+   GLA base went 0-2 in 1v1 and 10-6 in 2v2. That is either a real interaction or noise at these
+   sample sizes - it is not settled.
+5. **Resolution is good enough to build on**: 85% of 1v1 decided, 86% and 70% of the two 2v2 batches.
+
+## Limits
+
+- 17 decided 1v1 matches and 78 decided 2v2 matches in total. No confidence intervals were computed;
+  a 40%-vs-33% seat share over 70 seats is suggestive, not conclusive.
+- Start-position bias is real and was not cancelled here (it was ~12/13 in the earlier GLA/USA pair).
+  Round 3 should swap team positions on every pairing.
+- Nothing here is a human-vs-AI measurement, which is where "GLA feels oppressive" comes from.
+
+## Round 3, if it is worth it
+
+1. Swap positions per pairing (run each match twice, teams mirrored) and pool.
+2. 100+ matches per format so per-faction shares get intervals.
+3. Model the owner's own scenario: three seats, GLA+GLA against a single USA.
+4. Then, and only then, decide whether GLA's structure cost or HP needs touching - with USA's weakness
+   as the more likely finding to act on.
