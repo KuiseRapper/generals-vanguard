@@ -124,6 +124,38 @@ sides on these maps, so **balance is now the open work**, not function. The full
 are bought at 3,964, T-72Bs and Tunguskas follow, and the match is decided at 13,927. No match crashed,
 hung or ran to the cap.
 
+### Breadth against the shipped sides (2026-10-21)
+
+Russia is a complete core faction now, not just a couple of buildings:
+
+| Category | Russia | An original side |
+|---|---|---|
+| Buildings | 9 (Command Bunker, Thermal Power Plant, Supply Centre, Regimental Depot, Mobilization Plant, Tank Works, Fire Direction Center, S-300 Battery, Missile Brigade) | 10-12 |
+| Units | 9 (Sapery, Supply Truck, Motostrelki, Spetsnaz, BMP-3, T-72B, T-90, 2S19, Tunguska) | 11-15 |
+| Base defences | 1 (S-300 Battery) | 1-2 |
+| Superweapon | 1 (Missile Brigade) | 1 |
+| Upgrades | 3 (capture, Igla, ERA/Shtora) | 5-8 |
+| General's powers | 0 | several |
+| Aircraft | 0, deliberately: the design's Russia is a ground war with no air force | 5-7 |
+
+So the hole that is left is **general's powers** (and the science/powers bar that goes with them), plus
+the second roster tier and the art pass. Air is a design decision, not a gap.
+
+The **S-300 Battery** is a reskin of the Patriot Battery: long-range AA, built by the dozer, and now the
+`SideInfo Russia` base defense, so the AI's existing "build a defense" scripts finally have something
+to build. It is the static half of the design's air denial.
+
+The **Missile Brigade** is a reskin of China's Nuke Silo and reuses `SuperweaponNeutronMissile` as the
+placeholder round. A human can build it after the Fire Direction Center with no defence count; a
+computer player is held by the fork's twelve-defences-per-superweapon rule, and on the measured maps
+the AI built 3-7 S-300s, so **the AI does not field the brigade yet**. Its wiring was verified with the
+rule temporarily at one: the AI built it at frame 15,220 and aimed and fired the neutron missile. The
+build-order scripts needed three fixes: China's Nuke Silo scripts are `once=1` with a condition false at
+frame 0 (so they never ran), their Hard branch gifts 7,000 credits and repeated every pass once made
+repeating (the AI's bank ran to 126 million), and the escalation gate of 75 is twelve and a half minutes,
+longer than a measured match. Russia's copies run until the gate, ask at escalation 30 instead of 75, and
+the gift is gone.
+
 ### What it took (and the general defects it exposed)
 
 The skeleton was not a data-only job. Each of these was measured, and each fix is general - it is not a
@@ -184,14 +216,16 @@ orders: Igla was queued in 5 and ERA/Shtora in 8; 13 matches were decided and Ru
 
 ### Still open
 
-- **Balance.** The running total is 52 measured matches, 47 decided, Russia 41. That is a faction that
+- **Balance.** The running total is 60 measured matches, 54 decided, Russia 48. That is a faction that
   plays, not a balanced one; a faction-vs-faction table is the next measurement.
+- **General's powers.** The one whole category still missing. The Fire Direction Center has no powers,
+  Russia has no intrinsic science or purchase-science command sets, and the AI's "Russia Generals Powers"
+  scripts still name China's powers. This is the next structural gap after balance.
 - **Windowed play-test.** The bar, load-screen portrait and Eva fall back to China's; headless draws
   none of them, so the owner's Windows (or windowed macOS) check is still the one that proves them.
-- **Powers and the artillery tier.** Capture, Igla and ERA/Shtora are wired. The artillery-school
-  upgrades need Russia's own howitzer weapon (the 2S19 still fires the Nuke Cannon's, and a bonus on
-  that template would buff China too); the six general's powers, the science tree and the powers bar
-  are still design.
+- **The artillery tier.** Capture, Igla and ERA/Shtora are wired. The artillery-school upgrades need
+  Russia's own howitzer weapon (the 2S19 still fires the Nuke Cannon's, and a bonus on that template
+  would buff China too).
 - **Art.** Every unit and building is borrowed geometry. The silhouette pass is Stage 3.
 - **Two unit types are not yet fielded in a short match.** T-90, 2S19 and BMP-3 appear in the harder
   teams but a 3-9 minute match ends before those waves; longer batches must confirm their factories and

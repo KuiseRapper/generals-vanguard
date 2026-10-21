@@ -3,6 +3,25 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia gets a base defence and a superweapon
+
+- **S-300 Battery** (1,000, Thermal Power Plant): a long-range surface-to-air battery, reskinned from
+  the Patriot. It is Russia's first base defence, and it is now the `SideInfo Russia` base defense, so
+  the AI's existing "build a defense" scripts finally have something to build. Measured matches put
+  3-7 of them up.
+- **Missile Brigade** (5,000, Fire Direction Center): Russia's superweapon, reskinned from China's Nuke
+  Silo and firing the neutron missile as a placeholder round. A human can build it directly. A computer
+  player is held by the fork's twelve-defences-per-superweapon rule; the AI built at most seven S-300s
+  in the measured matches, so it does not field the brigade yet. Its wiring was verified with that rule
+  temporarily at one: the AI built it at frame 15,220 and aimed and fired the missile.
+- Three defects in the borrowed build-order scripts: China's Nuke Silo scripts are `once=1` with a
+  condition false at frame 0, so they never ran; their Hard branch hands out 7,000 credits, which
+  repeated every pass once the script was made repeating and ran the AI's bank to 126 million; and the
+  escalation gate of 75 is twelve and a half minutes, longer than a measured match. Russia's copies run
+  until the gate, ask at escalation 30, and no longer hand out money.
+- Breadth against a shipped side is now 9 buildings and 9 units (from 8 and 8), with one base defence,
+  one superweapon and three upgrades. The one whole category still missing is general's powers.
+
 ## 2026-10-21 - Russia's first upgrades: Igla and ERA/Shtora
 
 - **Igla** (Regimental Depot, 1,000) gives every Motostrelki squad an anti-aircraft missile beside its

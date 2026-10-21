@@ -68,17 +68,18 @@ Wave memory; per-match AI doctrines; random maps in skirmish (`Tools/RandomMapLa
 skirmish rule presets; a post-game stats screen from telemetry we already collect; a General's
 Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 
-### 6. Russia: the skeleton plays; finish the faction
-**Owner's ruling (2026-10-17): go big immediately.** The skeleton stage is **done** (2026-10-21): a
-fourth side with a Command Bunker, eight buildings, eight units on reused art, its own command sets,
-AI build list and skirmish scripts. The first upgrade tier is in too: **Igla** (Motostrelki gain an
-anti-air missile) and **ERA/Shtora** (+400 health to every T-90), both bought by the AI. What it took,
-the general AI defects it found and the measurements are in
+### 6. Russia: the skeleton and its first systems play; finish the faction
+**Owner's ruling (2026-10-17): go big immediately.** The skeleton is **done** (2026-10-21): a fourth
+side with nine buildings and nine units on reused art, its own command sets, AI build list and skirmish
+scripts, plus its first systems - **Igla** (Motostrelki gain an anti-air missile), **ERA/Shtora** (+400
+health to every T-90), the **S-300 Battery** (base defence and static AA) and the **Missile Brigade**
+(superweapon). What it took, the general AI defects it found and the measurements are in
 [russia-build-plan.md](docs/factions/russia-build-plan.md).
-*First step now:* **balance** - 52 measured matches, 47 decided, Russia 41 is a faction that plays, not
-a balanced one. Then the powers and the artillery tier (Russia needs its own howitzer weapon before a
-bonus on it can be Russia's), the Mobilized-to-Guards conversion, and the silhouette art pass. The
-windowed bar, portrait and Eva fallbacks still need the owner's play-test.
+*First step now:* **general's powers** - the one whole category still missing (the Fire Direction Center
+has none, Russia has no science tree, and the AI power scripts still name China's powers). Then
+**balance** - 60 measured matches, 54 decided, Russia 48 is a faction that plays, not a balanced one -
+the artillery tier (Russia needs its own howitzer weapon), the Mobilized-to-Guards conversion, and the
+silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
 
 The **three generals** (USA "Vanguard" first) move to *Later*: the owner would rather build the real
 faction directly than rehearse on a general.
