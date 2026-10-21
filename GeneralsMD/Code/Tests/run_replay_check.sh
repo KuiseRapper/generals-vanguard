@@ -16,8 +16,10 @@
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # E1's POSIX harness (Tools/replay-check.sh) checked on itself, with the game's data.
-#   1. One seed, 1200 frames: the recording, its playback and a second run from the same seed stop on
-#      the same HEADLESS CRC at the same frame.
+#   1. One seed, 3000 frames: the recording, its playback and a second run from the same seed stop on
+#      the same HEADLESS CRC at the same frame.  It was 1200 until Russia joined the random faction pool:
+#      the seed then drew sides whose first building completes after frame 1200, and the harness's idle
+#      guard - which is right to exist - failed a match that had simply not built yet.
 #   2. The armed control: the same with the kept replay's game seed edited before the playback.  The
 #      harness must report that seed FAILED, on the playback and not on the second run, and exit 1 -
 #      so a pass in 1 is a comparison that can fail.
@@ -32,11 +34,12 @@
 #      - it makes the Chinook that crashed every platform - and its Humvees fight; the Infantry General
 #      fields the ECM tank and the Nuke Cannon when its AI chooses to, which no log shows (their
 #      locomotors are locomotor_check's to prove).  Before port defect 33's fix this run crashed.
-#   8. Port defect 34 and the W2-era baseline: seed 0 at full length (12000 frames).  Seed 0 draws the
-#      Demolition General, whose AI recruits the reskinned Technicals that upstream's data had left with no
-#      AI module; before port defect 34's fix this run crashed near frame 6600.  The run must agree with itself and
-#      show Demolition structures built, so the seed still draws that general.  (One run serves both: a
-#      separate -side run would add three more 12000-frame games, and the recruiting cannot be forced.)
+#   8. Port defect 34 and the W2-era baseline: seed 0 at full length (12000 frames), the Demolition
+#      General pinned with -side.  Its AI recruits the reskinned Technicals that upstream's data had left
+#      with no AI module; before port defect 34's fix this run crashed near frame 6600.  The run must
+#      agree with itself and show Demolition structures built.  It used to rely on seed 0 drawing that
+#      general; with Russia in the random faction pool the draw moved, so the side is pinned as check 7
+#      pins its generals.
 #
 # WHAT THIS PROVES: same-machine determinism only, on this machine and this build.  Nothing about
 # agreement with a Windows build, which needs a replay recorded on Windows; none exists yet.
@@ -53,13 +56,13 @@ fi
 failed=0
 check() { if eval "$1"; then echo "ok: $2"; else echo "FAIL: $2"; failed=1; fi; }
 
-out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 1200 2>&1)"
+out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 3000 2>&1)"
 status=$?
 printf '%s\n' "$out"
 check '[ $status -eq 0 ]' "seed 0 agrees with itself (exit $status)"
-check 'printf "%s" "$out" | grep -q "the playback and the second run agree at frame 1200"' "at frame 1200, the playback and the second run both"
+check 'printf "%s" "$out" | grep -q "the playback and the second run agree at frame 3000"' "at frame 3000, the playback and the second run both"
 
-out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 1200 --control 2>&1)"
+out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 3000 --control 2>&1)"
 status=$?
 printf '%s\n' "$out"
 check '[ $status -eq 1 ]' "the control (the replay's seed edited) fails the harness (exit $status)"
@@ -85,8 +88,9 @@ printf '%s\n' "$out"
 check '[ $status -eq 0 ]' "seed 0, Infantry against Laser, agrees with itself at 12000 frames (exit $status)"
 check 'printf "%s" "$out" | grep -q "built: .*Lazr_AmericaSupplyCenter"' "the Laser General's Supply Center stood, so its Chinook was made (port defect 33)"
 
-# 8: seed 0 at full length, the Demolition General among its sides (port defect 34).
-out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 12000 2>&1)"
+# 8: seed 0 at full length, the Demolition General pinned (port defect 34).
+out="$(bash "$HARNESS" --generals "$GENERALS" --seeds "0" --maxframes 12000 \
+	--extra "-side 0 FactionGLADemolitionGeneral -side 1 FactionAmerica" 2>&1)"
 status=$?
 printf '%s\n' "$out"
 check '[ $status -eq 0 ]' "seed 0 agrees with itself at 12000 frames (exit $status)"
