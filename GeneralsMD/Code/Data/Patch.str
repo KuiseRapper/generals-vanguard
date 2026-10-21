@@ -1359,3 +1359,10 @@ END
 CONTROLBAR:ToolTipRussiaTunguska
 "Anti-aircraft gun and missile. Useless against tanks."
 END
+
+CONTROLBAR:UpgradeRussiaCaptureBuilding
+"&Capture Building"
+END
+CONTROLBAR:ToolTipRussiaCaptureBuilding
+"Allows infantry to capture neutral tech buildings. Captured oil derricks pay income."
+END
