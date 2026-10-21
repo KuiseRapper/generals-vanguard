@@ -131,12 +131,12 @@ Russia is a complete core faction now, not just a couple of buildings:
 | Category | Russia | An original side |
 |---|---|---|
 | Buildings | 12 (Command Bunker, Thermal Power Plant, Supply Centre, Regimental Depot, Mobilization Plant, Tank Works, Fire Direction Center, S-300 Battery, Missile Brigade, Regimental Air Base, Trench Line, Strongpoint) | 10-12 |
-| Units | 13 (Sapery, Supply Truck, Motostrelki, Spetsnaz, Kornet Team, BMP-3, T-72B, T-90, 2S19, Tunguska, MiG-25, Mi-24, Su-25) | 11-15 |
+| Units | 12 (Sapery, Supply Truck, Motostrelki, Spetsnaz, Kornet Team, BMP-3, T-72B, T-90, 2S19, Tunguska, MiG-25, Mi-24) | 11-15 |
 | Base defences | 3 (S-300 Battery, Trench Line, Strongpoint) | 1-2 |
 | Superweapon | 1 (Missile Brigade) | 1 |
 | Upgrades | 6 (capture, Igla, ERA/Shtora, Infantry Training, Aircraft Armour, Artillery Training) | 5-8 |
 | General's powers | 1 (Artillery Preparation) | several |
-| Aircraft | 3 (MiG-25 interceptor, Mi-24 attack helicopter, Su-25 CAS) | 5-7 |
+| Aircraft | 2 (MiG-25 interceptor, Mi-24 attack helicopter) | 5-7 |
 
 So the hole that is left is the **powers system** (one power works; the science tree, powers bar and the
 other five powers are design), plus the art pass. The air arm is deliberately small - three airframes,
@@ -160,11 +160,127 @@ the gift is gone.
 
 The **breadth pass** added the rest of a shipped side's categories: **Trench Line** (Fire Base howitzer,
 800, anti-ground) and **Strongpoint** (Bunker, 500, garrison) beside the S-300, giving three base
-defences; **Kornet Team** (Missile Defender, 400, anti-tank guided-missile infantry) and **Su-25**
-(China MiG, 1,200, napalm CAS) as units; and three upgrades - **Infantry Training** (+100 health to
+defences; **Kornet Team** (Missile Defender, 400, anti-tank guided-missile infantry) as a unit; and
+three upgrades - **Infantry Training** (+100 health to
 Motostrelki and Spetsnaz), **Aircraft Armour** (+300 to the MiG-25 and Mi-24) and **Artillery Training**
 (a new conventional `Russia2S19Gun`: 420 range, 8.5 s reload, no radiation field). The new units and
 defences are human-buildable; the AI does not use them yet.
+
+### Faction matrix, 2026-10-21
+
+`Tools/Balance/faction_matrix.py` draws the non-Russian seats at random from the twelve lobby
+templates each match and puts Russia on a random seat.  Two runs: 24 1v1 matches (96/128 cells, 60,000
+frames; the opponent deck is shuffled so each template appears twice) and 24 2v2 matches (128/160
+cells, 80,000 frames; Russia plus one random ally against two random enemies).  A frame-limited match
+counts as a draw.  The per-seat rows are in `build-mac/faction_matrix_1v1.csv`,
+`faction_matrix_2v2.csv` and `faction_matrix_combined.csv`.
+
+**1v1** (Russia 18-3, 85.7% of decided):
+
+| Faction | Played | Decided | Wins | Losses | Draws | Win% |
+|---|---|---|---|---|---|---|
+| China | 2 | 2 | 2 | 0 | 0 | 100.0 |
+| **Russia** | **24** | **21** | **18** | **3** | **3** | **85.7** |
+| China Infantry General | 2 | 2 | 1 | 1 | 0 | 50.0 |
+| America | 2 | 1 | 0 | 1 | 1 | 0.0 |
+| America Air Force General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| America Laser General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| America Superweapon General | 2 | 1 | 0 | 1 | 1 | 0.0 |
+| China Nuke General | 2 | 1 | 0 | 1 | 1 | 0.0 |
+| China Tank General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| GLA | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| GLA Demolition General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| GLA Stealth General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+| GLA Toxin General | 2 | 2 | 0 | 2 | 0 | 0.0 |
+
+All three Russian losses were to China: twice to the base faction and once to the Infantry General.
+Every American and GLA template lost both of its matches.
+
+**2v2** (Russia 14-7, 66.7% of decided; the rate is the team result of every seat the faction held):
+
+| Faction | Played | Decided | Wins | Losses | Draws | Win% |
+|---|---|---|---|---|---|---|
+| GLA | 4 | 3 | 3 | 0 | 1 | 100.0 |
+| GLA Toxin General | 6 | 5 | 5 | 0 | 1 | 100.0 |
+| GLA Demolition General | 10 | 9 | 6 | 3 | 1 | 66.7 |
+| **Russia** | **24** | **21** | **14** | **7** | **3** | **66.7** |
+| GLA Stealth General | 9 | 9 | 5 | 4 | 0 | 55.6 |
+| China Infantry General | 8 | 7 | 3 | 4 | 1 | 42.9 |
+| America Air Force General | 7 | 5 | 2 | 3 | 2 | 40.0 |
+| America Laser General | 5 | 4 | 1 | 3 | 1 | 25.0 |
+| America | 5 | 5 | 1 | 4 | 0 | 20.0 |
+| America Superweapon General | 6 | 5 | 1 | 4 | 1 | 20.0 |
+| China Nuke General | 5 | 5 | 1 | 4 | 0 | 20.0 |
+| China | 3 | 2 | 0 | 2 | 1 | 0.0 |
+| China Tank General | 4 | 4 | 0 | 4 | 0 | 0.0 |
+
+**Combined** (48 matches, 42 decided, 32-10, 76.2%):
+
+| Faction | Played | Decided | Wins | Losses | Draws | Win% |
+|---|---|---|---|---|---|---|
+| **Russia** | **48** | **42** | **32** | **10** | **6** | **76.2** |
+| GLA Toxin General | 8 | 7 | 5 | 2 | 1 | 71.4 |
+| GLA | 6 | 5 | 3 | 2 | 1 | 60.0 |
+| GLA Demolition General | 12 | 11 | 6 | 5 | 1 | 54.5 |
+| China | 5 | 4 | 2 | 2 | 1 | 50.0 |
+| GLA Stealth General | 11 | 11 | 5 | 6 | 0 | 45.5 |
+| China Infantry General | 10 | 9 | 4 | 5 | 1 | 44.4 |
+| America Air Force General | 9 | 7 | 2 | 5 | 2 | 28.6 |
+| America | 7 | 6 | 1 | 5 | 1 | 16.7 |
+| America Laser General | 7 | 6 | 1 | 5 | 1 | 16.7 |
+| America Superweapon General | 8 | 6 | 1 | 5 | 2 | 16.7 |
+| China Nuke General | 7 | 6 | 1 | 5 | 1 | 16.7 |
+| China Tank General | 6 | 6 | 0 | 6 | 0 | 0.0 |
+
+The 2v2 table is not a faction-strength table on its own: every seat's result is its team's result, so
+a strong ally lifts a faction and a strong enemy lowers it.  It does say where Russia's 2v2 losses
+came from: all seven came against a team with at least one GLA general, and two were Russia plus an
+American ally against two GLA.  Russia remains above the field in 1v1 and in the
+middle of the 2v2 spread, with China the only side that beat it one-on-one.
+
+### Model audit, 2026-10-21
+
+Every Russian object is an `ObjectReskin`; there is no Russian art in the tree. The audit covered all
+24 reskins and checked four things: the model loads (no missing-model or missing-texture line in a
+match's log), the reskin keeps every behaviour its source has (`ReskinCheck`: 0 of 260 lacking one),
+no two Russian objects use the same model, and whether the model takes the faction colour.
+
+| Russia object | Source | Base model | Colour |
+|---|---|---|---|
+| Command Bunker | ChinaCommandCenter | NBConYard | yes |
+| Thermal Power Plant | ChinaPowerPlant | NBPwrPlant | yes |
+| Supply Centre | ChinaSupplyCenter | NBSupCent | yes |
+| Regimental Depot | ChinaBarracks | NBBarracks | yes |
+| Mobilization Plant | ChinaWarFactory | NBWarFact | yes |
+| Tank Works | AmericaWarFactory | ABWarFact | yes |
+| Fire Direction Center | ChinaPropagandaCenter | NBPCenter | yes |
+| S-300 Battery | AmericaPatriotBattery | ABPatriot | yes |
+| Trench Line | AmericaFireBase | ABFIREBASE | yes |
+| Strongpoint | ChinaBunker | NBBunker | yes |
+| Missile Brigade | ChinaNuclearMissileLauncher | NBNMissle | yes |
+| Regimental Air Base | ChinaAirfield | NBAirfield | yes |
+| Sapery | ChinaVehicleDozer | NVCONSTDOZ | **no** |
+| Motostrelki | ChinaInfantryRedguard | NICNSC | yes |
+| Spetsnaz | AmericaInfantryRanger | AIRngr | yes |
+| BMP-3 | ChinaVehicleTroopCrawler | NVTCrawler | yes |
+| T-72B | ChinaTankBattleMaster | NVBtMstr | yes |
+| T-90 | ChinaTankOverlord | NVOvrlrd | yes |
+| 2S19 | ChinaVehicleNukeLauncher | NVNukeCn | yes |
+| Tunguska | ChinaTankGattling | NVGattTank | **no** |
+| Supply Truck | ChinaVehicleSupplyTruck | NVSSUPPLYTK | yes |
+| MiG-25 | ChinaJetMIG | NVMIG | yes |
+| Mi-24 | ChinaVehicleHelix | NVHELIX | yes |
+| Kornet Team | AmericaInfantryMissileDefender | NITHNT | yes |
+
+Nineteen sources are Chinese and five American. No Russia object shares a model with another Russia
+object, and every model loads. The Sapery and Tunguska do not accept the faction colour, so they keep
+the source's colour while the other twenty-two turn red with the player.
+
+**What the audit cannot fix:** every model is still shared with the faction it came from, and the
+Chinese building set is the largest visual mismatch - the base reads as Chinese architecture with red
+paint, not as a Soviet base. The MiG-25 was the worst unit case (it wore the American Raptor); it now
+wears the MiG model with an air-to-air weapon set, at the cost of sharing the MiG's silhouette with
+China. A true Russian look needs authored models and textures; that is the art pass, not a data fix.
 
 The **first general's power** is **Artillery Preparation** on the Command Bunker. The Command Centre's
 artillery-barrage `OCLSpecialPower` is inherited by the Russian bunker; the PlayerTemplate grants the
@@ -174,9 +290,10 @@ Aerosol Screen, Buratino, VDV) will follow.
 
 The **air arm** is the owner's revision of the design's original "no air-superiority fighter" line: a
 Regimental Air Base (1,500, Fire Direction Center) producing a **MiG-25** (1,200, interceptor) and a
-**Mi-24** (1,500, attack helicopter and troop carrier). The MiG reskins the Raptor because the shipped
-MiG model carries napalm, not air-to-air missiles; the Mi-24 reskins the Helix. Both are placeholders
-until the art pass, and the Su-25 remains the designed but unbuilt CAS airframe. The AI builds the air
+**Mi-24** (1,500, attack helicopter and troop carrier). The MiG reskins the shipped MiG model - the
+only Russian-looking jet in the data - and a patch weapon set with the same conditions replaces that
+model's napalm with a new air-to-air `RussiaMiG25Missile`; the Mi-24 reskins the Helix. Both are
+placeholders until the art pass, and the Su-25 remains the designed but unbuilt CAS airframe. The AI builds the air
 base on the longer maps (frames 12,449 and 21,756 in two batch matches), fields both aircraft, and they
 fight: a MiG-25 killed a Humvee and a Ranger in one match, a Mi-24 damaged a barracks in another.
 

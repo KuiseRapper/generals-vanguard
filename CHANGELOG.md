@@ -3,6 +3,38 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia in the random-faction matrix
+
+- `Tools/Balance/faction_matrix.py` draws the non-Russian seats from the twelve lobby templates at
+  random and puts Russia on a random seat.  Twenty-four 1v1 matches and twenty-four 2v2 matches:
+  - 1v1: Russia 18-3, 85.7% of decided.  All three losses were China (twice the base faction, once the
+    Infantry General); every American and GLA template lost both of its matches.
+  - 2v2 (Russia plus one random ally against two random enemies): Russia 14-7, 66.7%.  All seven
+    losses came against a team with at least one GLA general, and two were Russia plus an American
+    ally against two GLA.  The GLA factions were the strongest seats in this mode (Toxin 5-0, GLA 3-0).
+  - Combined: 48 matches, 42 decided, 32-10, 76.2%.
+- The per-seat rows are in `build-mac/faction_matrix_{1v1,2v2,combined}.csv`; the tables are in the
+  build plan.  The 2v2 table is a team-result table, not a faction-strength table.
+
+## 2026-10-21 - Russia's models audited; the MiG-25 gets the MiG model
+
+- Audited all 24 Russian reskins.  `ReskinCheck` reports 0 of 260 reskins lacking a source behaviour,
+  every model loads, and no two Russian objects use the same model.  Nineteen sources are Chinese and
+  five American; the Sapery and Tunguska do not accept the faction colour, the other twenty-two turn
+  red with the player.
+- The MiG-25 was the worst unit case - it wore the American Raptor.  It now reskins the shipped MiG
+  model, and a patch `WeaponSet` with the same conditions replaces that model's napalm with a new
+  air-to-air `RussiaMiG25Missile`.  A measured match confirms it kills Chinooks and not tanks.
+- The Su-25 is removed rather than left sharing the MiG model with the MiG-25; it remains a design
+  airframe and needs its own model.  Breadth is therefore twelve units and two aircraft, not thirteen
+  and three.
+- The two new weapons live in `WeaponRussiaReforged.ini`, not `WeaponReforged.ini`.  The unit test that
+  parses `WeaponReforged.ini` on its own has no projectile store, and a weapon naming a projectile
+  crashed it; the new file loads after the stores exist and is named `*Reforged.ini` so the
+  fork-owned-path test accepts it.
+- The audit cannot fix the base: the Chinese building set is still the largest visual mismatch.  A
+  true Russian look needs authored models and textures - an art pass, not a data fix.
+
 ## 2026-10-21 - Russia's breadth pass: units, defences, upgrades and a first power
 
 - **Two more base defences.** Trench Line (800, Fire Base howitzer, anti-ground) and Strongpoint (500,
