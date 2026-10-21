@@ -55,11 +55,16 @@ Wave memory; per-match AI doctrines; random maps in skirmish (`Tools/RandomMapLa
 skirmish rule presets; a post-game stats screen from telemetry we already collect; a General's
 Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 
-### 6. New content: three generals, then a new faction
-One general per existing side, **USA first** ("Vanguard", prototype tech). Then one full new army;
-**Russia** is the recommendation, with Germany/coalition and Japan after it. Read upstream's
-`feature/turkey-faction` branch first - it is a working reference for adding a side. See
-[ROADMAP.md](ROADMAP.md) section 4.
+### 6. New content: Russia first
+**Owner's ruling (2026-10-17): go big immediately.** One full new faction - **Russia** - is the top
+priority, ahead of tooling and balance. Its design is written ([ROADMAP.md](ROADMAP.md) section 4);
+read upstream's `feature/turkey-faction` branch before starting, because it is a working reference for
+adding a side.
+*First step:* the "skeleton" stage - template, command sets, six units on reused art, powers simplified,
+playable in skirmish - so the real cost is known from something running.
+
+The **three generals** (USA "Vanguard" first) move to *Later*: the owner would rather build the real
+faction directly than rehearse on a general.
 
 ### 7. Performance (parked by the owner)
 A "classic art" option (the upscaled overlay art is 1.07 GB of textures), the re-path storms, a

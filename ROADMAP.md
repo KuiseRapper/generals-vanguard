@@ -165,11 +165,16 @@ why the generals come first.
 
 ## 5. What I would do first
 
-1. **Close out the ravine work**: the play-test decides, then merge or drop it.
-2. **The endgame fixes** (section 1): stop the proliferation, reveal what remains, count it.
-3. **Find a decisive measurement setup** so balance and AI claims can be settled on outcome.
-4. **GLA balance** (section 2), with `Tools/Balance` and a faction-vs-faction batch.
+**The owner's ruling (2026-10-17): Russia is the priority. Go big now; the USA general waits in the
+backlog.** So the order is:
+
+1. **Russia** (section 4) - the first new faction, and the biggest thing this project can do.
+2. **Finish the pathfinder bug**: the 20,000-cell cap still returns a truncated route (section 6).
+3. **Make the AI spend its money** - it banks 60-75% of income; measured, and the biggest
+   gameplay-quality issue left.
+4. **The endgame fixes** (section 1), including the stealth-remnant reveal.
 5. **Wave memory** - the AI variety win.
-6. **The USA general** - the first real content, and the rehearsal for the new faction.
-7. **Fun batch** (section 3): doctrines, random maps, rule presets, post-game stats.
-8. **Russia** (section 4), after the generals have proven the pipeline.
+6. **Fun batch** (section 3): doctrines, random maps, rule presets, post-game stats.
+7. **The USA general** - moved here from the front; it was to be the rehearsal for Russia, but the
+   owner would rather build Russia directly and learn on the real thing.
+8. **Round 3 balance** (mirrored positions) - only when faction tuning is actually wanted.
