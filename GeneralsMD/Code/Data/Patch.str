@@ -1271,6 +1271,12 @@ END
 OBJECT:RussiaSupplyTruck
 "Supply Truck"
 END
+OBJECT:RussiaSAM
+"S-300 Battery"
+END
+OBJECT:RussiaMissileBrigade
+"Missile Brigade"
+END
 
 CONTROLBAR:ConstructRussiaCommandBunker
 "&Command Bunker"
@@ -1367,6 +1373,24 @@ CONTROLBAR:ConstructRussiaSupplyTruck
 END
 CONTROLBAR:ToolTipRussiaSupplyTruck
 "Carries supplies from a pile back to the Supply Centre."
+END
+CONTROLBAR:ConstructRussiaSAM
+"&S-300 Battery"
+END
+CONTROLBAR:ToolTipRussiaSAM
+"Long-range surface-to-air missiles. The static half of Russia's air denial."
+END
+CONTROLBAR:ConstructRussiaMissileBrigade
+"&Missile Brigade"
+END
+CONTROLBAR:ToolTipRussiaMissileBrigade
+"Theatre missile. A single very long-range strike on a chosen point."
+END
+CONTROLBAR:RussiaMissileStrike
+"&Missile Strike"
+END
+CONTROLBAR:ToolTipRussiaMissileStrike
+"Fire the brigade's missile at a point on the map."
 END
 
 CONTROLBAR:UpgradeRussiaCaptureBuilding
