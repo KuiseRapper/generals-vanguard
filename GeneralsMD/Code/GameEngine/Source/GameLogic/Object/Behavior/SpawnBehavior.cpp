@@ -625,17 +625,29 @@ Bool SpawnBehavior::createSpawn()
 {
 	Object *parent = getObject();
 	const SpawnBehaviorModuleData *md = getSpawnBehaviorModuleData();
+	const AsciiString spawnName = m_spawnTemplate ? m_spawnTemplate->getName() : AsciiString( "<none>" );
+	const Player *owner = parent->getControllingPlayer();
+	DEBUG_LOG(("SPAWN frame %d '%s' tag '%s': creating '%s' for player %d\n",
+		TheGameLogic->getFrame(), parent->getTemplate()->getName().str(),
+		TheNameKeyGenerator->keyToName( getModuleTagNameKey() ).str(), spawnName.str(),
+		owner ? owner->getPlayerIndex() : -1));
 
 	ExitInterface* exitInterface = parent->getObjectExitInterface();
 	if( exitInterface == NULL )
 	{
+		DEBUG_LOG(("SPAWN frame %d '%s': no exit interface, no spawn\n",
+			TheGameLogic->getFrame(), parent->getTemplate()->getName().str()));
 		DEBUG_ASSERTCRASH( exitInterface != NULL, ("Something cannot have SpawnBehavior without an exit interface") );
 		return FALSE;
 	}
 	
 	ExitDoorType exitDoor = exitInterface->reserveDoorForExit(NULL, NULL);
 	if (exitDoor == DOOR_NONE_AVAILABLE)
+	{
+		DEBUG_LOG(("SPAWN frame %d '%s': no exit door available, no spawn of '%s'\n",
+			TheGameLogic->getFrame(), parent->getTemplate()->getName().str(), spawnName.str()));
 		return FALSE;
+	}
 
 	Object *newSpawn = NULL;
 	
@@ -655,6 +667,11 @@ Bool SpawnBehavior::createSpawn()
 
 		//newSpawn = TheThingFactory->newObject( m_spawnTemplate, parent->getControllingPlayer()->getDefaultTeam() );
 		newSpawn = TheThingFactory->newObject( m_spawnTemplate, parent->getTeam() ); // just a little worried about this...
+
+		DEBUG_LOG(("SPAWN frame %d '%s': spawned '%s' (%s) for player %d\n",
+			TheGameLogic->getFrame(), parent->getTemplate()->getName().str(),
+			newSpawn ? newSpawn->getTemplate()->getName().str() : "<null>",
+			newSpawn ? "created" : "FAILED", owner ? owner->getPlayerIndex() : -1));
 
 		// Count this unit towards our score.
 		newSpawn->getControllingPlayer()->onUnitCreated(parent, newSpawn);
