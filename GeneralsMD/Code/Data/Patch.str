@@ -1223,3 +1223,139 @@ END
 OBJECT:RussiaSapery
 "Sapery"
 END
+
+// Russia's skeleton roster (RussiaReforged.ini, CommandSetReforged.ini).
+
+OBJECT:RussiaCommandBunker
+"Command Bunker"
+END
+OBJECT:RussiaThermalPowerPlant
+"Thermal Power Plant"
+END
+OBJECT:RussiaSupplyCenter
+"Supply Centre"
+END
+OBJECT:RussiaRegimentalDepot
+"Regimental Depot"
+END
+OBJECT:RussiaMobilizationPlant
+"Mobilization Plant"
+END
+OBJECT:RussiaTankWorks
+"Tank Works"
+END
+OBJECT:RussiaFireDirectionCenter
+"Fire Direction Center"
+END
+OBJECT:RussiaMotostrelki
+"Motostrelki"
+END
+OBJECT:RussiaSpetsnaz
+"Spetsnaz"
+END
+OBJECT:RussiaBMP3
+"BMP-3"
+END
+OBJECT:RussiaT72B
+"T-72B (Mobilized)"
+END
+OBJECT:RussiaT90
+"T-90"
+END
+OBJECT:Russia2S19
+"2S19 Msta"
+END
+OBJECT:RussiaTunguska
+"Tunguska"
+END
+
+CONTROLBAR:ConstructRussiaCommandBunker
+"&Command Bunker"
+END
+CONTROLBAR:ToolTipRussiaCommandBunker
+"The Russian command post. Builds the Sapery, the faction's only builder."
+END
+CONTROLBAR:ConstructRussiaThermalPowerPlant
+"&Thermal Power Plant"
+END
+CONTROLBAR:ToolTipRussiaThermalPowerPlant
+"Power. Cheap, dirty, high output."
+END
+CONTROLBAR:ConstructRussiaSupplyCenter
+"&Supply Centre"
+END
+CONTROLBAR:ToolTipRussiaSupplyCenter
+"Gathers supplies. Sends out a supply truck."
+END
+CONTROLBAR:ConstructRussiaRegimentalDepot
+"&Regimental Depot"
+END
+CONTROLBAR:ToolTipRussiaRegimentalDepot
+"Infantry. Motostrelki and Spetsnaz."
+END
+CONTROLBAR:ConstructRussiaMobilizationPlant
+"&Mobilization Plant"
+END
+CONTROLBAR:ToolTipRussiaMobilizationPlant
+"Cheap vehicles: the T-72B and the BMP-3."
+END
+CONTROLBAR:ConstructRussiaTankWorks
+"&Tank Works"
+END
+CONTROLBAR:ToolTipRussiaTankWorks
+"The real vehicles: T-90, 2S19 Msta, Tunguska."
+END
+CONTROLBAR:ConstructRussiaFireDirectionCenter
+"&Fire Direction Center"
+END
+CONTROLBAR:ToolTipRussiaFireDirectionCenter
+"Artillery school and the general's powers."
+END
+CONTROLBAR:ConstructRussiaSapery
+"&Sapery"
+END
+CONTROLBAR:ToolTipRussiaSapery
+"The only builder. Repairs what the guns cannot save."
+END
+CONTROLBAR:ConstructRussiaMotostrelki
+"&Motostrelki"
+END
+CONTROLBAR:ToolTipRussiaMotostrelki
+"Line infantry. Garrisons buildings."
+END
+CONTROLBAR:ConstructRussiaSpetsnaz
+"&Spetsnaz"
+END
+CONTROLBAR:ToolTipRussiaSpetsnaz
+"Recon. Finds the hidden and designates for the guns."
+END
+CONTROLBAR:ConstructRussiaBMP3
+"&BMP-3"
+END
+CONTROLBAR:ToolTipRussiaBMP3
+"Tracked IFV with a 100 mm gun and a missile. Carries five."
+END
+CONTROLBAR:ConstructRussiaT72B
+"&T-72B"
+END
+CONTROLBAR:ToolTipRussiaT72B
+"Mobilized tank: cheap, slow, no upgrade slots."
+END
+CONTROLBAR:ConstructRussiaT90
+"&T-90"
+END
+CONTROLBAR:ToolTipRussiaT90
+"Main battle tank. The fist."
+END
+CONTROLBAR:ConstructRussia2S19
+"&2S19 Msta"
+END
+CONTROLBAR:ToolTipRussia2S19
+"Self-propelled howitzer. Must deploy; needs a spotter."
+END
+CONTROLBAR:ConstructRussiaTunguska
+"&Tunguska"
+END
+CONTROLBAR:ToolTipRussiaTunguska
+"Anti-aircraft gun and missile. Useless against tanks."
+END
