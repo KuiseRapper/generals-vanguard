@@ -1375,3 +1375,22 @@ END
 CONTROLBAR:ToolTipRussiaCaptureBuilding
 "Allows infantry to capture neutral tech buildings. Captured oil derricks pay income."
 END
+
+UPGRADE:RussiaIgla
+"Igla"
+END
+UPGRADE:RussiaERAShtora
+"ERA/Shtora"
+END
+CONTROLBAR:UpgradeRussiaIgla
+"&Igla Missiles"
+END
+CONTROLBAR:ToolTipRussiaIgla
+"Motostrelki carry an anti-aircraft missile beside their rifles."
+END
+CONTROLBAR:UpgradeRussiaERAShtora
+"&ERA / Shtora"
+END
+CONTROLBAR:ToolTipRussiaERAShtora
+"Explosive reactive armour and a soft-kill system for every T-90."
+END
