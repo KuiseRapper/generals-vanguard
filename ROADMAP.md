@@ -137,7 +137,8 @@ than as a whole army.
 Why Russia first:
 
 - The strongest identity of the three, and the clearest contrast with China. China is already the
-  cheap-swarm side; Russia can be the opposite - heavy, slow, durable, artillery-led, no air force.
+  cheap-swarm side; Russia can be the opposite - heavy, slow, durable, artillery-led, with only a
+  small air arm (an interceptor and an attack helicopter) and air denial from the ground.
 - The most natural model reuse: tank hulls, artillery, SAMs and heavy infantry can be adapted from
   China and USA shapes with new silhouettes, which matches the "reuse and change them" plan.
 - It gives the AI a genuinely different playstyle to learn, which is worth as much as the player
@@ -148,7 +149,7 @@ faction feels like a reskin:
 
 | | Identity | Signature mechanics |
 |---|---|---|
-| Russia | Ground war, no air force | Slow high-HP armour; long-range artillery with a creeping-barrage power; cheap large conscript squads; strong static AA; slower but cheaper economy. |
+| Russia | Ground war with a small air arm | Slow high-HP armour; long-range artillery with a creeping-barrage power; cheap large conscript squads; strong static AA; a MiG-25 interceptor and Mi-24 attack helicopter, no strategic bomber; slower but cheaper economy. |
 | EU / Coalition (Germany-led) | Precision and recovery | Fast mobile armour; recon drones that spot (an anti-hiding faction by design); repair and reclaim of wrecks; strong defensive turrets. |
 
 **What a faction actually costs.** Art is the real bill: models, textures, animations, voices, UI

@@ -70,14 +70,15 @@ Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 
 ### 6. Russia: the skeleton and its first systems play; finish the faction
 **Owner's ruling (2026-10-17): go big immediately.** The skeleton is **done** (2026-10-21): a fourth
-side with nine buildings and nine units on reused art, its own command sets, AI build list and skirmish
+side with ten buildings and eleven units on reused art, its own command sets, AI build list and skirmish
 scripts, plus its first systems - **Igla** (Motostrelki gain an anti-air missile), **ERA/Shtora** (+400
-health to every T-90), the **S-300 Battery** (base defence and static AA) and the **Missile Brigade**
-(superweapon). What it took, the general AI defects it found and the measurements are in
+health to every T-90), the **S-300 Battery** (base defence and static AA), the **Missile Brigade**
+(superweapon) and a small **air arm** (MiG-25 interceptor and Mi-24 attack helicopter from the
+Regimental Air Base). What it took, the general AI defects it found and the measurements are in
 [russia-build-plan.md](docs/factions/russia-build-plan.md).
 *First step now:* **general's powers** - the one whole category still missing (the Fire Direction Center
 has none, Russia has no science tree, and the AI power scripts still name China's powers). Then
-**balance** - 60 measured matches, 54 decided, Russia 48 is a faction that plays, not a balanced one -
+**balance** - 80 measured matches, 72 decided, Russia 64 is a faction that plays, not a balanced one -
 the artillery tier (Russia needs its own howitzer weapon), the Mobilized-to-Guards conversion, and the
 silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
 

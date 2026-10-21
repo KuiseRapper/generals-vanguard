@@ -3,6 +3,24 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia gets its air arm: MiG-25 and Mi-24
+
+- **Regimental Air Base** (1,500, Fire Direction Center) builds aircraft. It is a reskin of China's
+  Airfield, so parking, rearm and the production queue are the shipped ones.
+- **MiG-25** (1,200): a high-speed interceptor with air-to-air missiles. **Mi-24 Hind** (1,500): an
+  attack helicopter and troop carrier. Both are placeholders - the MiG reskins the Raptor because the
+  shipped MiG model carries napalm, the Mi-24 reskins the Helix - and the Su-25 remains the designed
+  but unbuilt ground-attack airframe.
+- The design's summary said "no air force", but its detailed air section only ruled out an
+  air-superiority fighter; the owner asked for a MiG-25 on 2026-10-21 and the air arm is now a small
+  one - two airframes, no strategic bomber - alongside the S-300 and Tunguska air denial.
+- The AI builds the air base on the longer maps (frames 12,449, 13,887 and 21,756 in measured
+  matches), fields both aircraft and fights with them: a MiG-25 killed a tank and damaged a fire base
+  in one match, a Mi-24 damaged a barracks in another. Across the two air batches (twenty matches)
+  eighteen were decided and Russia won sixteen, so the running total is 80 matches, 72 decided,
+  Russia 64.
+- Breadth is now ten buildings and eleven units, against a shipped side's ten to fifteen.
+
 ## 2026-10-21 - Russia gets a base defence and a superweapon
 
 - **S-300 Battery** (1,000, Thermal Power Plant): a long-range surface-to-air battery, reskinned from

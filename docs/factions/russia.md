@@ -119,7 +119,7 @@ concentration-of-force feel.
 4. **Mobilization Plant** — cheap vehicles, no tech.
 5. **Tank Works** — the real vehicles; needs the Fire Direction Center and serious power.
 6. **Fire Direction Center** — tech; unlocks artillery upgrades, spotting accuracy, the powers, and the Missile Brigade.
-7. **Regimental Air Base** — Su-25 and Mi-24 production, rearm, **and the SAM umbrella**. One building is both Russia's air power and its air denial, which is the cleanest statement of the air doctrine.
+7. **Regimental Air Base** — aircraft production, rearm, **and the SAM umbrella**. One building is both Russia's air power and its air denial. The skeleton fields a MiG-25 interceptor and a Mi-24; the Su-25 is the designed CAS airframe and not built yet.
 8. **Missile Brigade** — superweapon.
 
 Defences, not counted above: **Trench Line** (cheap, forward, infantry-only, built by Sapery), the
@@ -135,9 +135,15 @@ under a SAM umbrella.
 - **Mi-24 Hind** — a flying BMP that puts infantry on top of a position without the slow ground approach.
 - **VDV drop** — where the strategic-lift fantasy lives, as a power rather than a transport fleet.
 
-**Deliberately absent:** an air-superiority fighter, stealth aircraft, and a strategic bomber. Enemy air
-is answered by **Tunguska, the S-300 and Igla-armed infantry** — Russia does not contest the sky, it
-*denies* it from the ground, which makes the opponent's air force expensive rather than absent.
+**Owner's revision (2026-10-21):** the original design deliberately had no air-superiority fighter.
+The owner asked for a MiG-25, which is exactly that, so the air arm now has one: a high-speed
+interceptor with air-to-air missiles and no ground attack.  The doctrine is still ground-led — the
+MiG exists to make the opponent's aircraft pay for entering, not to win the sky on its own — and the
+Su-25 remains the designed (unbuilt) ground-attack airframe beside the Mi-24.
+
+**Still absent:** stealth aircraft and a strategic bomber. Enemy air is answered by **Tunguska, the
+S-300, the MiG-25 and Igla-armed infantry**; Russia's default is still to *deny* the sky from the
+ground rather than live in it.
 
 **Why air does not take over:** both airframes are slow, short-ranged and long to rearm, so sorties are
 events; both lose to dedicated AA, so they exploit suppressed defences rather than bypass them; and air

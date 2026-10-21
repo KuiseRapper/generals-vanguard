@@ -115,11 +115,11 @@ match. Two batches of six, generated maps at 96, 128 and 160 cells, brutal, 60,0
 | Russia slot 0 | 6/6 | 6 | 24,797 (6.9 min) | 52.2 / 59.8 / 32.7 / 12,417 | 27.5 / 31.3 / 59.8 / 13,417 |
 | Russia slot 1 | 6/6 | 4 | 30,922 (8.6 min) | 52.3 / 51.3 / 69.5 / 12,967 | 32.3 / 68.5 / 51.8 / 24,917 |
 
-**The first twelve matches gave Russia ten wins.** Two later clean-build batches (eight and sixteen
-matches, 96-160 cells, both orders) decided 22 of 24 and Russia took 18. Across all **36 measured
-matches, 34 were decided and Russia won 28**; the two frame-limited ones were 160-cell games. That is a
-first number, not a verdict: it says the faction is playable and that the skeleton sits above the shipped
-sides on these maps, so **balance is now the open work**, not function. The full base goes up on the 96-cell seed-0 match at frames 3,939 (Supply Centre), 5,986
+**The first twelve matches gave Russia ten wins.** Later clean-build batches (eight, sixteen, twelve
+and eight matches, 96-160 cells, both orders) kept the pattern. Across all **80 measured matches, 72
+were decided and Russia won 64**; the eight frame-limited ones were mostly 160-cell games. That is a first
+number, not a verdict: it says the faction is playable and that it sits above the shipped sides on these
+maps, so **balance is now the open work**, not function. The full base goes up on the 96-cell seed-0 match at frames 3,939 (Supply Centre), 5,986
 (Mobilization Plant), 7,099 (Tank Works) and 9,579 (Fire Direction Center); the first supply trucks
 are bought at 3,964, T-72Bs and Tunguskas follow, and the match is decided at 13,927. No match crashed,
 hung or ran to the cap.
@@ -130,16 +130,18 @@ Russia is a complete core faction now, not just a couple of buildings:
 
 | Category | Russia | An original side |
 |---|---|---|
-| Buildings | 9 (Command Bunker, Thermal Power Plant, Supply Centre, Regimental Depot, Mobilization Plant, Tank Works, Fire Direction Center, S-300 Battery, Missile Brigade) | 10-12 |
-| Units | 9 (Sapery, Supply Truck, Motostrelki, Spetsnaz, BMP-3, T-72B, T-90, 2S19, Tunguska) | 11-15 |
+| Buildings | 10 (Command Bunker, Thermal Power Plant, Supply Centre, Regimental Depot, Mobilization Plant, Tank Works, Fire Direction Center, S-300 Battery, Missile Brigade, Regimental Air Base) | 10-12 |
+| Units | 11 (Sapery, Supply Truck, Motostrelki, Spetsnaz, BMP-3, T-72B, T-90, 2S19, Tunguska, MiG-25, Mi-24) | 11-15 |
 | Base defences | 1 (S-300 Battery) | 1-2 |
 | Superweapon | 1 (Missile Brigade) | 1 |
 | Upgrades | 3 (capture, Igla, ERA/Shtora) | 5-8 |
 | General's powers | 0 | several |
-| Aircraft | 0, deliberately: the design's Russia is a ground war with no air force | 5-7 |
+| Aircraft | 2 (MiG-25 interceptor, Mi-24 attack helicopter) | 5-7 |
 
 So the hole that is left is **general's powers** (and the science/powers bar that goes with them), plus
-the second roster tier and the art pass. Air is a design decision, not a gap.
+the second roster tier and the art pass. The air arm is deliberately small - two airframes, no
+strategic bomber - but it is no longer absent; the design's original "no air-superiority fighter" line
+was overruled by the owner, who asked for a MiG-25.
 
 The **S-300 Battery** is a reskin of the Patriot Battery: long-range AA, built by the dozer, and now the
 `SideInfo Russia` base defense, so the AI's existing "build a defense" scripts finally have something
@@ -155,6 +157,14 @@ frame 0 (so they never ran), their Hard branch gifts 7,000 credits and repeated 
 repeating (the AI's bank ran to 126 million), and the escalation gate of 75 is twelve and a half minutes,
 longer than a measured match. Russia's copies run until the gate, ask at escalation 30 instead of 75, and
 the gift is gone.
+
+The **air arm** is the owner's revision of the design's original "no air-superiority fighter" line: a
+Regimental Air Base (1,500, Fire Direction Center) producing a **MiG-25** (1,200, interceptor) and a
+**Mi-24** (1,500, attack helicopter and troop carrier). The MiG reskins the Raptor because the shipped
+MiG model carries napalm, not air-to-air missiles; the Mi-24 reskins the Helix. Both are placeholders
+until the art pass, and the Su-25 remains the designed but unbuilt CAS airframe. The AI builds the air
+base on the longer maps (frames 12,449 and 21,756 in two batch matches), fields both aircraft, and they
+fight: a MiG-25 killed a Humvee and a Ranger in one match, a Mi-24 damaged a barracks in another.
 
 ### What it took (and the general defects it exposed)
 
@@ -216,7 +226,7 @@ orders: Igla was queued in 5 and ERA/Shtora in 8; 13 matches were decided and Ru
 
 ### Still open
 
-- **Balance.** The running total is 60 measured matches, 54 decided, Russia 48. That is a faction that
+- **Balance.** The running total is 80 measured matches, 72 decided, Russia 64. That is a faction that
   plays, not a balanced one; a faction-vs-faction table is the next measurement.
 - **General's powers.** The one whole category still missing. The Fire Direction Center has no powers,
   Russia has no intrinsic science or purchase-science command sets, and the AI's "Russia Generals Powers"
