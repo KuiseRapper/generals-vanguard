@@ -46,6 +46,9 @@ OBJECT_TYPE = 15
 TEAM = 3
 SCRIPT = 2
 SCRIPT_SUBROUTINE = 13
+INT = 0
+COUNTER = 4
+SPECIAL_POWER = 30
 UPGRADE = 32
 
 # The skeleton roster in RussiaReforged.ini.  Everything else China names has no Russia counterpart
@@ -65,6 +68,8 @@ UNITS = {
     "ChinaBarracks": "RussiaRegimentalDepot",
     "ChinaWarFactory": "RussiaMobilizationPlant",
     "ChinaPropagandaCenter": "RussiaFireDirectionCenter",
+    "ChinaGattlingCannon": "RussiaSAM",
+    "ChinaNuclearMissileLauncher": "RussiaMissileBrigade",
 }
 
 # Actions that name an upgrade or a building Russia does not have yet; dropped whole, because a
@@ -80,6 +85,12 @@ UPGRADES = {
     "Upgrade_ChinaNeutronShells": "Upgrade_RussiaIgla",
     "Upgrade_ChinaUraniumShells": "Upgrade_RussiaERAShtora",
     "Upgrade_ChinaNuclearTanks": "Upgrade_RussiaERAShtora",
+}
+
+# China's superweapon power becomes Russia's: the Missile Brigade reuses the neutron missile until
+# its own round exists, and the EMP scripts then wait for and fire it.
+SPECIAL_POWERS = {
+    "SuperweaponEMPPulse": "SuperweaponNeutronMissile",
 }
 
 # The team record fields that hold a script name rather than a unit or a number.
@@ -178,17 +189,21 @@ def drop_dead_scripts(script_list):
     return dropped
 
 
-def rename_calls(chunk, renamed_scripts):
+def rename_calls(chunk, renamed_scripts, renamed_powers):
     """Every <This Team> action and condition lives in one of these chunks, and the ones that name a
-    script name it through a SCRIPT or SCRIPT_SUBROUTINE parameter."""
+    script name it through a SCRIPT or SCRIPT_SUBROUTINE parameter.  A superweapon power is named
+    by the SPECIAL_POWER parameter and moves the same way."""
     rewritten = 0
     if chunk.name in ("Condition", "ScriptAction", "ScriptActionFalse"):
         for parameter in chunk.fields[2]:
             if parameter[0] in (SCRIPT, SCRIPT_SUBROUTINE) and parameter[3] in renamed_scripts:
                 parameter[3] = renamed_scripts[parameter[3]]
                 rewritten += 1
+            elif parameter[0] == SPECIAL_POWER and parameter[3] in renamed_powers:
+                parameter[3] = renamed_powers[parameter[3]]
+                rewritten += 1
     for child in chunk.children or []:
-        rewritten += rename_calls(child, renamed_scripts)
+        rewritten += rename_calls(child, renamed_scripts, renamed_powers)
     return rewritten
 
 
@@ -220,7 +235,7 @@ def rewrite_scripts(script_list, renamed_teams, renamed_scripts):
             if script.name != "Script":
                 continue
             script.fields[0] = rename_group(script.fields[0])
-            rewritten += rename_calls(script, renamed_scripts)
+            rewritten += rename_calls(script, renamed_scripts, SPECIAL_POWERS)
             rewritten += rename_conditions(script)
             for child in list(script.children or []):
                 if child.name not in ("ScriptAction", "ScriptActionFalse"):
@@ -246,6 +261,60 @@ def rewrite_scripts(script_list, renamed_teams, renamed_scripts):
                     script.children.remove(child)
                     dropped += 1
     return rewritten, dropped
+
+
+def make_repeating(script_list, needle):
+    """China's Nuke Silo scripts are once=1 with a condition that is false at frame 0 (a fire
+    direction centre and an escalation counter), so they evaluate once, find nothing, and never
+    look again: the AI asks for the building's prerequisite but never builds the silo.  Russia's
+    copy runs until the condition holds."""
+    changed = 0
+    for group in script_list.children or []:
+        for script in group.children or []:
+            if script.name == "Script" and needle in script.fields[0]:
+                script.fields[5] = 0
+                changed += 1
+    return changed
+
+
+def lower_nuke_timer(script_list, threshold):
+    """China's Hard Nuke Silo asks for escalation 75, about twelve and a half minutes of game time.
+    Russia's measured matches are decided inside ten, so the Missile Brigade never reached the
+    field.  Ask at 30 (five minutes) instead; the script's own 7,000 credits then pay for it."""
+    changed = 0
+    for group in script_list.children or []:
+        for script in group.children or []:
+            if script.name != "Script" or "Nuke Silo" not in script.fields[0]:
+                continue
+            for or_condition in script.children or []:
+                conditions = [or_condition] if or_condition.name == "Condition" else list(or_condition.children or [])
+                for condition in conditions:
+                    if condition.name != "Condition":
+                        continue
+                    parameters = condition.fields[2]
+                    if not parameters or parameters[0][0] != COUNTER or parameters[0][3] != "_ESCALATION":
+                        continue
+                    for parameter in parameters:
+                        if parameter[0] == INT and parameter[1] > threshold:
+                            parameter[1] = threshold
+                            changed += 1
+    return changed
+
+
+def drop_nuke_gifts(script_list, needle):
+    """China's repeating Nuke Silo script pays 7,000 credits each time it runs.  With once=0 that is
+    every pass, and a measured Hard Russia's bank ran to 126 million before the Missile Brigade went
+    up.  The brigade is a 5,000-credit saving decision here; the script asks for it and the AI saves."""
+    dropped = 0
+    for group in script_list.children or []:
+        for script in group.children or []:
+            if script.name != "Script" or needle not in script.fields[0]:
+                continue
+            for child in list(script.children or []):
+                if child.name in ("ScriptAction", "ScriptActionFalse") and child.fields[1] == "PLAYER_GIVE_MONEY":
+                    script.children.remove(child)
+                    dropped += 1
+    return dropped
 
 
 def remove_existing(chunks):
@@ -296,6 +365,9 @@ def main():
     dead = drop_dead_scripts(russia_list)
     rewritten, dropped = rewrite_scripts(russia_list, renamed_teams, renamed_scripts)
     dropped += dead
+    repeating = make_repeating(russia_list, "Nuke Silo")
+    lowered = lower_nuke_timer(russia_list, 30)
+    gifts = drop_nuke_gifts(russia_list, "Nuke Silo")
     for team in source_teams:
         teams.fields.append(clone_team(team, renamed_teams, renamed_scripts))
 
@@ -304,7 +376,8 @@ def main():
 
     scbtool.save(target, table, chunks)
     print(f"{PLAYER_NAME}: {len(source_teams)} teams, {rewritten} names rewritten, "
-          f"{dropped} actions dropped")
+          f"{dropped} actions dropped, {repeating} scripts made repeating, "
+          f"{lowered} nuke timers lowered, {gifts} nuke money gifts dropped")
 
 
 if __name__ == "__main__":
