@@ -161,13 +161,37 @@ Russia special case:
    scripts. `Tools/ScbTool/russia.py` now remaps all of them, and is idempotent so the file can be
    regenerated in place.
 
+### The first upgrade tier (2026-10-21)
+
+Two player upgrades, both bought from the building the design gives them:
+
+- **Igla** (`Upgrade_RussiaIgla`, Regimental Depot, 1,000): a `WeaponSetUpgrade` adds a
+  `PLAYER_UPGRADE` weapon set to Motostrelki with the Stinger missile in the secondary slot. The
+  Stinger is a placeholder for the Igla launcher until the weapon pass. Verified applied: a match
+  that bought it logged the set being set on twelve Motostrelki already on the field.
+- **ERA/Shtora** (`Upgrade_RussiaERAShtora`, Tank Works, 1,500): a `MaxHealthUpgrade` adds 400 health
+  to every T-90. A health pool stands in for a separate armour type until the stat pass.
+
+Both modules are added with `AddModule`, not as bare `Behavior` lines: a restated module clears every
+copied module sharing its interface (port defect 34), and the reskin check then reports the T-90
+losing the Overlord's upgrade modules. `ReskinCheck` now reports 0 of 252 reskins lacking a source
+module.
+
+The AI buys both from the skirmish scripts: `russia.py` maps the relevant China upgrade purchases to
+Russia's (Nationalism and Neutron Shells to Igla, Uranium Shells and Nuclear Tanks to ERA/Shtora) and
+drops the air upgrades it has no aircraft for. Measured on 16 matches, 96-160 cells, brutal, both
+orders: Igla was queued in 5 and ERA/Shtora in 8; 13 matches were decided and Russia won all 13.
+
 ### Still open
 
-- **Balance.** 10/12 needs a wider batch and a faction-vs-faction table before any stat is called final.
+- **Balance.** The running total is 52 measured matches, 47 decided, Russia 41. That is a faction that
+  plays, not a balanced one; a faction-vs-faction table is the next measurement.
 - **Windowed play-test.** The bar, load-screen portrait and Eva fall back to China's; headless draws
   none of them, so the owner's Windows (or windowed macOS) check is still the one that proves them.
-- **Powers, upgrades and the second roster tier.** Only the capture-building upgrade is wired; the
-  Igla, ERA/Shtora, artillery school and the six general's powers are still design.
+- **Powers and the artillery tier.** Capture, Igla and ERA/Shtora are wired. The artillery-school
+  upgrades need Russia's own howitzer weapon (the 2S19 still fires the Nuke Cannon's, and a bonus on
+  that template would buff China too); the six general's powers, the science tree and the powers bar
+  are still design.
 - **Art.** Every unit and building is borrowed geometry. The silhouette pass is Stage 3.
 - **Two unit types are not yet fielded in a short match.** T-90, 2S19 and BMP-3 appear in the harder
   teams but a 3-9 minute match ends before those waves; longer batches must confirm their factories and

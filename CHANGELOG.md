@@ -3,6 +3,22 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia's first upgrades: Igla and ERA/Shtora
+
+- **Igla** (Regimental Depot, 1,000) gives every Motostrelki squad an anti-aircraft missile beside its
+  rifle. It is a `WeaponSetUpgrade` adding a `PLAYER_UPGRADE` weapon set; the Stinger missile stands in
+  for the Igla launcher until the weapon pass. Verified applied: the upgrade set the weapon flag on
+  twelve Motostrelki already on the field in the match where the AI bought it.
+- **ERA/Shtora** (Tank Works, 1,500) adds 400 health to every T-90, applied when the upgrade completes.
+  A health pool stands in for a separate armour type until the stat pass.
+- Both are added with `AddModule`, not bare `Behavior` lines: restating a module clears every copied
+  module sharing its interface (port defect 34). The reskin check now reports 0 of 252 reskins missing
+  a module their source has.
+- The AI buys both. `Tools/ScbTool/russia.py` maps the China upgrade purchases it can use - Nationalism
+  and Neutron Shells to Igla, Uranium Shells and Nuclear Tanks to ERA/Shtora - and drops the air
+  upgrades Russia has no aircraft for. On 16 measured matches Igla was queued in 5 and ERA/Shtora in 8;
+  13 were decided and Russia won all 13.
+
 ## 2026-10-21 - Russia becomes a faction that plays
 
 - **Russia is a playable fourth side in skirmish.** It has a Command Bunker, a Thermal Power Plant, a

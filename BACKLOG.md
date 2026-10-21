@@ -71,13 +71,14 @@ Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 ### 6. Russia: the skeleton plays; finish the faction
 **Owner's ruling (2026-10-17): go big immediately.** The skeleton stage is **done** (2026-10-21): a
 fourth side with a Command Bunker, eight buildings, eight units on reused art, its own command sets,
-AI build list and skirmish scripts. Twelve headless matches on generated 96-160 cell maps, brutal, all
-decided; Russia won ten, built its full base and its economy, and trained infantry and vehicles. What it
-took, and the general AI defects it found, are in
+AI build list and skirmish scripts. The first upgrade tier is in too: **Igla** (Motostrelki gain an
+anti-air missile) and **ERA/Shtora** (+400 health to every T-90), both bought by the AI. What it took,
+the general AI defects it found and the measurements are in
 [russia-build-plan.md](docs/factions/russia-build-plan.md).
-*First step now:* **balance** - 10 of 12 is a first number, not a finished one. Then the powers and the
-upgrade tier (Igla, ERA/Shtora, artillery school), the Mobilized-to-Guards conversion, and the
-silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
+*First step now:* **balance** - 52 measured matches, 47 decided, Russia 41 is a faction that plays, not
+a balanced one. Then the powers and the artillery tier (Russia needs its own howitzer weapon before a
+bonus on it can be Russia's), the Mobilized-to-Guards conversion, and the silhouette art pass. The
+windowed bar, portrait and Eva fallbacks still need the owner's play-test.
 
 The **three generals** (USA "Vanguard" first) move to *Later*: the owner would rather build the real
 faction directly than rehearse on a general.
