@@ -1201,3 +1201,25 @@ END
 GUI:KickVoteNone
 "No vote is open. Type /kick and a player's name to start one."
 END
+
+// The Russia faction (PlayerTemplateReforged.ini, RussiaReforged.ini, AIDataReforged.ini).
+
+SIDE:Russia
+"Russia"
+END
+
+INI:FactionRussia
+"Russia"
+END
+
+TOOLTIP:RussiaArmy
+"Russia: a fire plan before the tanks move, and the densest ground-based air denial in the game."
+END
+
+OBJECT:RussiaCommandBunker
+"Command Bunker"
+END
+
+OBJECT:RussiaSapery
+"Sapery"
+END
