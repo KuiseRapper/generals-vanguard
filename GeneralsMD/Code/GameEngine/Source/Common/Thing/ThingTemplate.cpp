@@ -706,7 +706,14 @@ void ThingTemplate::parsePrerequisites( INI* ini, void *instance, void *store, c
 		{ 0, 0, 0, 0 }
 	};
 
-	if (ini->getLoadType() == INI_LOAD_CREATE_OVERRIDES)
+	/* A file that patches an object's fields replaces the list it names, it does not add to the
+		 list the object already had.  Overrides have always been cleared here; MULTIFILE was not,
+		 so RussiaReforged.ini's "Prerequisites Object = RussiaSupplyCenter" left ChinaWarFactory's
+		 ChinaSupplyCenter requirement in place beside it, and a Russian building that needed a
+		 Russian prereq could never be built: a measured Hard Russia's Mobilization Plant reported
+		 NO_PREREQ for every frame while it stood on 6,300 in the bank.  Only Reforged patch files load Object blocks as MULTIFILE (the base tree loads
+		 with OVERWRITE), so this changes no shipped object. */
+	if (ini->getLoadType() == INI_LOAD_CREATE_OVERRIDES || ini->getLoadType() == INI_LOAD_MULTIFILE)
 	{
 		self->m_prereqInfo.clear();
 	}
