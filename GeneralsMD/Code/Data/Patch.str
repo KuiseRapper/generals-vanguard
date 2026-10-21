@@ -1268,6 +1268,9 @@ END
 OBJECT:RussiaTunguska
 "Tunguska"
 END
+OBJECT:RussiaSupplyTruck
+"Supply Truck"
+END
 
 CONTROLBAR:ConstructRussiaCommandBunker
 "&Command Bunker"
@@ -1358,6 +1361,12 @@ CONTROLBAR:ConstructRussiaTunguska
 END
 CONTROLBAR:ToolTipRussiaTunguska
 "Anti-aircraft gun and missile. Useless against tanks."
+END
+CONTROLBAR:ConstructRussiaSupplyTruck
+"&Supply Truck"
+END
+CONTROLBAR:ToolTipRussiaSupplyTruck
+"Carries supplies from a pile back to the Supply Centre."
 END
 
 CONTROLBAR:UpgradeRussiaCaptureBuilding
