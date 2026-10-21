@@ -1097,6 +1097,7 @@ static void giveUpOnSpot( BuildListInfo *info )
 // ------------------------------------------------------------------------------------------------
 Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildListInfo *info)
 {
+	const Bool trace = std::strstr(bldgPlan->getName().str(), "SupplyCenter") != NULL;
 	// Find a dozer.
 	Object *dozer = findDozer(info->getLocation());
 	if (dozer==NULL && isSkirmishAI() && getSkillProfile()->m_economyBuildings && isPowerThin() &&
@@ -1108,15 +1109,18 @@ Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildLi
 		dozer = findNearestDozer(info->getLocation());
 	}
 	if (dozer==NULL) {
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: no dozer free at (%.0f,%.0f)\n", bldgPlan->getName().str(), TheGameLogic->getFrame(), info->getLocation()->x, info->getLocation()->y));
 		return NULL;
 	}
 	// Check available funds, and with a Hard AI whether the money is saved for something better.
 	Money *money = m_player->getMoney();
 	const Int cost = bldgPlan->calcCostToBuild(m_player);
 	if (!purchaseAllowed(bldgPlan->getTemplateID(), cost, purchaseKindOf(bldgPlan), TRUE, bldgPlan->getName())) {
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: purchase not allowed (cost %d, bank %d)\n", bldgPlan->getName().str(), TheGameLogic->getFrame(), cost, (Int)money->countMoney()));
 		return NULL;
 	}
 	if ((Int)money->countMoney()<cost) {
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: not enough money (cost %d, bank %d)\n", bldgPlan->getName().str(), TheGameLogic->getFrame(), cost, (Int)money->countMoney()));
 		return NULL;
 	}
 
@@ -1132,6 +1136,7 @@ Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildLi
 		 minute to put up. The order is the player list order, so every machine defers the same
 		 player on the same frame and a replay still matches. */
 	if (!TheAI->claimBuildingPlacement(TheGameLogic->getFrame())) {
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: placement claim lost\n", bldgPlan->getName().str(), TheGameLogic->getFrame()));
 		m_buildDelay = 1;		// try again next frame; doBaseBuilding leaves any value >= 1 alone
 		return NULL;
 	}
@@ -1140,6 +1145,7 @@ Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildLi
 	pos.z += TheTerrainLogic->getGroundHeight(pos.x, pos.y);
 	if( !dozer->getAIUpdateInterface() )
 	{
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: dozer has no AI\n", bldgPlan->getName().str(), TheGameLogic->getFrame()));
 		return NULL;
 	}
 	Real angle = info->getAngle();
@@ -1148,6 +1154,7 @@ Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildLi
 																								 dozer, m_player ) != LBC_OK ) {
 		// If there's enemy units or structures, don't build/rebuild.
 		TheTerrainVisual->removeAllBibs();	// isLocationLegalToBuild adds bib feedback, turn it off.  jba.
+		if (trace) DEBUG_LOG(("BUILD '%s' frame %d: enemy overlap at (%.0f,%.0f), giving up the spot\n", bldgPlan->getName().str(), TheGameLogic->getFrame(), pos.x, pos.y));
 		giveUpOnSpot(info);
 		return NULL;
 	}
