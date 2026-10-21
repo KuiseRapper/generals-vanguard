@@ -23,17 +23,12 @@ on top.
 
 ## Now
 
-### 0. A building the AI requests through `AI EXPAND` never completes
-`ChinaSupplyCenter` is asked for twice in a 60,000-frame match (`AI EXPAND frame 14725 ... builds
-'ChinaSupplyCenter'`, then frame 45863) and never finishes: no `AI QUEUE ... buys 'ChinaSupplyCenter'`,
-no object creation, no `AI BUILT` line. `AmericaSupplyCenter` in the same match goes `AI QUEUE` ->
-`CREATE` (frame 1809) -> `AI BUILT` (frame 2738) and spawns its two Chinooks. China earns anyway, from
-captured oil derricks (`AI player 2 capturing a 'TechOilDerrick'`, `Upgrade_InfantryCaptureBuilding`),
-which is why the defect was invisible until a faction without derricks was measured.
-
-General, not Russia's: a fourth side is only the faction that exposed it.
-*First step:* one log-only comparison of the EXPAND path against the build-list path in
-`AISkirmishPlayer` (who completes a placement, and what cancels it), no engine change.
+### 0. AI expansions die of old age in the build queue
+Found while building Russia: China's own expansion supply centre is picked at a **legal** spot at frame
+14,725, first attempted by a dozer at **45,862** (31,137 frames later), refused because an enemy had
+moved onto it, and dropped with no re-pick. Any AI expansion can lose this much time to the queue.
+Diagnosis, the four failed fixes, and two candidate fixes: [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
+*First step:* (a) re-pick the spot at build time instead of dropping the entry, with the gate in the doc.
 
 ### 1. Close out the ravine work
 Five commits on `ai/lane-reachability`, cherry-picked to `ai/measure`. The mechanism is confirmed
