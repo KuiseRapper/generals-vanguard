@@ -13,6 +13,11 @@ the dock's own cell, which is water or otherwise unsuitable - so the request is 
 And when one dock yields no legal spot, the AI never tries a different dock: it re-asks the same dock
 until the match ends.**
 
+Seven attempts have now been recorded. **This thread has run its course**: the defect needs a
+dedicated, instrumented investigation of the picker's search area - what `isLocationLegalToBuild`
+with the dozer's flags actually rejects near a dock, and for which object - rather than an eighth
+patch on the same function.
+
 Everything below is how that was established. The 31,137-frame wait between pick and build is real and
 worth fixing in its own right, but it is **secondary**: even with no wait at all, the queued position
 was not a legal build spot.
@@ -52,6 +57,7 @@ position was already illegal when it was queued, so fixing the wait alone would 
 | Re-pick the spot at build time (fix (a), the previous recommendation): bounded, rate-limited, nearest-first rings out to `SUPPLY_CENTER_CLOSE_DIST` = 20 cells around the requested spot *and* around the dock, with the dozer's flags | **no legal candidate in the whole 20-cell square** at the moment of the attempt - the spot had been invalid since it was picked | the request was queued at the dock's own cell and fails the picker's own test; a retry cannot rescue a spot that never existed. Reverted |
 | Companion: refuse to queue an invalid expansion spot | China then **never asks for that centre at all** - no request, no build | avoids the wasted queue entry but produces no building, and loses scale: China **10 buildings -> 7**, peak 53 -> 49, earned 11,600 -> 9,800 (still a win). Reverted |
 | Dock selection, first shape: a strict pre-check on the single base-ward candidate spot, block the dock for 30s when it fails, and skip blocked docks in `findSupplyCenter` | the pre-check is the wrong shape: the picker's placement is a *search* (the wiggle), not one candidate, so a single-candidate test condemns docks that would have worked | **America's own supply centre was blocked too** (`has no legal spot by dock 2` at frame 0), both seats fell to 4-5 buildings, and the match hit the cap. Reverted |
+| Seventh: run the picker's **own** search with the dozer's flags (no new pass), and let its `valid == false` path not queue the request and set the dock block from that positive signal | the strict test rejects **every** candidate in the picker's search area at pick time, not just the queued cell | China still never queues the centre (`no legal spot for 'ChinaSupplyCenter' by dock 1, set aside 30s, not queued` at 14,725 and 45,863), and scale regresses: **10 buildings -> 7**, peak 53 -> 49, earned 11,600 -> 9,800 (a win). Reverted |
 
 ## Where the fix now belongs: dock selection
 
