@@ -23,6 +23,16 @@ owned by a Russia player, and rewrites every object type to Russia's roster.  Wh
 counterpart for a China object the action is dropped rather than left pointing at China: a China
 building in a Russia build order is the defect this exists to remove.
 
+A script is found by name across the whole file (ScriptEngine::findScript caches every script in one
+map), so a rename is only safe if every reference moves with it.  That means the actions and
+conditions (ENABLE_SCRIPT, CALL_SUBROUTINE, TEAM_EXECUTE_SEQUENTIAL_SCRIPT) *and* the team records
+(teamProductionCondition, teamOnCreateScript, the generic hooks, ...): a Russia team whose onCreate
+still names "China Guard Base" runs the China side's script, and a Russia build condition that enables
+"China Barracks - N" enables nothing that is in Russia's list.
+
+Running the script again replaces the Russia entry instead of failing, so the generated data can be
+rebuilt after a roster change without resetting the .scb to the commit before Russia.
+
 usage: russia.py <in.scb> <out.scb>
 """
 import copy
@@ -34,12 +44,15 @@ PLAYER_NAME = "SkirmishRussia"
 SOURCE_PLAYER = "SkirmishChina"
 OBJECT_TYPE = 15
 TEAM = 3
+SCRIPT = 2
+SCRIPT_SUBROUTINE = 13
 
 # The skeleton roster in RussiaReforged.ini.  Everything else China names has no Russia counterpart
 # yet and is dropped (build actions) or emptied (team slots).
 UNITS = {
     "ChinaInfantryRedguard": "RussiaMotostrelki",
     "ChinaVehicleDozer": "RussiaSapery",
+    "ChinaVehicleSupplyTruck": "RussiaSupplyTruck",
     "ChinaVehicleTroopCrawler": "RussiaBMP3",
     "ChinaTankBattleMaster": "RussiaT72B",
     "ChinaTankOverlord": "RussiaT90",
@@ -57,6 +70,14 @@ UNITS = {
 # build request for a China object is exactly the failure this patch removes.
 DROP_ACTIONS = {"AI_PLAYER_BUILD_UPGRADE"}
 
+# The team record fields that hold a script name rather than a unit or a number.
+TEAM_SCRIPT_FIELDS = {
+    "teamAllClearScript", "teamEnemySightedScript", "teamGenericScriptHook0",
+    "teamGenericScriptHook1", "teamGenericScriptHook2", "teamGenericScriptHook3",
+    "teamOnCreateScript", "teamOnDestroyedScript", "teamOnIdleScript",
+    "teamOnUnitDestroyedScript", "teamProductionCondition",
+}
+
 
 def team_name(name):
     if name.startswith("China "):
@@ -68,15 +89,27 @@ def team_name(name):
     return "Russia " + name
 
 
-def clone_team(team, renamed):
+def rename_group(name):
+    """The scripts carry their side in their names; a Russia group that says China in every line is
+    the kind of thing that makes the next reader distrust the file."""
+    if name.startswith("China "):
+        return "Russia " + name[len("China "):]
+    if name.startswith("China"):
+        return "Russia" + name[len("China"):]
+    return name
+
+
+def clone_team(team, renamed_teams, renamed_scripts):
     entries = []
     unit_slot = 0
     for key, kind, value in team:
         value = copy.deepcopy(value)
         if key == "teamName":
-            value = renamed[value]
+            value = renamed_teams[value]
         elif key == "teamOwner" and value == SOURCE_PLAYER:
             value = PLAYER_NAME
+        elif key in TEAM_SCRIPT_FIELDS and value in renamed_scripts:
+            value = renamed_scripts[value]
         elif key.startswith("teamUnitType") and value and value != "<none>":
             slot = key[len("teamUnitType"):]
             mapped = UNITS.get(value)
@@ -91,16 +124,6 @@ def clone_team(team, renamed):
         entries = [(key, kind, 0) if key in (f"teamUnitMinCount{unit_slot}", f"teamUnitMaxCount{unit_slot}") else (key, kind, value)
                    for key, kind, value in entries]
     return entries
-
-
-def rename_group(name):
-    """The scripts carry their side in their names; a Russia group that says China in every line is
-    the kind of thing that makes the next reader distrust the file."""
-    if name.startswith("China "):
-        return "Russia " + name[len("China "):]
-    if name.startswith("China"):
-        return "Russia" + name[len("China"):]
-    return name
 
 
 def condition_names_china_object(script):
@@ -143,52 +166,91 @@ def drop_dead_scripts(script_list):
     return dropped
 
 
-def rewrite_scripts(script_list, renamed):
+def rename_calls(chunk, renamed_scripts):
+    """Every <This Team> action and condition lives in one of these chunks, and the ones that name a
+    script name it through a SCRIPT or SCRIPT_SUBROUTINE parameter."""
+    rewritten = 0
+    if chunk.name in ("Condition", "ScriptAction", "ScriptActionFalse"):
+        for parameter in chunk.fields[2]:
+            if parameter[0] in (SCRIPT, SCRIPT_SUBROUTINE) and parameter[3] in renamed_scripts:
+                parameter[3] = renamed_scripts[parameter[3]]
+                rewritten += 1
+    for child in chunk.children or []:
+        rewritten += rename_calls(child, renamed_scripts)
+    return rewritten
+
+
+def rename_conditions(script):
+    """A condition that asks about an object type asks about the same object type Russia builds, or
+    the script is dead: 'has a China dozer' is never true for a Russian player."""
+    rewritten = 0
+    for or_condition in script.children or []:
+        if or_condition.name not in ("Condition", "OrCondition"):
+            continue
+        candidates = [or_condition] + list(or_condition.children or [])
+        for condition in candidates:
+            if condition.name != "Condition":
+                continue
+            for parameter in condition.fields[2]:
+                if parameter[0] == OBJECT_TYPE and parameter[3] in UNITS:
+                    parameter[3] = UNITS[parameter[3]]
+                    rewritten += 1
+    return rewritten
+
+
+def rewrite_scripts(script_list, renamed_teams, renamed_scripts):
     dropped = 0
     rewritten = 0
-    stack = [script_list]
-    while stack:
-        chunk = stack.pop()
-        if chunk.name == "ScriptGroup":
-            chunk.fields[0] = rename_group(chunk.fields[0])
-        elif chunk.name == "Script":
-            chunk.fields[0] = rename_group(chunk.fields[0])
-        for child in list(chunk.children or []):
-            if chunk.name in ("Script", "OrCondition") and child.name in ("Condition", "ScriptAction", "ScriptActionFalse"):
-                # conditions test object types too: "has a China dozer" is false for a Russian player
-                for parameter in child.fields[2]:
-                    if parameter[0] == OBJECT_TYPE and parameter[3] in UNITS:
-                        parameter[3] = UNITS[parameter[3]]
-                        rewritten += 1
-            if child.name in ("ScriptAction", "ScriptActionFalse"):
+    for group in script_list.children or []:
+        if group.name == "ScriptGroup":
+            group.fields[0] = rename_group(group.fields[0])
+        for script in list(group.children or []):
+            if script.name != "Script":
+                continue
+            script.fields[0] = rename_group(script.fields[0])
+            rewritten += rename_calls(script, renamed_scripts)
+            rewritten += rename_conditions(script)
+            for child in list(script.children or []):
+                if child.name not in ("ScriptAction", "ScriptActionFalse"):
+                    continue
                 action = child.fields[1]
-                params = child.fields[2]
                 doomed = action in DROP_ACTIONS
-                for parameter in params:
+                for parameter in child.fields[2]:
                     if parameter[0] == OBJECT_TYPE and parameter[3] in UNITS:
                         parameter[3] = UNITS[parameter[3]]
                         rewritten += 1
                     elif parameter[0] == OBJECT_TYPE and parameter[3].startswith("China"):
                         doomed = True
-                    elif parameter[0] == TEAM and parameter[3] in renamed:
-                        parameter[3] = renamed[parameter[3]]
+                    elif parameter[0] == TEAM and parameter[3] in renamed_teams:
+                        parameter[3] = renamed_teams[parameter[3]]
                 if doomed:
-                    chunk.children.remove(child)
+                    script.children.remove(child)
                     dropped += 1
-                continue
-            if child.children:
-                stack.append(child)
     return rewritten, dropped
+
+
+def remove_existing(chunks):
+    """Take a previous run's Russia entry out so the file can be regenerated in place."""
+    players = [chunk for chunk in chunks if chunk.name == "ScriptsPlayers"][0]
+    names = [name for name, _ in players.fields[1]]
+    if PLAYER_NAME in names:
+        index = names.index(PLAYER_NAME)
+        del players.fields[1][index]
+        lists = [chunk for chunk in chunks if chunk.name == "PlayerScriptsList"][0]
+        del lists.children[index]
+    teams = [chunk for chunk in chunks if chunk.name == "ScriptTeams"][0]
+    teams.fields = [team for team in teams.fields
+                    if dict((key, value) for key, _, value in team).get("teamOwner") != PLAYER_NAME]
 
 
 def main():
     source, target = sys.argv[1], sys.argv[2]
     table, chunks = scbtool.load(source)
 
+    remove_existing(chunks)
+
     players = [chunk for chunk in chunks if chunk.name == "ScriptsPlayers"][0]
     names = [name for name, _ in players.fields[1]]
-    if PLAYER_NAME in names:
-        raise SystemExit(f"{PLAYER_NAME} is already in {source}")
     source_index = names.index(SOURCE_PLAYER)
 
     lists = [chunk for chunk in chunks if chunk.name == "PlayerScriptsList"][0]
@@ -198,24 +260,31 @@ def main():
     teams = [chunk for chunk in chunks if chunk.name == "ScriptTeams"][0]
     source_teams = [team for team in teams.fields
                     if dict((key, value) for key, _, value in team).get("teamOwner") == SOURCE_PLAYER]
-    renamed = {}
+    renamed_teams = {}
     for team in source_teams:
         old = dict((key, value) for key, _, value in team)["teamName"]
-        renamed[old] = team_name(old)
-    if len(set(renamed.values())) != len(renamed):
+        renamed_teams[old] = team_name(old)
+    if len(set(renamed_teams.values())) != len(renamed_teams):
         raise SystemExit("two China teams map to one Russia name")
 
+    # every script the copy will rename, so a reference can move with the definition
+    renamed_scripts = {}
+    for group in source_list.children or []:
+        for script in group.children or []:
+            if script.name == "Script":
+                renamed_scripts[script.fields[0]] = rename_group(script.fields[0])
+
     dead = drop_dead_scripts(russia_list)
-    rewritten, dropped = rewrite_scripts(russia_list, renamed)
+    rewritten, dropped = rewrite_scripts(russia_list, renamed_teams, renamed_scripts)
     dropped += dead
     for team in source_teams:
-        teams.fields.append(clone_team(team, renamed))
+        teams.fields.append(clone_team(team, renamed_teams, renamed_scripts))
 
     players.fields[1].append((PLAYER_NAME, None))
     lists.children.append(russia_list)
 
     scbtool.save(target, table, chunks)
-    print(f"{PLAYER_NAME}: {len(source_teams)} teams, {rewritten} object types rewritten, "
+    print(f"{PLAYER_NAME}: {len(source_teams)} teams, {rewritten} names rewritten, "
           f"{dropped} actions dropped")
 
 
