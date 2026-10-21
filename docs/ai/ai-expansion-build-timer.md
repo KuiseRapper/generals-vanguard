@@ -1,12 +1,21 @@
 # Why an AI expansion never gets built: the build timer
 
-**Status: diagnosis only, nothing changed.** Four attempts to fix it are recorded below so the next
-person does not re-run them. The defect is a **timing** defect, not a placement defect: the AI picks a
-legal spot and then does not attempt to build it for tens of thousands of frames, by which time the
-spot is no longer legal and the request is dropped.
+**Status: diagnosis only, nothing changed.** Five attempts to fix it are recorded below so the next
+person does not re-run them.
 
 Found while building the Russia faction: Russia is the first faction with no captured-derrick income
 to paper over it, and its supply centre never completed, so its income stayed 0.
+
+## The starting point for the next attempt
+
+**The AI's supply-centre picker validates a spot, finds it invalid, and queues the request anyway - at
+the dock's own cell, which is water or otherwise unsuitable - so the request is doomed at pick time.
+And when one dock yields no legal spot, the AI never tries a different dock: it re-asks the same dock
+until the match ends.**
+
+Everything below is how that was established. The 31,137-frame wait between pick and build is real and
+worth fixing in its own right, but it is **secondary**: even with no wait at all, the queued position
+was not a legal build spot.
 
 ## The chain (fixed seed 0, 96 cells, 60,000-frame cap, China slot 0 vs USA)
 
@@ -28,7 +37,8 @@ the intervening 1,809 frames.
 The wait comes from `AIPlayer::processBaseBuilding`, which builds **one structure per timer slot**
 (`m_readyToBuildStructure` / `m_structureTimer`) and walks the build list in order. A priority entry
 added by the expansion sits behind the rest of the base, so its spot ages while the AI builds barracks,
-bunkers and defences.
+bunkers and defences. **The wait is real but secondary** (see the starting point above): the queued
+position was already illegal when it was queued, so fixing the wait alone would not build the centre.
 
 ## What each attempt proved, and why it failed
 
@@ -39,25 +49,28 @@ bunkers and defences.
 | Bounded ring, single frame (8 directions, radii 2–10 cells), no flood, no delay | a bounded retry is safe: China stayed exactly at baseline | **no legal candidate in forty** around (186,125) at frame 45,862 — the site had no usable neighbour at that moment. The site was fine when picked; the world had moved |
 | Make the picker use the dozer's exact flags (`CLEAR_PATH \| TERRAIN_RESTRICTIONS \| NO_OBJECT_OVERLAP \| NO_ENEMY_OBJECT_OVERLAP`), one helper instead of five copies | the pick at 14,725 **was** legal under those flags | it does not help: legality at pick time says nothing about legality 31k frames later. Reverted |
 | Collapse the five placement tests into one helper | cleanup worth having when the real fix lands | not a fix on its own; reverted with the above |
+| Re-pick the spot at build time (fix (a), the previous recommendation): bounded, rate-limited, nearest-first rings out to `SUPPLY_CENTER_CLOSE_DIST` = 20 cells around the requested spot *and* around the dock, with the dozer's flags | **no legal candidate in the whole 20-cell square** at the moment of the attempt - the spot had been invalid since it was picked | the request was queued at the dock's own cell and fails the picker's own test; a retry cannot rescue a spot that never existed. Reverted |
+| Companion: refuse to queue an invalid expansion spot | China then **never asks for that centre at all** - no request, no build | avoids the wasted queue entry but produces no building, and loses scale: China **10 buildings -> 7**, peak 53 -> 49, earned 11,600 -> 9,800 (still a win). Reverted |
 
-## The two candidate fixes
+## Where the fix now belongs: dock selection
 
-**(a) Re-pick the spot at build time instead of dropping the entry.** When `buildStructureWithDozer`
-finds the spot illegal, ask the picker (`buildBySupplies`/`buildAISupplyCenter` logic, which can now
-test with the dozer's flags) for a fresh spot near the same dock; only `giveUpOnSpot` when the picker
-also finds none. *This is the one I would take.* It is local to the dozer path, it uses machinery that
-already exists, and it fixes the real damage: the request is not thrown away because the world moved.
-*What could go wrong:* re-picking must be rate-limited (once per attempt, not per frame) or a contested
-dock becomes the cost sink the flood attempt measured; and the re-pick must not wander — it should stay
-within the dock's `SUPPLY_CENTER_CLOSE_DIST`, or a "supply centre" will be built at the far side of the
-map.
+The dozer, the re-pick and the queue are all downstream of a choice that was wrong when it was made.
+The fix is in **dock selection** - `buildBySupplies` / `findBestSupplyWarehouse` / `buildAISupplyCenter`
+- and it is two rules:
 
-**(b) Let expansion requests bypass the one-per-timer queue.** A priority build added by
-`buildAISupplyCenter` could be attempted on the next build tick rather than behind the whole list, so
-the gap between pick and build is small. *What could go wrong:* this changes the base-building rhythm
-for **every** faction and every building, and the one-per-timer rule exists to spread placement cost
-across frames (one `isLocationLegalToBuild` ring can cost 10ms). It needs its own performance
-measurement, and it is a bigger behavioural change than (a).
+1. **Never queue a spot that failed the picker's own test.** If no position beside the chosen dock is
+   legal, the dock is not usable for a supply centre this time.
+2. **Then choose another dock** instead of re-asking the same one. The need (the AI wants a supply
+   centre) must survive even when one dock cannot take it; today the need is either queued at an
+   impossible position or dropped, and neither is right.
+
+*What could go wrong:* dock selection is shared by every faction's expansion, and the search must stay
+bounded (the map has tens of docks); a dock that fails today may be usable later (an enemy walks away),
+so a "skip" should not be permanent. Measure the dock-scan cost with the pathfinder telemetry.
+
+**Secondary, still worth taking:** expansion requests bypass the one-per-timer queue, so the gap
+between pick and build cannot grow to 31k frames. It changes base-building rhythm for every faction and
+must be measured on its own (one `isLocationLegalToBuild` ring can cost 10ms).
 
 Either way this is an **AI-expansion behaviour change for every faction**, not a Russia patch.
 

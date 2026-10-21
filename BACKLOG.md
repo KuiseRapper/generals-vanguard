@@ -23,12 +23,13 @@ on top.
 
 ## Now
 
-### 0. AI expansions die of old age in the build queue
-Found while building Russia: China's own expansion supply centre is picked at a **legal** spot at frame
-14,725, first attempted by a dozer at **45,862** (31,137 frames later), refused because an enemy had
-moved onto it, and dropped with no re-pick. Any AI expansion can lose this much time to the queue.
-Diagnosis, the four failed fixes, and two candidate fixes: [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
-*First step:* (a) re-pick the spot at build time instead of dropping the entry, with the gate in the doc.
+### 0. The AI queues supply centres at spots that are already illegal, and never tries another dock
+China's own expansion centre is picked at (186,125), the dock's own (unsuitable) cell: the picker's test
+fails, the request is queued anyway, the dozer refuses it 31,137 frames later, and the entry is dropped.
+When a dock yields no legal spot the AI re-asks the same dock and never chooses another. Five fixes were
+tried and are recorded with their numbers: [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
+*First step:* dock selection - never queue an invalid spot, and choose another dock when this one cannot
+take a centre - with the gate in the doc (China's centre completes, then Russia earns, then no regression).
 
 ### 1. Close out the ravine work
 Five commits on `ai/lane-reachability`, cherry-picked to `ai/measure`. The mechanism is confirmed
