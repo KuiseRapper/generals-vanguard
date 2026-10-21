@@ -3,6 +3,35 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia becomes a faction that plays
+
+- **Russia is a playable fourth side in skirmish.** It has a Command Bunker, a Thermal Power Plant, a
+  Supply Centre with its own supply truck, a Regimental Depot, a Mobilization Plant, a Tank Works, a
+  Fire Direction Center, and eight units on borrowed models (Motostrelki, Sapery, Spetsnaz, BMP-3,
+  T-72B, T-90, 2S19 Msta, Tunguska) with their own command sets, names, build list and skirmish AI
+  scripts. Its bar, load-screen portrait and Eva lines fall back to China's until its own art exists.
+- **The AI can play it.** Of 36 headless matches on generated 96-160 cell maps at brutal, both start
+  orders, 34 were decided and Russia won 28; the two that ran to the cap were 160-cell games. It builds
+  its full base by frame 9,579 on the fastest one, buys supply trucks the frame after the centre
+  completes, and trains infantry and armour. Balance is a first number, not a verdict - Russia currently
+  sits above the shipped sides on these maps.
+- **Six defects the faction exposed, all fixed generally:**
+  - an INI patch block appended prerequisites instead of replacing them, so a Russian building that
+    needed another Russian building could never be built (`ThingTemplate::parsePrerequisites`);
+  - the AI placed supply centres inside the engine's `SupplyBuildBorder` and gave every spot up
+    (`AIPlayer::buildBySupplies`);
+  - an inert Spy Satellite ping counted as an enemy that made a base site "unsafe"
+    (`AIPlayer::isLocationSafe`);
+  - a supply centre in the player's own base was refused because the enemy was within 300 units on a
+    small map (same function, home-base exception);
+  - two reskins of one model were interchangeable to a command set, so the dozer answered a
+    Mobilization Plant request with the Tank Works, which needs it
+    (`BuildAssistant::isPossibleToMakeUnit` now prefers an exact match);
+  - the copied skirmish scripts were renamed without their `ENABLE_SCRIPT`, `CALL_SUBROUTINE` and team
+    hooks, pointing Russia at China's scripts (`Tools/ScbTool/russia.py` now moves every reference).
+- The China expansion centre that could never complete in a measured match now does on three of four
+  seeds. Its remaining half - choosing another dock when one cannot take a centre - is in the backlog.
+
 ## 2026-10-15 - Version 0.2.0
 
 - The version line moves to 0.2.0. It covers the rename, the credits and licence notices, the fork's

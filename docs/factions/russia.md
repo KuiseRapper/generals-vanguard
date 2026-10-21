@@ -1,8 +1,10 @@
 # Russia — faction design
 
-**Status: design only.** Nothing here is built, and nothing here is measured. Treat every number as a
-starting hypothesis. One spike (the in-place vehicle conversion) has to prove itself before any of this
-is promised.
+**Status: the skeleton is built and plays.** The fourth side, its roster, command sets, AI build list and
+skirmish scripts exist; in a headless batch of twelve matches (96-160 cell generated maps, brutal) every
+match was decided and Russia won ten. The powers, the upgrade tier, the Mobilized-to-Guards conversion
+and the silhouette art are still design. What was built, the defects it exposed and the numbers are in
+[russia-build-plan.md](russia-build-plan.md); treat every other number here as a starting hypothesis.
 
 ## The identity
 

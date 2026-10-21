@@ -23,13 +23,18 @@ on top.
 
 ## Now
 
-### 0. The AI queues supply centres at spots that are already illegal, and never tries another dock
-China's own expansion centre is picked at (186,125), the dock's own (unsuitable) cell: the picker's test
-fails, the request is queued anyway, the dozer refuses it 31,137 frames later, and the entry is dropped.
-When a dock yields no legal spot the AI re-asks the same dock and never chooses another. Five fixes were
-tried and are recorded with their numbers: [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
-*First step:* dock selection - never queue an invalid spot, and choose another dock when this one cannot
-take a centre - with the gate in the doc (China's centre completes, then Russia earns, then no regression).
+### 0. AI expansion: choose another dock when the first one cannot take a centre
+The **illegal spot** half is fixed (2026-10-21), and it was three defects, not one: `buildBySupplies`
+offset a supply centre by a fixed three pathfind cells, inside the engine's `SupplyBuildBorder`;
+`isLocationSafe` counted an inert Spy Satellite ping as an enemy; and it refused any centre whose site
+was within 300 units of the enemy, which on a 96-cell map is the player's own base. China's centre now
+completes on 3 of 4 measured seeds instead of never, and Russia's economy depends on it (see
+[russia-build-plan.md](docs/factions/russia-build-plan.md)). The numbers and the seven earlier attempts
+are in [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
+What remains: when a dock yields no legal spot the AI re-asks the same dock and never chooses another
+(seed 0 asked at 14,725 after an earlier refusal).
+*First step:* dock selection on failure, with the gate in the doc (China's centre completes on every
+seed, then no regression).
 
 ### 1. Close out the ravine work
 Five commits on `ai/lane-reachability`, cherry-picked to `ai/measure`. The mechanism is confirmed
@@ -63,13 +68,16 @@ Wave memory; per-match AI doctrines; random maps in skirmish (`Tools/RandomMapLa
 skirmish rule presets; a post-game stats screen from telemetry we already collect; a General's
 Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 
-### 6. New content: Russia first
-**Owner's ruling (2026-10-17): go big immediately.** One full new faction - **Russia** - is the top
-priority, ahead of tooling and balance. Its design is written ([ROADMAP.md](ROADMAP.md) section 4);
-read upstream's `feature/turkey-faction` branch before starting, because it is a working reference for
-adding a side.
-*First step:* the "skeleton" stage - template, command sets, six units on reused art, powers simplified,
-playable in skirmish - so the real cost is known from something running.
+### 6. Russia: the skeleton plays; finish the faction
+**Owner's ruling (2026-10-17): go big immediately.** The skeleton stage is **done** (2026-10-21): a
+fourth side with a Command Bunker, eight buildings, eight units on reused art, its own command sets,
+AI build list and skirmish scripts. Twelve headless matches on generated 96-160 cell maps, brutal, all
+decided; Russia won ten, built its full base and its economy, and trained infantry and vehicles. What it
+took, and the general AI defects it found, are in
+[russia-build-plan.md](docs/factions/russia-build-plan.md).
+*First step now:* **balance** - 10 of 12 is a first number, not a finished one. Then the powers and the
+upgrade tier (Igla, ERA/Shtora, artillery school), the Mobilized-to-Guards conversion, and the
+silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
 
 The **three generals** (USA "Vanguard" first) move to *Later*: the owner would rather build the real
 faction directly than rehearse on a general.

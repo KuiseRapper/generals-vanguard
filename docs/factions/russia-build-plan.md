@@ -104,3 +104,71 @@ spike, then one silhouette art pass (our textures), then balance.
 0 --extra "-side 0 FactionRussia -side 1 FactionAmerica"` and the swapped ordering. Report decided,
 idle/crash, average length and the per-seat table; a faction that starts but cannot be played by the
 AI is not done.
+
+## Result, 2026-10-21: the skeleton plays
+
+The fourth side **builds, earns, trains the roster and attacks**, and a headless batch decides every
+match. Two batches of six, generated maps at 96, 128 and 160 cells, brutal, 60,000-frame cap:
+
+| Ordering | Decided | Russia wins | Avg length | Russia peak / kills / lost / spent | America peak / kills / lost / spent |
+|---|---|---|---|---|---|
+| Russia slot 0 | 6/6 | 6 | 24,797 (6.9 min) | 52.2 / 59.8 / 32.7 / 12,417 | 27.5 / 31.3 / 59.8 / 13,417 |
+| Russia slot 1 | 6/6 | 4 | 30,922 (8.6 min) | 52.3 / 51.3 / 69.5 / 12,967 | 32.3 / 68.5 / 51.8 / 24,917 |
+
+**The first twelve matches gave Russia ten wins.** Two later clean-build batches (eight and sixteen
+matches, 96-160 cells, both orders) decided 22 of 24 and Russia took 18. Across all **36 measured
+matches, 34 were decided and Russia won 28**; the two frame-limited ones were 160-cell games. That is a
+first number, not a verdict: it says the faction is playable and that the skeleton sits above the shipped
+sides on these maps, so **balance is now the open work**, not function. The full base goes up on the 96-cell seed-0 match at frames 3,939 (Supply Centre), 5,986
+(Mobilization Plant), 7,099 (Tank Works) and 9,579 (Fire Direction Center); the first supply trucks
+are bought at 3,964, T-72Bs and Tunguskas follow, and the match is decided at 13,927. No match crashed,
+hung or ran to the cap.
+
+### What it took (and the general defects it exposed)
+
+The skeleton was not a data-only job. Each of these was measured, and each fix is general - it is not a
+Russia special case:
+
+1. **Patch blocks appended prerequisites instead of replacing them.** `ThingTemplate::parsePrerequisites`
+   cleared its list for `INI_LOAD_CREATE_OVERRIDES` only, so `Object RussiaX` under `INI_LOAD_MULTIFILE`
+   kept the source's China prerequisite beside the Russian one. No Russian building that needed another
+   Russian building could ever be built (`Mobilization Plant` reported `NO_PREREQ` for 60,000 frames
+   while 6,300 sat in the bank). Fixed in `ThingTemplate.cpp`; the base tree loads objects with
+   `INI_LOAD_OVERWRITE`, so no shipped object changes.
+2. **Russia had no gatherer.** Supply centres do not earn by themselves; the AI builds any template with
+   `KINDOF_HARVESTER`. Added `RussiaSupplyTruck` (reskin of `ChinaVehicleSupplyTruck`), its button and
+   its set on the supply centre. Income starts the frame the first truck exists.
+3. **The AI placed supply centres inside the engine's supply build border.** `buildBySupplies` offset a
+   cash generator by a fixed three pathfind cells; `isLocationLegalToBuild` refuses a supply centre
+   within `SupplyBuildBorder` of the source, so the dozer gave up every spot and never tried another
+   dock. The offset now clears the border (`AIPlayer.cpp`).
+4. **An inert Spy Satellite ping read as an enemy.** `isLocationSafe` counted any enemy object inside
+   `SupplyCenterSafeRadius`; the ping is `NO_COLLIDE IMMOBILE UNATTACKABLE INERT` and sits still for the
+   match. It is filtered out now. This is the same class of defect the seven expansion attempts in
+   [ai-expansion-build-timer.md](../ai/ai-expansion-build-timer.md) were circling.
+5. **A supply centre in the home base was called "unsafe".** On a 96-cell map the enemy's own power
+   plant stands inside the 300-unit safe radius, so every candidate was refused. Home is not an
+   expansion: a cash generator inside the base radius skips the enemy-proximity check.
+6. **Two reskins of one model were indistinguishable to a command set.** `isEquivalentTo` calls two
+   reskins of `ChinaWarFactory` equivalent; `isPossibleToMakeUnit` kept the *last* matching button, so
+   asking whether the dozer could build a Mobilization Plant answered for the Tank Works (which needs
+   it) and Russia never built a vehicle. An exact template match now wins over an equivalent one, and
+   the Tank Works reskins `AmericaWarFactory` as the plan always said, so the two buildings no longer
+   collide.
+7. **The skirmish script copy did not rename with its own references.** Scripts are found by name
+   across the whole file, so renaming a Russia script in `SkirmishScripts.scb` without moving its
+   `ENABLE_SCRIPT`, `CALL_SUBROUTINE` and team-hook references pointed Russia at the China side's
+   scripts. `Tools/ScbTool/russia.py` now remaps all of them, and is idempotent so the file can be
+   regenerated in place.
+
+### Still open
+
+- **Balance.** 10/12 needs a wider batch and a faction-vs-faction table before any stat is called final.
+- **Windowed play-test.** The bar, load-screen portrait and Eva fall back to China's; headless draws
+  none of them, so the owner's Windows (or windowed macOS) check is still the one that proves them.
+- **Powers, upgrades and the second roster tier.** Only the capture-building upgrade is wired; the
+  Igla, ERA/Shtora, artillery school and the six general's powers are still design.
+- **Art.** Every unit and building is borrowed geometry. The silhouette pass is Stage 3.
+- **Two unit types are not yet fielded in a short match.** T-90, 2S19 and BMP-3 appear in the harder
+  teams but a 3-9 minute match ends before those waves; longer batches must confirm their factories and
+  prerequisites.
