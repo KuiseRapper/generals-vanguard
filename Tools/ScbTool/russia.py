@@ -46,6 +46,7 @@ OBJECT_TYPE = 15
 TEAM = 3
 SCRIPT = 2
 SCRIPT_SUBROUTINE = 13
+UPGRADE = 32
 
 # The skeleton roster in RussiaReforged.ini.  Everything else China names has no Russia counterpart
 # yet and is dropped (build actions) or emptied (team slots).
@@ -67,8 +68,19 @@ UNITS = {
 }
 
 # Actions that name an upgrade or a building Russia does not have yet; dropped whole, because a
-# build request for a China object is exactly the failure this patch removes.
-DROP_ACTIONS = {"AI_PLAYER_BUILD_UPGRADE"}
+# build request for a China object is exactly the failure this patch removes.  An upgrade the
+# faction does have is mapped below instead of dropped.
+DROP_ACTIONS = set()
+
+# China's AI buys its upgrades from script; Russia has its own first tier.  Anything not named here
+# (the air upgrades above all - Russia has no aircraft) is dropped.
+UPGRADES = {
+    "Upgrade_InfantryCaptureBuilding": "Upgrade_InfantryCaptureBuilding",
+    "Upgrade_Nationalism": "Upgrade_RussiaIgla",
+    "Upgrade_ChinaNeutronShells": "Upgrade_RussiaIgla",
+    "Upgrade_ChinaUraniumShells": "Upgrade_RussiaERAShtora",
+    "Upgrade_ChinaNuclearTanks": "Upgrade_RussiaERAShtora",
+}
 
 # The team record fields that hold a script name rather than a unit or a number.
 TEAM_SCRIPT_FIELDS = {
@@ -223,6 +235,13 @@ def rewrite_scripts(script_list, renamed_teams, renamed_scripts):
                         doomed = True
                     elif parameter[0] == TEAM and parameter[3] in renamed_teams:
                         parameter[3] = renamed_teams[parameter[3]]
+                    elif parameter[0] == UPGRADE and action == "AI_PLAYER_BUILD_UPGRADE":
+                        mapped = UPGRADES.get(parameter[3])
+                        if mapped is None:
+                            doomed = True
+                        else:
+                            parameter[3] = mapped
+                            rewritten += 1
                 if doomed:
                     script.children.remove(child)
                     dropped += 1
