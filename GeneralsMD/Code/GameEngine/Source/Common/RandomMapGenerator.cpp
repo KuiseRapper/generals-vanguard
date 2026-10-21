@@ -6718,6 +6718,7 @@ static const char *theSkirmishSides[][2] =
 	{ "SkirmishAmerica",					"FactionAmerica" },
 	{ "SkirmishChina",						"FactionChina" },
 	{ "SkirmishGLA",						"FactionGLA" },
+	{ "SkirmishRussia",						"FactionRussia" },
 	{ "SkirmishAmericaAirForceGeneral",		"FactionAmericaAirForceGeneral" },
 	{ "SkirmishAmericaLaserGeneral",		"FactionAmericaLaserGeneral" },
 	{ "SkirmishAmericaSuperWeaponGeneral",	"FactionAmericaSuperWeaponGeneral" },

@@ -8632,9 +8632,9 @@ TEST(a_generated_map_reads_back_through_the_engines_own_chunk_reader)
 	CHECK_EQ( theRMGParse.m_weather, 0 );
 	CHECK_EQ( theRMGParse.m_compression, 0 );
 
-	// Neutral plus the civilian and skirmish sides, one default team each.
-	CHECK_EQ( theRMGParse.m_numSides, 14 );
-	CHECK_EQ( theRMGParse.m_numTeams, 14 );
+	// Neutral plus the civilian and skirmish sides (Russia included), one default team each.
+	CHECK_EQ( theRMGParse.m_numSides, 15 );
+	CHECK_EQ( theRMGParse.m_numTeams, 15 );
 
 	// One start waypoint per player, and the map is dressed rather than bare.
 	CHECK_EQ( (Int)theRMGParse.m_waypointNames.size(), 4 );
@@ -10266,14 +10266,14 @@ TEST(the_generator_still_turns_a_seed_into_the_bytes_it_used_to)
 {
 	CHECK( bootOnce() );
 
-	CHECK_EQ( RANDOM_MAP_GENERATOR_VERSION, 14 );
+	CHECK_EQ( RANDOM_MAP_GENERATOR_VERSION, 15 );
 
 	struct RMGFingerprint { Int m_seed, m_players, m_cells; UnsignedInt m_crc; };
 	static const RMGFingerprint theFingerprints[] =
 	{
-		{ 0, 2, 64, 0x47855C63 },
-		{ 12345, 4, 96, 0x2863C7C9 },
-		{ 7, 8, 128, 0x297288D3 },
+		{ 0, 2, 64, 0x766F50D6 },
+		{ 12345, 4, 96, 0x881FED07 },
+		{ 7, 8, 128, 0xF695AF3A },
 	};
 	const Int numFingerprints = sizeof(theFingerprints) / sizeof(theFingerprints[0]);
 
