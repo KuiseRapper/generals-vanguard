@@ -1286,6 +1286,18 @@ END
 OBJECT:RussiaMi24
 "Mi-24 Hind"
 END
+OBJECT:RussiaTrenchLine
+"Trench Line"
+END
+OBJECT:RussiaStrongpoint
+"Strongpoint"
+END
+OBJECT:RussiaKornetTeam
+"Kornet Team"
+END
+OBJECT:RussiaSu25
+"Su-25 Frogfoot"
+END
 
 CONTROLBAR:ConstructRussiaCommandBunker
 "&Command Bunker"
@@ -1419,6 +1431,30 @@ END
 CONTROLBAR:ToolTipRussiaMi24
 "Attack helicopter. Carries troops and a heavy cannon; the air arm's ground punch."
 END
+CONTROLBAR:ConstructRussiaTrenchLine
+"&Trench Line"
+END
+CONTROLBAR:ToolTipRussiaTrenchLine
+"Cheap forward howitzer position. Garrison it with infantry and it holds a flank."
+END
+CONTROLBAR:ConstructRussiaStrongpoint
+"&Strongpoint"
+END
+CONTROLBAR:ToolTipRussiaStrongpoint
+"A garrisoned bunker. Cheap, hard to dig out, and no threat on its own."
+END
+CONTROLBAR:ConstructRussiaKornetTeam
+"&Kornet Team"
+END
+CONTROLBAR:ToolTipRussiaKornetTeam
+"Anti-tank guided-missile infantry. The answer to heavy armour in the open."
+END
+CONTROLBAR:ConstructRussiaSu25
+"&Su-25 Frogfoot"
+END
+CONTROLBAR:ToolTipRussiaSu25
+"Armoured ground-attack aircraft. Slow, short-ranged, and built to survive one pass."
+END
 
 CONTROLBAR:UpgradeRussiaCaptureBuilding
 "&Capture Building"
@@ -1444,4 +1480,39 @@ CONTROLBAR:UpgradeRussiaERAShtora
 END
 CONTROLBAR:ToolTipRussiaERAShtora
 "Explosive reactive armour and a soft-kill system for every T-90."
+END
+
+UPGRADE:RussiaInfantryTraining
+"Infantry Training"
+END
+UPGRADE:RussiaAircraftArmor
+"Aircraft Armour"
+END
+UPGRADE:RussiaArtilleryTraining
+"Artillery Training"
+END
+CONTROLBAR:UpgradeRussiaInfantryTraining
+"&Infantry Training"
+END
+CONTROLBAR:ToolTipRussiaInfantryTraining
+"Motostrelki and Spetsnaz take more punishment before they go down."
+END
+CONTROLBAR:UpgradeRussiaAircraftArmor
+"&Aircraft Armour"
+END
+CONTROLBAR:ToolTipRussiaAircraftArmor
+"More armour on every MiG-25 and Mi-24."
+END
+CONTROLBAR:UpgradeRussiaArtilleryTraining
+"&Artillery Training"
+END
+CONTROLBAR:ToolTipRussiaArtilleryTraining
+"The 2S19 gets a conventional heavy shell, longer range and a faster reload."
+END
+
+CONTROLBAR:RussiaArtilleryPreparation
+"&Artillery Preparation"
+END
+CONTROLBAR:ToolTipRussiaArtilleryPreparation
+"Call a scheduled artillery barrage on a point. Three waves once the science is fully bought."
 END

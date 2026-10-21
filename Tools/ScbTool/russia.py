@@ -85,9 +85,11 @@ DROP_ACTIONS = set()
 UPGRADES = {
     "Upgrade_InfantryCaptureBuilding": "Upgrade_InfantryCaptureBuilding",
     "Upgrade_Nationalism": "Upgrade_RussiaIgla",
-    "Upgrade_ChinaNeutronShells": "Upgrade_RussiaIgla",
+    "Upgrade_ChinaNeutronShells": "Upgrade_RussiaArtilleryTraining",
     "Upgrade_ChinaUraniumShells": "Upgrade_RussiaERAShtora",
     "Upgrade_ChinaNuclearTanks": "Upgrade_RussiaERAShtora",
+    "Upgrade_ChinaSubliminalMessaging": "Upgrade_RussiaInfantryTraining",
+    "Upgrade_ChinaAircraftArmor": "Upgrade_RussiaAircraftArmor",
 }
 
 # China's superweapon power becomes Russia's: the Missile Brigade reuses the neutron missile until
