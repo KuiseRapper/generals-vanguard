@@ -1170,6 +1170,13 @@ void ControlBarSchemeManager::setControlBarSchemeByPlayerTemplate( const PlayerT
 	// if we don't have a side, set it to Observer shell
 	if(side.isEmpty())
 		side.set("Observer");
+	/* a faction with no bar of its own (the fork's own fourth sides) wears the bar of the original
+		 faction it is built on - Russia on China */
+	{
+		const AsciiString oldSide = ThePlayerTemplateStore->getOldFactionSide(pt->getBaseSide());
+		if(!oldSide.isEmpty() && findSchemeForSide(side, TRUE) == NULL)
+			side = oldSide;
+	}
 	// picked again every time, even for the side on screen: a new resolution can want a different
 	// scheme for it (findSchemeForSide), and the multiplier below is the screen's
 	// the squished bar keeps EA's pick: the side's Small scheme, and none ships, so "Default"
@@ -1206,6 +1213,13 @@ void ControlBarSchemeManager::setControlBarSchemeByPlayer(Player *p)
 	// if we don't have a side, set it to Observer shell
 	if(side.isEmpty())
 		side.set("Observer");
+	/* a faction with no bar of its own (the fork's own fourth sides) wears the bar of the original
+		 faction it is built on - Russia on China */
+	{
+		const AsciiString oldSide = ThePlayerTemplateStore->getOldFactionSide(p->getBaseSide());
+		if(!oldSide.isEmpty() && findSchemeForSide(side, TRUE) == NULL)
+			side = oldSide;
+	}
 	// picked again every time, even for the side on screen: a new resolution can want a different
 	// scheme for it (findSchemeForSide), and the multiplier below is the screen's
 	// the neutral and civilian players are of no country, and wear America's

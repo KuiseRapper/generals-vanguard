@@ -1369,13 +1369,14 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 	}
 	else 
 	{
-		// the main original factions don't have associated generals
+		// the main original factions don't have associated generals; a side built on one of them (the
+		// fork's own fourth sides) wears the portrait of the faction it is built on
 		AsciiString imageName;
-		if (pt->getName() == "FactionAmerica")
+		if (pt->getBaseSide() == "USA")
 			portrait = TheMappedImageCollection->findImageByName("SAFactionLogoLg_US");
-		else if (pt->getName() == "FactionGLA")
+		else if (pt->getBaseSide() == "GLA")
 			portrait = TheMappedImageCollection->findImageByName("SUFactionLogoLg_GLA");
-		else if (pt->getName() == "FactionChina")
+		else if (pt->getBaseSide() == "China")
 			portrait = TheMappedImageCollection->findImageByName("SNFactionLogoLg_China");
 		else
 			DEBUG_ASSERTCRASH(NULL, ("Unexpected player template"));

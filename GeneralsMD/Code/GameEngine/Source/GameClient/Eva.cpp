@@ -31,6 +31,7 @@
 
 #include "Common/Player.h"
 #include "Common/PlayerList.h"
+#include "Common/PlayerTemplate.h"
 #include "GameLogic/GameLogic.h"
 
 #ifdef _INTERNAL
@@ -529,22 +530,25 @@ void Eva::processPlayingMessages(UnsignedInt currentFrame)
 		return;
 	}
 
-	// We've got a winner!
-	AsciiString side = ThePlayerList->getLocalPlayer()->getSide();
-	Int numSides = storedIt->m_evaInfo->m_evaSideSounds.size();
+	// We've got a winner!  A side Eva.ini has no line for (the fork's own fourth sides) speaks
+	// with the original faction it is built on.
+	const Player *localPlayer = ThePlayerList->getLocalPlayer();
+	const std::vector<EvaSideSounds> &sideSounds = storedIt->m_evaInfo->m_evaSideSounds;
+	Int found = -1;
+	for (Int i = 0; i < (Int)sideSounds.size(); ++i)
+		if (localPlayer->getSide().compareNoCase(sideSounds[i].m_side) == 0) { found = i; break; }
+	if (found < 0) {
+		const AsciiString oldSide = ThePlayerTemplateStore->getOldFactionSide(localPlayer->getBaseSide());
+		for (Int i = 0; i < (Int)sideSounds.size(); ++i)
+			if (!oldSide.isEmpty() && oldSide.compareNoCase(sideSounds[i].m_side) == 0) { found = i; break; }
+	}
 
   // clear it. If we can't find the side we want, don't play anything
   m_evaSpeech.setEventName(AsciiString::TheEmptyString);
 
-	for (Int i = 0; i < numSides; ++i) {
-		if (side.compareNoCase(storedIt->m_evaInfo->m_evaSideSounds[i].m_side) == 0) {
-			// Its this one.
-			if (storedIt->m_evaInfo->m_evaSideSounds[i].m_soundNames.size() > 0) {
-				Int soundToPlay = GameClientRandomValue(0, storedIt->m_evaInfo->m_evaSideSounds[i].m_soundNames.size() - 1);
-				m_evaSpeech.setEventName(storedIt->m_evaInfo->m_evaSideSounds[i].m_soundNames[soundToPlay]);
-			}
-      break;
-		}
+	if (found >= 0 && sideSounds[found].m_soundNames.size() > 0) {
+		Int soundToPlay = GameClientRandomValue(0, sideSounds[found].m_soundNames.size() - 1);
+		m_evaSpeech.setEventName(sideSounds[found].m_soundNames[soundToPlay]);
 	}
 
 	// Update the entry
