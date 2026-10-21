@@ -1661,6 +1661,18 @@ Bool AIPlayer::isLocationSafe(const Coord3D *pos, const ThingTemplate *tthing )
 {
 	if (tthing == NULL) return 0;
 
+	/* Home is not an expansion.  A supply centre in your own base is where the economy starts, not
+		 a forward position to be refused because the enemy is near - and on a 96-cell generated map
+		 the enemy's own power plant is 404 units from the base centre, inside the 300-unit safe
+		 radius, so every candidate for the centre was refused and Russia never earned.  The check
+		 still applies to a centre placed away from home, which is what it is for. */
+	if (m_baseCenterSet && tthing->isKindOf(KINDOF_CASH_GENERATOR)) {
+		Real dx = pos->x - m_baseCenter.x;
+		Real dy = pos->y - m_baseCenter.y;
+		if (dx*dx + dy*dy <= m_baseRadius*m_baseRadius)
+			return true;
+	}
+
 	// See if we have enemies.
 	Real radius = TheAI->getAiData()->m_supplyCenterSafeRadius;
 	radius += tthing->getTemplateGeometryInfo().getBoundingCircleRadius();
@@ -1683,6 +1695,12 @@ Bool AIPlayer::isLocationSafe(const Coord3D *pos, const ThingTemplate *tthing )
 
 	PartitionFilterRejectByKindOf	filterDozer(MAKE_KINDOF_MASK(KINDOF_DOZER), KINDOFMASK_NONE);
 
+	// An inert object is not a threat and cannot be shot: the Spy Satellite ping (NO_COLLIDE IMMOBILE
+	// UNATTACKABLE INERT) sits where the enemy put it for the rest of the match, and a Hard Russia
+	// read it as an enemy beside its own base and refused to build its supply centre for 60,000
+	// frames while the ping never moved.  A base site is safe from things that cannot fight.
+	PartitionFilterRejectByKindOf	filterInert(MAKE_KINDOF_MASK(KINDOF_INERT), KINDOFMASK_NONE);
+
 	PartitionFilter *filters[16];
 	Int numFilters = 0;
 
@@ -1693,6 +1711,7 @@ Bool AIPlayer::isLocationSafe(const Coord3D *pos, const ThingTemplate *tthing )
 	filters[numFilters++] = &filterInsignificant;
 	filters[numFilters++] = &filterHarvesters;
 	filters[numFilters++] = &filterDozer;
+	filters[numFilters++] = &filterInert;
 	filters[numFilters] = NULL;
 
 	Object *enemy = ThePartitionManager->getClosestObject(  pos, radius, FROM_BOUNDINGSPHERE_2D, filters );
@@ -3462,7 +3481,17 @@ void AIPlayer::buildBySupplies(Int minimumCash, const AsciiString& thingName, Bo
 		offset.y = location.y - m_baseCenter.y;
 		offset.normalize();
 		Real radius = 3*PATHFIND_CELL_SIZE_F;
-		if (!tTemplate->isKindOf(KINDOF_CASH_GENERATOR)) {
+		if (tTemplate->isKindOf(KINDOF_CASH_GENERATOR)) {
+			/* A supply centre may not stand inside SupplyBuildBorder of the supply source it serves
+				 (BuildAssistant::isLocationLegalToBuild).  The old fixed offset - three pathfind cells
+				 from the dock's centre - put the centre's own footprint inside that border, so the
+				 dozer refused every spot buildBySupplies chose: measured on a generated 96-cell map,
+				 Russia asked for a centre twice and gave the spot up twice, and never earned.  Start
+				 the search outside the border instead, on the side facing home. */
+			radius = bestSupplyWarehouse->getGeometryInfo().getBoundingCircleRadius()
+				+ TheGlobalData->m_SupplyBuildBorder*2
+				+ tTemplate->getTemplateGeometryInfo().getBoundingCircleRadius();
+		} else {
 			// It's probably a defensive structure - build towards the enemy.
 			Region2D bounds;
 			Player *skirmishEnemy = TheScriptEngine->getSkirmishEnemyPlayer();	// can be NULL
