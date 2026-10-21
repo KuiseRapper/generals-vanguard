@@ -1277,6 +1277,15 @@ END
 OBJECT:RussiaMissileBrigade
 "Missile Brigade"
 END
+OBJECT:RussiaAirBase
+"Regimental Air Base"
+END
+OBJECT:RussiaMiG25
+"MiG-25"
+END
+OBJECT:RussiaMi24
+"Mi-24 Hind"
+END
 
 CONTROLBAR:ConstructRussiaCommandBunker
 "&Command Bunker"
@@ -1391,6 +1400,24 @@ CONTROLBAR:RussiaMissileStrike
 END
 CONTROLBAR:ToolTipRussiaMissileStrike
 "Fire the brigade's missile at a point on the map."
+END
+CONTROLBAR:ConstructRussiaAirBase
+"&Regimental Air Base"
+END
+CONTROLBAR:ToolTipRussiaAirBase
+"Aircraft. Builds the MiG-25 and the Mi-24."
+END
+CONTROLBAR:ConstructRussiaMiG25
+"&MiG-25"
+END
+CONTROLBAR:ToolTipRussiaMiG25
+"High-speed interceptor with air-to-air missiles. The air arm's answer to enemy aircraft."
+END
+CONTROLBAR:ConstructRussiaMi24
+"&Mi-24 Hind"
+END
+CONTROLBAR:ToolTipRussiaMi24
+"Attack helicopter. Carries troops and a heavy cannon; the air arm's ground punch."
 END
 
 CONTROLBAR:UpgradeRussiaCaptureBuilding

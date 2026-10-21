@@ -70,6 +70,9 @@ UNITS = {
     "ChinaPropagandaCenter": "RussiaFireDirectionCenter",
     "ChinaGattlingCannon": "RussiaSAM",
     "ChinaNuclearMissileLauncher": "RussiaMissileBrigade",
+    "ChinaAirfield": "RussiaAirBase",
+    "ChinaJetMIG": "RussiaMiG25",
+    "ChinaVehicleHelix": "RussiaMi24",
 }
 
 # Actions that name an upgrade or a building Russia does not have yet; dropped whole, because a
