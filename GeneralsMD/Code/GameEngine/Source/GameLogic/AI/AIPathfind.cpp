@@ -8435,18 +8435,18 @@ Path *Pathfinder::internalFindPath( Object *obj, const LocomotorSet& locomotorSe
 		 request could spend the whole frame: 140513 cells / 285 ms measured, against a budget of
 		 5000.  The cap is a fixed count, not a timer, so every machine and every replay stops the
 		 search at the same cell. */
-	/* Lowering this was tried twice, to bound the tail rather than the throughput: a search that
-		 hits the cap hands back the partial route it has and the unit asks again later, so most
-		 searches never notice. Both times it pulls in two directions and the movement one loses.
+	/* Lowering this was tried twice, to bound the tail rather than the throughput, and both times it
+		 pulls in two directions and the movement one loses.
 
 		 At 5000: 4v4 p99 7.08ms to 6.67 and stuck 149 to 87, but four players go blocked unit-frames
 		 7,673 to 9,595, stuck 9.8 to 86.8, and a frame over 16.7ms where there had been none. At
 		 10000, with the request cap below already in place: the worst frame of four matches 16.0ms
 		 to 11.4, and blocked 7,191 to 9,908 with the mean and p99 both worse.
 
-		 A truncated route is a unit walking at a wall it cannot see round, and it pays for that with
-		 another search a second later. Three separate attempts to buy the tail with search capacity
-		 (this, twice, and the queue's cell budget) all bought it with movement instead. */
+		 A capped search has not reached its goal, so it has found no path: it says so and returns
+		 nothing.  It used to hand back the best cell it had seen, which is a route that stops short -
+		 a unit walking at a wall it cannot see round - and it paid for that with another search a
+		 second later. */
 	enum { MAX_INTERNAL_CELL_COUNT = 20000 };
 	PathfindCell *closestCell = NULL;
 	Real closestDistanceSqr = FLT_MAX;
@@ -8537,28 +8537,20 @@ Path *Pathfinder::internalFindPath( Object *obj, const LocomotorSet& locomotorSe
 
 	}
 
-	/* the cap stopped the search - return the best partial route rather than nothing, so the unit
-		 closes on the goal and the next request picks up from there.  The partial path is built the
-		 same way a complete one is, so the caller cannot tell the difference and nothing downstream
-		 needs to learn about capped searches. */
-	if (hitCellCap && closestCell && closestCell != parentCell) {
-		Path *partial = buildActualPath( obj, locomotorSet.getValidSurfaces(), from, closestCell, centerInCell, false );
-		if (partial) {
-			if (fpFreq64 > 0) {
-				Int64 fpTCap = 0;
-				fpTCap = Clock_Ticks();
-				DEBUG_LOG(("Pathfind CAPPED frame %d unit '%s' [%s]: %d cells, %.1f ms, partial to %d cells short of goal, (%.0f,%.0f)->(%.0f,%.0f)\n",
-									 TheGameLogic->getFrame(), obj ? obj->getTemplate()->getName().str() : "?",
-									 m_lastSearchRestricted ? "corridor" : "openmap",
-									 cellCount, 1000.0f * (Real)(fpTCap - fpT0) / (Real)fpFreq64,
-									 (Int)sqrt(closestDistanceSqr), from->x, from->y, rawTo->x, rawTo->y));
-			}
-			m_isTunneling = false;
-			cleanOpenAndClosedLists();
-			parentCell->releaseInfo();
-			goalCell->releaseInfo();
-			return partial;
-		}
+	/* The cap stopped the search before the goal was reached, so there is no path to hand back.
+		 Logged on its own line because a capped search is otherwise indistinguishable from a dry
+		 map, then the failure path below releases the cells exactly as any other failed search
+		 does.  Returning the best cell found was a truncated route presented as success; the unit
+		 followed it to the wall it could not pass and asked again, which is what Twilight Flame's
+		 blocked unit-frames were made of. */
+	if (hitCellCap) {
+		Int64 fpTCap = 0;
+		fpTCap = Clock_Ticks();
+		DEBUG_LOG(("Pathfind CAPPED frame %d unit '%s' [%s]: %d cells, %.1f ms, no path, best cell %d cells from the goal, (%.0f,%.0f)->(%.0f,%.0f)\n",
+							 TheGameLogic->getFrame(), obj ? obj->getTemplate()->getName().str() : "?",
+							 m_lastSearchRestricted ? "corridor" : "openmap",
+							 cellCount, (fpFreq64 > 0) ? 1000.0f * (Real)(fpTCap - fpT0) / (Real)fpFreq64 : 0.0f,
+							 closestCell ? (Int)sqrt(closestDistanceSqr) : -1, from->x, from->y, rawTo->x, rawTo->y));
 	}
 
 	// failure - goal cannot be reached
