@@ -700,6 +700,23 @@ SidesInfo *SidesList::findSkirmishSideFor(const PlayerTemplate *pt, TeamsInfoRec
 				*teams = &m_skirmishTeamrec;
 		}
 	}
+	/* A side the skirmish scripts were never written for (the fork's own fourth sides) plays the
+		 scripts and teams of the original faction it is built on: Russia on China.  Only asked when
+		 nothing matched by side, so a side with its own scripts is untouched. */
+	if (best == NULL && !pt->getBaseSide().isEmpty())
+	{
+		const AsciiString oldSide = ThePlayerTemplateStore->getOldFactionSide(pt->getBaseSide());
+		for (Int i = 0; i < m_numSkirmishSides && best == NULL; ++i)
+		{
+			const PlayerTemplate *spt = ThePlayerTemplateStore->findPlayerTemplate(NAMEKEY(m_skirmishSides[i].getDict()->getAsciiString(TheKey_playerFaction)));
+			if (spt && !oldSide.isEmpty() && spt->getSide() == oldSide && spt->getModIndex() == -1)
+			{
+				best = &m_skirmishSides[i];
+				if (teams)
+					*teams = &m_skirmishTeamrec;
+			}
+		}
+	}
 	return best;
 }
 

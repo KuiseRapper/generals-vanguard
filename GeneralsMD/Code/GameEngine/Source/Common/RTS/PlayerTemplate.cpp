@@ -15,6 +15,7 @@
 **	You should have received a copy of the GNU General Public License
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+// Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -313,6 +314,21 @@ Int PlayerTemplateStore::getTemplateNumByName(AsciiString name) const
 	}
 	DEBUG_ASSERTCRASH(NULL, ("Template doesn't exist for given name"));
 	return -1;
+}
+
+//-----------------------------------------------------------------------------
+/** The side of the original faction a new side is built on.  The skirmish scripts were written for
+	* the original three sides, so a fourth side plays the scripts and teams of the one it borrows
+	* its bodies from (Russia on China, as the turkey branch did Turkiye on America). */
+AsciiString PlayerTemplateStore::getOldFactionSide(const AsciiString& baseSide) const
+{
+	for (PlayerTemplateVector::const_iterator it = m_playerTemplates.begin(); it != m_playerTemplates.end(); ++it)
+	{
+		// Civilian and Observer are old factions with no BaseSide; a side with none borrows nothing
+		if (it->isOldFaction() && !baseSide.isEmpty() && it->getBaseSide() == baseSide)
+			return it->getSide();
+	}
+	return AsciiString::TheEmptyString;
 }
 
 //-----------------------------------------------------------------------------

@@ -15,6 +15,7 @@
 **	You should have received a copy of the GNU General Public License
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+// Modified 2026 by İlyas Akın for the macOS/Linux port; see NOTICE.md and the git history.
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,6 +226,9 @@ public:
 	const PlayerTemplate* findPlayerTemplate(NameKeyType namekey) const;
 	inline Int getPlayerTemplateCount() const { return m_playerTemplates.size(); }
 	Int getTemplateNumByName(AsciiString name) const;
+	/** The side name of the original faction this base side belongs to (a fourth side built on China
+		* answers "China"), or the empty string when no old faction carries the base side. */
+	AsciiString getOldFactionSide(const AsciiString& baseSide) const;
 	
 	// This function will fill outStringList with all the sides found in all the templates
 	void getAllSideStrings(AsciiStringList *outStringList);	
