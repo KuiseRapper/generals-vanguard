@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -1412,6 +1413,7 @@ Bool BuildAssistant::isPossibleToMakeUnit( Object *builder, const ThingTemplate 
 	//
 	const CommandButton *commandButton;
 	const CommandButton *foundCommand = NULL;
+	const CommandButton *foundEquivalent = NULL;
 	Int i;
 	for( i = 0; i < MAX_COMMANDS_PER_SET; i++ )
 	{
@@ -1420,11 +1422,29 @@ Bool BuildAssistant::isPossibleToMakeUnit( Object *builder, const ThingTemplate 
 		commandButton = commandSet->getCommandButton(i);
 		if( commandButton &&
 				(commandButton->getCommandType() == GUI_COMMAND_UNIT_BUILD ||
-				 commandButton->getCommandType() == GUI_COMMAND_DOZER_CONSTRUCT) &&
-				commandButton->getThingTemplate()->isEquivalentTo(whatToBuild) )
-			foundCommand = commandButton;
+				 commandButton->getCommandType() == GUI_COMMAND_DOZER_CONSTRUCT) )
+		{
+			/* A button that names this exact template wins over one that is merely equivalent.
+				 isEquivalentTo() calls two reskins of one model equivalent, and the skeleton roster
+				 has the Mobilization Plant and the Tank Works both reskinned from ChinaWarFactory:
+				 a dozer's set holds a button for each, the loop used to keep the last one, and so
+				 asking whether the dozer could build a Mobilization Plant answered for the Tank
+				 Works instead - which needs the Mobilization Plant - and Russia never built a
+				 vehicle.  The last equivalent is kept as the fallback, so a button for a build
+				 variation (a general's chassis) still answers as it did. */
+			if (commandButton->getThingTemplate() == whatToBuild)
+			{
+				foundCommand = commandButton;
+				foundEquivalent = NULL;
+				break;
+			}
+			if (commandButton->getThingTemplate()->isEquivalentTo(whatToBuild))
+				foundEquivalent = commandButton;
+		}
 
 	}  // end for i
+	if( foundCommand == NULL )
+		foundCommand = foundEquivalent;
 	if( foundCommand == NULL )
 		return FALSE;
 
