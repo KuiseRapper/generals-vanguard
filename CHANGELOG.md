@@ -3,6 +3,26 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia's breadth pass: units, defences, upgrades and a first power
+
+- **Two more base defences.** Trench Line (800, Fire Base howitzer, anti-ground) and Strongpoint (500,
+  garrisoned Bunker) join the S-300, so the side has an anti-air, an anti-infantry and a garrison
+  position like the shipped factions.
+- **Two more units.** Kornet Team (400, anti-tank guided-missile infantry, reskinned Missile Defender)
+  and Su-25 Frogfoot (1,200, napalm CAS on China's MiG model, which is a ground-attack aircraft in
+  this data).
+- **Three more upgrades**, for six in all: Infantry Training (+100 health to Motostrelki and
+  Spetsnaz), Aircraft Armour (+300 to the MiG-25 and Mi-24) and Artillery Training, which swaps the
+  2S19 onto a new conventional `Russia2S19Gun` (420 range, 8.5 s reload, no radiation field) instead of
+  the Nuke Cannon's nuclear shell.
+- **The first general's power: Artillery Preparation.** The Command Bunker inherits the Command
+  Centre's artillery-barrage module and the player template grants the three barrage sciences, so the
+  power fires with no purchase yet. The AI aimed and fired it in a measured match (frame 19,826). The
+  science tree, powers bar and the other five powers are still to build.
+- Breadth is now twelve buildings, thirteen units, three base defences, six upgrades, three aircraft
+  and one power. Across the eight-match breadth batch six were decided and Russia won five (two
+  128/160-cell games hit the cap); the running total is 88 matches, 78 decided, Russia 69.
+
 ## 2026-10-21 - Russia gets its air arm: MiG-25 and Mi-24
 
 - **Regimental Air Base** (1,500, Fire Direction Center) builds aircraft. It is a reskin of China's
