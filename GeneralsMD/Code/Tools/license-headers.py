@@ -75,6 +75,11 @@ FORK_PORT_HASH = [("#\t" + l) if l else "#" for l in FORK_BODY]
 assert len(FORK_PORT_C) == 17
 
 MOD_MARK = "for the macOS/Linux port"
+# Generals Vanguard: a file EA released and this fork changes is marked as the fork's, the same rule
+# AGENTS.md states.  Either line satisfies the check; a file that needs one gets the fork's, because
+# this tree is the fork.
+FORK_MOD_MARK = "for Generals Vanguard"
+FORK_MOD_LINE = "// Modified 2026 by KuiseRapper " + FORK_MOD_MARK + "; see the git history."
 def mod_line(holder):
 	return "// Modified 2026 by " + holder + " " + MOD_MARK + "; see NOTICE.md and the git history."
 
@@ -214,10 +219,13 @@ def fix_modified(path, data):
 	block = ea_block(lines)
 	if block is None:
 		return None
-	line = mod_line(holder_for(data)).encode("utf-8")
+	line = FORK_MOD_LINE.encode("utf-8")
 	after = block[1] + 1
-	if any(MOD_MARK.encode() in l for l in lines[after:after + 3]):
+	if any(MOD_MARK.encode() in l or FORK_MOD_MARK.encode() in l for l in lines[after:after + 4]):
 		return None
+	# The upstream notices already under the header stay first; ours goes after them.
+	while after < len(lines) and (b"Modified " in lines[after] or b"Portions adapted" in lines[after]):
+		after += 1
 	return join_lines(bom, lines[:after] + [line] + lines[after:], eol, ends)
 
 
