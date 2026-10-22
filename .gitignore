@@ -34,3 +34,11 @@ build64/
 # retail-install fingerprint out, at GameEngine.cpp:1353).  Kept apart from build-mac/ so the
 # shipping Release tree and its measurements stay untouched.
 build-mac-debug/
+
+# .NET launcher build output
+Tools/VanguardLauncher/bin/
+Tools/VanguardLauncher/obj/
+Tools/VanguardLauncher.Core/bin/
+Tools/VanguardLauncher.Core/obj/
+Tools/VanguardLauncher.Tests/bin/
+Tools/VanguardLauncher.Tests/obj/
