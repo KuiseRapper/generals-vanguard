@@ -206,6 +206,16 @@ final class LauncherModel: ObservableObject {
             alert("Zero Hour not found", "Choose the Zero Hour folder that holds INIZH.big.")
             return
         }
+        if containsReforgedGameData(zeroHour) {
+            let box = NSAlert()
+            box.messageText = "Reforged data detected"
+            box.informativeText = "This Zero Hour folder has the Reforged 3.x GameData.ini (UserDataLeafName), "
+                + "which this Vanguard build (upstream 3.0.1) cannot parse. Verify Zero Hour in Steam, "
+                + "or choose a clean 3.0.1 folder.\n\nPlay anyway?"
+            box.addButton(withTitle: "Play anyway")
+            box.addButton(withTitle: "Cancel")
+            if box.runModal() != .alertFirstButtonReturn { return }
+        }
         let executable = gameApp.appendingPathComponent("Contents/MacOS/generals")
         guard FileManager.default.fileExists(atPath: executable.path) else {
             alert("Game missing", "The game executable is missing; run Check for updates.")
@@ -220,6 +230,22 @@ final class LauncherModel: ObservableObject {
             status = "Game started."
         } catch {
             alert("Could not start the game", error.localizedDescription)
+        }
+    }
+
+    private func containsReforgedGameData(_ zero: String) -> Bool {
+        let path = zero + "/INIZH.big"
+        guard let handle = FileHandle(forReadingAtPath: path) else { return false }
+        defer { try? handle.close() }
+        let needle = Data("UserDataLeafName".utf8)
+        var carry = Data()
+        while true {
+            let chunk = handle.readData(ofLength: 1 << 20)
+            if chunk.isEmpty { return false }
+            var combined = carry
+            combined.append(chunk)
+            if combined.range(of: needle) != nil { return true }
+            carry = combined.suffix(needle.count - 1)
         }
     }
 

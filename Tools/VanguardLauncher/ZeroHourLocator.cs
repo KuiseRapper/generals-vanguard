@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -133,6 +134,43 @@ public static class ZeroHourLocator
 
     public static bool HasBase(string directory)
         => File.Exists(Path.Combine(directory, BaseArchive));
+
+    /// <summary>
+    /// Upstream 3.2.0 added UserDataLeafName to GameData.ini.  This fork is based on 3.0.1 and
+    /// stops on that field, so a Zero Hour install carrying the Reforged 3.x data needs to be
+    /// restored to the 3.0.1 files before Vanguard can parse it.  The field is readable in the
+    /// unofficial INIZH.big; a vanilla one does not contain it.
+    /// </summary>
+    public static bool HasReforgedGameData(string? zeroHour)
+    {
+        if (zeroHour is null)
+            return false;
+        var path = Path.Combine(zeroHour, "INIZH.big");
+        if (!File.Exists(path))
+            return false;
+        try
+        {
+            var needle = Encoding.ASCII.GetBytes("UserDataLeafName");
+            using var stream = File.OpenRead(path);
+            var buffer = new byte[(1 << 20) + needle.Length];
+            var carry = 0;
+            while (true)
+            {
+                var read = stream.Read(buffer, carry, buffer.Length - carry);
+                if (read <= 0)
+                    return false;
+                var total = carry + read;
+                if (buffer.AsSpan(0, total).IndexOf(needle) >= 0)
+                    return true;
+                carry = Math.Min(needle.Length - 1, total);
+                Buffer.BlockCopy(buffer, total - carry, buffer, 0, carry);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     private static string? FindBaseSource(string? zeroHour, string? manual)
     {
