@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>VanguardLauncher</AssemblyName>
     <RootNamespace>VanguardLauncher</RootNamespace>
-    <Version>0.5.7</Version>
+    <Version>0.5.8</Version>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
