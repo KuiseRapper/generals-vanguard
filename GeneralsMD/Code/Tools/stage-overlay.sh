@@ -77,6 +77,7 @@ else
 	copy German Data/German
 	copy Install_Final.bmp Install_Final.bmp
 	copy Art/Textures Art/Textures
+	copy Art/W3D Art/W3D
 	copy Window Window
 	if [ -n "$run" ] && [ -d "$run" ]; then
 		for big in "$run"/Reforged*.big; do

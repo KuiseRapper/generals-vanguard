@@ -1768,6 +1768,10 @@ add_custom_command(TARGET generals POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_SOURCE_DIR}/Data/Art/Textures
           ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Art/Textures
+  # The Russia buildings' models (Rise of the Reds art): loose Art/W3D files beat the archives.
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/Data/Art/W3D
+          ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Art/W3D
   # The fork's window layouts, generated from the shipped ones by Tools/*.py and
   # tracked here.  They live outside Data/ in the archive (Window/Menus/...), and
   # a loose file wins over WindowZH.big.  Layouts are not in the multiplayer INI
