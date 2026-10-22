@@ -631,6 +631,8 @@ public sealed class MainForm : Form
                 return (Result: result, Message: message);
             });
             _baseInfo.Text = prep.Message;
+            await Task.Run(() => ZeroHourLocator.PrepareCursorAssets(
+                _gameDir, _settings.ZeroHourPath));
 
             if (_manifest.Launcher is not null
                 && UpdateService.IsNewer(_manifest.Launcher.Version, LauncherVersion))
@@ -710,7 +712,8 @@ public sealed class MainForm : Form
             }
             var duplicate = await Task.Run(() => ZeroHourLocator.MoveDuplicateInizh(zeroHour.Path));
             var archives = await Task.Run(() => ZeroHourLocator.PrepareZeroHourArchives(_gameDir, zeroHour.Path));
-            _baseInfo.Text = archives.Message;
+            var pointers = await Task.Run(() => ZeroHourLocator.PrepareCursorAssets(_gameDir, zeroHour.Path));
+            _baseInfo.Text = archives.Message + " " + pointers.Message;
             var gameWeather = await Task.Run(() => ZeroHourLocator.HasInizhFile(_gameDir, "Weather.ini"));
             if (!gameWeather)
             {

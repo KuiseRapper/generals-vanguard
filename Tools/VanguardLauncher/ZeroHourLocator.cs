@@ -175,6 +175,50 @@ public static class ZeroHourLocator
         return (linked, copied, message);
     }
 
+    /// <summary>
+    /// The game's pointers are the retail .ANI files under Data\Cursors, loaded by Win32Mouse with
+    /// LoadCursorFromFile from the game folder.  A portable install ships none of them (they are EA's),
+    /// so the launcher links the player's own copies in beside the rest of the game data.  Without this
+    /// there is no pointer in the menu or in the match: the buttons cannot be clicked.
+    /// </summary>
+    public static (int Linked, int Copied, string Message) PrepareCursorAssets(
+        string gameDirectory, string? zeroHour)
+    {
+        if (zeroHour is null || !Directory.Exists(zeroHour))
+            return (0, 0, "Zero Hour folder not found, so its pointers were not linked.");
+        var source = Path.Combine(zeroHour, "Data", "Cursors");
+        if (!Directory.Exists(source))
+            return (0, 0, "The Zero Hour install has no Data\\Cursors folder, so its pointers were not linked.");
+        var target = Path.Combine(gameDirectory, "Data", "Cursors");
+        Directory.CreateDirectory(target);
+        var linked = 0;
+        var copied = 0;
+        foreach (var file in Directory.GetFiles(source))
+        {
+            var destination = Path.Combine(target, Path.GetFileName(file));
+            if (File.Exists(destination))
+                continue;
+            if (TryHardLink(destination, file))
+            {
+                linked++;
+                continue;
+            }
+            try
+            {
+                File.Copy(file, destination, false);
+                copied++;
+            }
+            catch
+            {
+                // A missing pointer falls back to the system arrow in Win32Mouse.
+            }
+        }
+        var message = linked + copied == 0
+            ? "Zero Hour pointers already linked."
+            : $"Zero Hour pointers: {linked} linked, {copied} copied.";
+        return (linked, copied, message);
+    }
+
     private static bool TryHardLink(string link, string target)
     {
         try
