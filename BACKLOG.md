@@ -24,19 +24,15 @@ on top.
 ## Now
 
 ### Russia's art from Rise of the Reds and ShockWave
-Russia still builds China/USA models. The owner's direction (2026-10-23) is to adapt the community
-mods instead of authoring a fourth set: **Rise of the Reds** already has a Russian Federation and an
-ECA faction with models, textures, cameos, icons and sounds; **ShockWave** has ~100 units and
-structures whose look can be borrowed for the less Russian slots. Take a small, credited set first:
-the Command Bunker, power plant, barracks, war factory, air field and the T-90/BMP-3/MiG-25/Mi-24,
-with their cameos, then replace `ObjectReskin`/`ButtonImage` in one commit per asset group.
-*First step:* unpack a mod archive (`bigfile.py` reads its `.big`) into `docs/modding/rotR-*`, list
-what each model's INI calls, and pick the 10 assets. Blocked here on 2026-10-23: ModDB's download
-mirror sits behind a Cloudflare challenge this machine cannot pass; the archives have to be fetched
-on the owner's machine (or a non-challenged mirror found).
-*Credit:* SWR Productions (Rise of the Reds) and the ShockWave team, in `NOTICE.md` and the release
-notes, exactly as the GPL/EA terms require.
-
+**Buildings are done** (0.5.7/0.5.8): nine Russian buildings and their cameos/portraits come from
+Rise of the Reds 1.8; extraction and wiring are in [docs/modding/rotr-1.8.md](docs/modding/rotr-1.8.md).
+The same recipe covers the units: RotR's Russia objects are under
+`Data\INI\Object\Russia\{Infantry,Vehicles,Aircraft,Defences}\*.ini` in `!BetaRotrINI.big`, with the
+models in `!BetaRotrW3D.big`; take the model names from each object's `Draw` block, extract the W3D and
+the textures it names, then `ReplaceModule ModuleTag_01` (plus `Model = None` for the base's other draw
+tags) on our `Russia*` reskins. Start with the T-90, BMP-3, MiG-25 and Mi-24, one commit per group,
+with a screenshot from a skirmish each time.
+*Licence:* SWR Productions' art, not GPL; see NOTICE.md. The owner directed its use.
 ### Mod manager in the launcher
 The owner wants GenPatcher-style mod management: search, install, enable/disable and uninstall
 community mods from the launcher, without hand-copying `.big`s. Design the manifest first (mod id,
