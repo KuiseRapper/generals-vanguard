@@ -330,7 +330,9 @@ struct SideView: View {
                 .font(.system(size: 10))
                 .foregroundColor(Color(red: 0.33, green: 0.40, blue: 0.50))
         }
-        .padding(28)
+        .padding(.horizontal, 28)
+        .padding(.top, 52)
+        .padding(.bottom, 24)
         .frame(width: 400, height: 640, alignment: .topLeading)
         .background(Color(red: 0.04, green: 0.06, blue: 0.10))
     }
