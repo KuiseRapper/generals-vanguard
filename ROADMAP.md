@@ -119,6 +119,8 @@ win per hour. Then the re-path storms (a 60,000-frame match costs ~5-6 million p
 expansions), persisting the BIG archive index, shipping a precompiled shader cache, and job-system
 tuning.
 
+**VSync is on by default since 0.5.9**, which removes the idle 118 fps and the coil whine that came with it; what remains here is an explicit frame cap and the measurement.
+
 **Vulkan.** The renderer already has two backends: D3D11 on Windows and SDL3's Metal path on macOS
 (the same SDL3 GPU abstraction). A Vulkan backend is the same SDL3 GPU API with `SDL_GPU_VULKAN`, so
 it is an option switch, not a rewrite: ship D3D11 as the default, add `-gpu vulkan` as experimental,
