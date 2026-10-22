@@ -34,7 +34,9 @@ final class LauncherModel: ObservableObject {
     @Published var zeroHour = ""
 
     let launcherVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0"
-    let manifestURL = URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/latest/download/launcher-mac.json")!
+    // The 0.4.1 release asset named launcher-mac.json is 404 on GitHub; the 0.4.0 copy works and
+    // is kept up to date for macOS.
+    let manifestURL = URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.4.0/launcher-mac.json")!
     let hero: NSImage?
     let support: URL
 
