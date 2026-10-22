@@ -195,7 +195,13 @@ The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, and
 
 ### macOS and Linux
 
-There is no launcher for these yet, so the game is built from this repository with one command (see
+On macOS, download **VanguardLauncher-mac.dmg** from the [latest
+release](https://github.com/KuiseRapper/generals-vanguard/releases/latest), drag the launcher to
+Applications, and point it at your Zero Hour folder with **Set Zero Hour folder**. It installs the
+macOS game app, runs it with `-root` pointing at that folder, and updates it from
+`launcher-mac.json`; [docs/launcher-macos.md](docs/launcher-macos.md) has the details.
+
+Linux has no launcher yet, so the game is built from this repository with one command (see
 [Build it](#build-it)) and pointed at the Zero Hour you already have installed. The folder it wants is
 the one holding `INIZH.big`, with the original Generals inside it as `ZH_Generals/` or beside it,
 because Zero Hour mounts both. Saves and replays go to

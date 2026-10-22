@@ -42,3 +42,8 @@ Tools/VanguardLauncher.Core/bin/
 Tools/VanguardLauncher.Core/obj/
 Tools/VanguardLauncher.Tests/bin/
 Tools/VanguardLauncher.Tests/obj/
+
+# macOS launcher build products
+Tools/VanguardLauncherMac/build/
+Tools/VanguardLauncherMac/.swift-cache/
+Tools/VanguardLauncherMac/.tmp/

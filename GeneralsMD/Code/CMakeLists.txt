@@ -1751,6 +1751,11 @@ add_custom_command(TARGET generals POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_SOURCE_DIR}/Data/German
           ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Data/German
+  # The title/menu art the game loads from the loose English folder; a loose file beats
+  # EnglishZH.big, so the fork's own Vanguard title screen wins over the shipped one.
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/Data/English
+          ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Data/English
   # The startup splash.  WinMain loads it from a loose file next to the exe, so
   # the fork's own artwork is a tracked master here rather than a hand-made file
   # in gitignored Run/.
