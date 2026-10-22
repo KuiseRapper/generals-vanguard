@@ -281,6 +281,7 @@ inline int listDisplayModes( const char *device, DisplayModeEntry *entries, int 
 	entries[0].height = MIN_DISPLAY_MODE_HEIGHT;
 	return 1;
 }
+#endif
 
 /** A monitor's size, brought down to its panel's where the panel has fewer pixels.  A Mac in a scaled
 	* mode ("More Space") draws its desktop at 3420x2224 and shows it on a 2560x1664 panel: drawing the game
@@ -310,18 +311,22 @@ inline void fitToPanel( int monitorWidth, int monitorHeight, int panelWidth, int
 
 /** The resolution a first run starts at, when Options.ini names none: the monitor's own size, in pixels,
 	* or its panel's where that is smaller (fitToPanel).
-	* Windows starts at GameData's 800x600, and its fullscreen sets the monitor to that size.  Fullscreen
-	* here is the desktop at its own size, so 800x600 would be stretched over it, and a window would be
-	* a small box in the middle.  With no platform table (headless, the tests) this is the floor-sized
-	* monitor's 800x600, as before. */
+	* Without this, a first run starts at GameData's resolution (1024x768, or 800x600 where that names
+	* none), and fullscreen then sets the monitor to that size: the desktop is stretched over the panel,
+	* and the options screen - 1024 wide - is clipped to the screen's edges, which reads as a broken
+	* options menu.  Both platforms show the game at the desktop's own size, so the first run should start
+	* there too; a window is not a small box in the middle of the desktop either.
+	* Windows has its own monitor list above; off Windows the panel size comes through the platform table.
+	* With no platform table (headless, the tests) this is the floor-sized monitor's 800x600, as before. */
 inline void firstRunResolution( const char *device, int *width, int *height )
 {
 	const MonitorEntry monitor = findMonitor( device );
 	int panelWidth = 0, panelHeight = 0;
+#if !defined(_WIN32)
 	if (ThePlatformDisplays != NULL && ThePlatformDisplays->panelSize != NULL
 			&& !ThePlatformDisplays->panelSize( monitor.device, &panelWidth, &panelHeight ))
 		panelWidth = panelHeight = 0;
+#endif
 	fitToPanel( (int)(monitor.rect.right - monitor.rect.left), (int)(monitor.rect.bottom - monitor.rect.top),
 		panelWidth, panelHeight, width, height );
 }
-#endif

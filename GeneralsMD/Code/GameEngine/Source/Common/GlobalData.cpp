@@ -1589,13 +1589,14 @@ void GlobalData::parseGameDataDefinition( INI* ini )
 	TheWritableGlobalData->m_xResolution = xres;
 	TheWritableGlobalData->m_yResolution = yres;
 	TheWritableGlobalData->m_monitor = optionPref["Monitor"];
-#if !defined(_WIN32)
 	// A first run: Options.ini names no resolution, so start at the monitor's own size (Monitors.h).
-	// The platform layer's displays are up by now: SdlGameEngine starts its video before this INI loads.
+	// Off Windows the platform layer's displays are up by now - SdlGameEngine starts its video before
+	// this INI loads - and on Windows the monitors are asked directly, as WinMain already does.  Without
+	// it the game starts at GameData's 1024x768 and stretches that over a larger desktop, clipping the
+	// 1024-wide options screen at the edges.
 	if (optionPref.find( "Resolution" ) == optionPref.end())
 		firstRunResolution( TheWritableGlobalData->m_monitor.str(),
 			&TheWritableGlobalData->m_xResolution, &TheWritableGlobalData->m_yResolution );
-#endif
 
 	// Everything in TheOptionCatalog, in one pass, and last: a row is allowed to overwrite what the
 	// hand-written block above just read.  This is also why the catalog is read here and not in
