@@ -164,6 +164,42 @@ public static class ZeroHourLocator
     }
 
     /// <summary>
+    /// The expansion's INIZH.big carries the shared INIs, including Data\INI\Default\Weather.ini.
+    /// An install where the game cannot open that file is incomplete; the launcher says so before
+    /// starting rather than letting the engine throw.
+    /// </summary>
+    public static bool HasInizhFile(string? zeroHour, string fileName)
+    {
+        if (zeroHour is null)
+            return false;
+        var path = Path.Combine(zeroHour, "INIZH.big");
+        if (!File.Exists(path))
+            return false;
+        try
+        {
+            var needle = Encoding.ASCII.GetBytes(fileName);
+            using var stream = File.OpenRead(path);
+            var buffer = new byte[(1 << 20) + needle.Length];
+            var carry = 0;
+            while (true)
+            {
+                var read = stream.Read(buffer, carry, buffer.Length - carry);
+                if (read <= 0)
+                    return false;
+                var total = carry + read;
+                if (buffer.AsSpan(0, total).IndexOf(needle) >= 0)
+                    return true;
+                carry = Math.Min(needle.Length - 1, total);
+                Buffer.BlockCopy(buffer, total - carry, buffer, 0, carry);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Upstream 3.2.0 added UserDataLeafName to GameData.ini.  This fork is based on 3.0.1 and
     /// stops on that field, so a Zero Hour install carrying the Reforged 3.x data needs to be
     /// restored to the 3.0.1 files before Vanguard can parse it.  The field is readable in the
@@ -353,13 +389,8 @@ public static class ZeroHourLocator
 
     private static bool Repair(string found)
     {
-        foreach (var candidate in RegistryCandidates())
-        {
-            var path = Normalize(candidate);
-            if (path is not null && File.Exists(Path.Combine(path, "INIZH.big")))
-                return false;
-        }
-
+        // Always point the per-user key at the install the launcher found.  A stale HKLM key after
+        // an uninstall/reinstall otherwise sends the game at a folder whose INIZH.big is gone.
         try
         {
             using var key = Registry.CurrentUser.CreateSubKey(ZeroHourKey, true);

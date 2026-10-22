@@ -206,6 +206,16 @@ final class LauncherModel: ObservableObject {
             alert("Zero Hour not found", "Choose the Zero Hour folder that holds INIZH.big.")
             return
         }
+        if !inizhContains(zeroHour, "Weather.ini") {
+            let box = NSAlert()
+            box.messageText = "Zero Hour data incomplete"
+            box.informativeText = "This Zero Hour folder's INIZH.big has no Data/INI/Default/Weather.ini. "
+                + "Install or verify the Zero Hour expansion in Steam/EA (not just base Generals), "
+                + "then choose the folder again.\n\nPlay anyway?"
+            box.addButton(withTitle: "Play anyway")
+            box.addButton(withTitle: "Cancel")
+            if box.runModal() != .alertFirstButtonReturn { return }
+        }
         moveDuplicateInizh(zeroHour)
         let executable = gameApp.appendingPathComponent("Contents/MacOS/generals")
         guard FileManager.default.fileExists(atPath: executable.path) else {
@@ -234,6 +244,22 @@ final class LauncherModel: ObservableObject {
             index += 1
         }
         try? FileManager.default.moveItem(atPath: path, toPath: backup)
+    }
+
+    private func inizhContains(_ zero: String, _ name: String) -> Bool {
+        let path = zero + "/INIZH.big"
+        guard let handle = FileHandle(forReadingAtPath: path) else { return false }
+        defer { try? handle.close() }
+        let needle = Data(name.utf8)
+        var carry = Data()
+        while true {
+            let chunk = handle.readData(ofLength: 1 << 20)
+            if chunk.isEmpty { return false }
+            var combined = carry
+            combined.append(chunk)
+            if combined.range(of: needle) != nil { return true }
+            carry = combined.suffix(needle.count - 1)
+        }
     }
 
     private func containsReforgedGameData(_ zero: String) -> Bool {

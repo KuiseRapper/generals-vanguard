@@ -691,6 +691,18 @@ public sealed class MainForm : Form
         SetBusy(true);
         try
         {
+            var hasWeather = await Task.Run(() => ZeroHourLocator.HasInizhFile(zeroHour.Path, "Weather.ini"));
+            if (!hasWeather)
+            {
+                var answer = MessageBox.Show(this,
+                    "Your Zero Hour install is incomplete: its INIZH.big has no "
+                    + "Data\\INI\\Default\\Weather.ini.\n\n"
+                    + "Install or verify the Zero Hour expansion in Steam/EA (not just base Generals), "
+                    + "then use Locate Zero Hour if the folder is not detected.\n\nPlay anyway?",
+                    "Zero Hour data incomplete", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (answer != DialogResult.Yes)
+                    return;
+            }
             var duplicate = await Task.Run(() => ZeroHourLocator.MoveDuplicateInizh(zeroHour.Path));
             if (duplicate is not null)
                 _baseInfo.Text = "Moved the duplicate Data\\INI\\INIZH.big out of Zero Hour.";
