@@ -1,0 +1,107 @@
+name: release
+
+# Build the Windows game, publish the launcher, package both and put them on a GitHub release.
+# A tag push builds that tag; a manual run builds the branch and creates the tag named in the input.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, for example v0.3.0"
+        required: true
+        default: "v0.3.0"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Build the game
+        shell: cmd
+        run: build.bat Release
+
+      - name: Publish the launcher
+        shell: pwsh
+        run: >
+          dotnet publish Tools/VanguardLauncher/VanguardLauncher.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:DebugType=None
+          -o dist/launcher
+
+      - name: Package the game and the update manifest
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "${{ inputs.version }}" }
+          $version = $tag.TrimStart('v')
+          "TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          if (-not (Test-Path "GeneralsMD/Run/generals.exe")) {
+            throw "The game build produced no GeneralsMD/Run/generals.exe"
+          }
+          Set-Content -Path "GeneralsMD/Run/version.txt" -Value $version -NoNewline
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "GeneralsMD/Run/*" -DestinationPath "dist/VanguardGame.zip" -Force
+          Copy-Item "dist/launcher/VanguardLauncher.exe" "dist/VanguardLauncher.exe" -Force
+
+          $launcherHash = (Get-FileHash "dist/VanguardLauncher.exe" -Algorithm SHA256).Hash.ToLowerInvariant()
+          $gameHash = (Get-FileHash "dist/VanguardGame.zip" -Algorithm SHA256).Hash.ToLowerInvariant()
+          $base = "https://github.com/${{ github.repository }}/releases/download/$tag"
+          $manifest = @{
+            launcher = @{ version = $version; url = "$base/VanguardLauncher.exe"; sha256 = $launcherHash }
+            game = @{
+              version = $version
+              url = "$base/VanguardGame.zip"
+              sha256 = $gameHash
+              size = (Get-Item "dist/VanguardGame.zip").Length
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Path "dist/launcher.json" -Encoding utf8
+          Get-Content "dist/launcher.json"
+
+      - name: Keep the three files as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanguard-${{ env.VERSION }}
+          path: |
+            dist/VanguardLauncher.exe
+            dist/VanguardGame.zip
+            dist/launcher.json
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "Generals Vanguard ${{ env.TAG }}"
+          body: |
+            Generals Vanguard ${{ env.VERSION }}.
+
+            **Install:** download `VanguardLauncher.exe`, put it anywhere and run it.  It downloads the
+            game build from this release and starts it.  Zero Hour must already be installed (Steam or
+            the EA app); the launcher does not ship EA's game files.
+
+            **Update:** press *Check for updates* in the launcher.  It replaces the game build and, when
+            a newer launcher is on this release, updates itself and restarts.
+
+            `VanguardGame.zip` is the same game build for a manual install; `launcher.json` is the
+            update manifest the launcher reads.
+          files: |
+            dist/VanguardLauncher.exe
+            dist/VanguardGame.zip
+            dist/launcher.json
+          fail_on_unmatched_files: true
