@@ -207,16 +207,6 @@ final class LauncherModel: ObservableObject {
             return
         }
         moveDuplicateInizh(zeroHour)
-        if containsReforgedGameData(zeroHour) {
-            let box = NSAlert()
-            box.messageText = "Reforged data detected"
-            box.informativeText = "This Zero Hour folder has the Reforged 3.x GameData.ini (UserDataLeafName), "
-                + "which this Vanguard build (upstream 3.0.1) cannot parse. Verify Zero Hour in Steam, "
-                + "or choose a clean 3.0.1 folder.\n\nPlay anyway?"
-            box.addButton(withTitle: "Play anyway")
-            box.addButton(withTitle: "Cancel")
-            if box.runModal() != .alertFirstButtonReturn { return }
-        }
         let executable = gameApp.appendingPathComponent("Contents/MacOS/generals")
         guard FileManager.default.fileExists(atPath: executable.path) else {
             alert("Game missing", "The game executable is missing; run Check for updates.")

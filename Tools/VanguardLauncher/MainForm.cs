@@ -694,18 +694,6 @@ public sealed class MainForm : Form
             var duplicate = await Task.Run(() => ZeroHourLocator.MoveDuplicateInizh(zeroHour.Path));
             if (duplicate is not null)
                 _baseInfo.Text = "Moved the duplicate Data\\INI\\INIZH.big out of Zero Hour.";
-            var newerData = await Task.Run(() => ZeroHourLocator.HasReforgedGameData(zeroHour.Path));
-            if (newerData)
-            {
-                var answer = MessageBox.Show(this,
-                    "Your Zero Hour data is the Reforged 3.x mod: its GameData.ini has UserDataLeafName, "
-                    + "which this Vanguard build (upstream 3.0.1) cannot parse.\n\n"
-                    + "Verify Zero Hour in Steam, or point Vanguard at a clean 3.0.1 install, before "
-                    + "playing.\n\nPlay anyway?",
-                    "Reforged data detected", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if (answer != DialogResult.Yes)
-                    return;
-            }
             var prep = await Task.Run(() =>
             {
                 var result = ZeroHourLocator.PrepareBaseAssets(

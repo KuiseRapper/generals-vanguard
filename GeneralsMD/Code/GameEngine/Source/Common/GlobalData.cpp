@@ -107,6 +107,9 @@ static const INI::RealRange PARTITION_CELL_SIZE_RANGE = { 20.0f, 400.0f };
 	{ "Use3WayTerrainBlends",			INI::parseInt,				NULL,			offsetof( GlobalData, m_use3WayTerrainBlends ) },
 	{ "StretchTerrain",						INI::parseBool,				NULL,			offsetof( GlobalData, m_stretchTerrain ) },
 	{ "UseHalfHeightMap",					INI::parseBool,				NULL,			offsetof( GlobalData, m_useHalfHeightMap ) },
+	// The retail Steam GameData.ini carries this key.  The source's user data folder comes from
+	// findUserDataDirectory, so parse it into a member rather than throwing on a shipped file.
+	{ "UserDataLeafName",					INI::parseQuotedAsciiString,	NULL,			offsetof( GlobalData, m_userDataLeafName ) },
 	
 	
 	{ "DrawEntireTerrain",					INI::parseBool,				NULL,			offsetof( GlobalData, m_drawEntireTerrain ) },

@@ -738,6 +738,11 @@ private:
 	// this is private, since we read the info from Windows and cache it for
 	// future use. No one is allowed to change it, ever. (srj)
 	AsciiString m_userDataDir;
+
+	// The retail GameData.ini carries this key; the user data directory itself comes from
+	// findUserDataDirectory (which reads the same name from the registry), so the value is kept
+	// only so the parser accepts the shipped file.
+	AsciiString m_userDataLeafName;
 	
 	static GlobalData *m_theOriginal;		///< the original global data instance (no overrides)
 	GlobalData *m_next;									///< next instance (for overrides)
