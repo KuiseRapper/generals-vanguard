@@ -185,8 +185,10 @@ played a full check match on a Steam Deck. A match between Windows and a Mac has
    the launcher itself when a newer one is on the release.
 
 The launcher does not ship EA's game files: the game finds your Zero Hour install and reads its
-`*.big` where they are. A Steam copy still starts through Steam. If you build the game yourself,
-**Set game folder** points the launcher at the `generals.exe` in `GeneralsMD/Run`.
+`*.big` where they are. Zero Hour's shared base-game files are linked in from the Zero Hour install
+automatically, so a separate Generals install is not needed. A Steam copy still starts through
+Steam. If you build the game yourself, **Set game folder** points the launcher at the `generals.exe`
+in `GeneralsMD/Run`.
 
 The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, and
 [docs/launcher.md](docs/launcher.md) has the manifest, the update path and how a release is cut.

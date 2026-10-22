@@ -8,6 +8,12 @@ It does **not** ship EA's game files. The game build it installs is the fork's `
 scripts; Zero Hour itself must already be installed, because the game reads its `*.big` files from
 that installation. A Steam copy still starts through Steam.
 
+Zero Hour shares most of its art, sound and music with the base game. It keeps those shared files in a
+`ZH_Generals` folder beside its `generals.exe` (Steam does this); the launcher links that folder into
+its own `game` folder as `ZH_Generals` before Play, from the Zero Hour install, a registered Generals
+install, or a Steam sibling. If Windows refuses the junction, the `.big` files are copied. A separate
+base-game install is **not** required.
+
 It looks for **Zero Hour**, not the base game: the `InstallPath` under
 `HKCU`/`HKLM\SOFTWARE\Electronic Arts\EA Games\Command and Conquer Generals Zero Hour` (both
 registry views), then Steam's `libraryfolders.vdf` and the EA app's default folders. A folder counts
@@ -32,6 +38,10 @@ shows *"Please start Generals Vanguard from its launcher."*
 The launcher refuses to update while `generals.exe` is running, because Windows would keep the old
 files locked.
 
+The window is a single screen: the hero art on the left, the game and launcher versions, Play,
+Check for updates, and the Zero Hour/base-file status on the right. Check for updates opens a review
+screen with the release notes and an Update/Cancel choice; nothing is written until Update is pressed.
+
 ## Updates
 
 The launcher reads this asset from the newest release:
@@ -45,13 +55,13 @@ The manifest names the two files and their SHA-256 hashes:
 ```json
 {
   "launcher": {
-    "version": "0.3.2",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.2/VanguardLauncher.exe",
+    "version": "0.4.0",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.4.0/VanguardLauncher.exe",
     "sha256": "..."
   },
   "game": {
-    "version": "0.3.2",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.2/VanguardGame.zip",
+    "version": "0.4.0",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.4.0/VanguardGame.zip",
     "sha256": "...",
     "size": 12345678
   }
@@ -111,14 +121,14 @@ assets on a GitHub release:
 Run it by pushing a tag:
 
 ```
-git tag v0.3.2
-git push origin v0.3.2
+git tag v0.4.0
+git push origin v0.4.0
 ```
 
 or from the Actions tab (**Run workflow**) with the version, or:
 
 ```
-gh workflow run release.yml --ref develop -f version=v0.3.2
+gh workflow run release.yml --ref develop -f version=v0.4.0
 ```
 
 The workflow needs **Read and write permissions** for `GITHUB_TOKEN` in the repository's
