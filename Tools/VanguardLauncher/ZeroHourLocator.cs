@@ -136,6 +136,34 @@ public static class ZeroHourLocator
         => File.Exists(Path.Combine(directory, BaseArchive));
 
     /// <summary>
+    /// Some Zero Hour SKUs ship a second INIZH.big in Data\INI.  The retail game deletes it on
+    /// startup (relative to its own working directory), but Vanguard runs from its own game folder,
+    /// so the duplicate survives and its GameData.ini wins — that is where a Reforged 3.x
+    /// UserDataLeafName comes from even after a Steam verify.  Move it aside once.
+    /// </summary>
+    public static string? MoveDuplicateInizh(string? zeroHour)
+    {
+        if (zeroHour is null)
+            return null;
+        var path = Path.Combine(zeroHour, "Data", "INI", "INIZH.big");
+        if (!File.Exists(path))
+            return null;
+        var backup = path + ".vanguard-backup";
+        var index = 1;
+        while (File.Exists(backup))
+            backup = path + ".vanguard-backup" + index++;
+        try
+        {
+            File.Move(path, backup);
+            return backup;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Upstream 3.2.0 added UserDataLeafName to GameData.ini.  This fork is based on 3.0.1 and
     /// stops on that field, so a Zero Hour install carrying the Reforged 3.x data needs to be
     /// restored to the 3.0.1 files before Vanguard can parse it.  The field is readable in the

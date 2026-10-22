@@ -691,6 +691,9 @@ public sealed class MainForm : Form
         SetBusy(true);
         try
         {
+            var duplicate = await Task.Run(() => ZeroHourLocator.MoveDuplicateInizh(zeroHour.Path));
+            if (duplicate is not null)
+                _baseInfo.Text = "Moved the duplicate Data\\INI\\INIZH.big out of Zero Hour.";
             var newerData = await Task.Run(() => ZeroHourLocator.HasReforgedGameData(zeroHour.Path));
             if (newerData)
             {

@@ -206,6 +206,7 @@ final class LauncherModel: ObservableObject {
             alert("Zero Hour not found", "Choose the Zero Hour folder that holds INIZH.big.")
             return
         }
+        moveDuplicateInizh(zeroHour)
         if containsReforgedGameData(zeroHour) {
             let box = NSAlert()
             box.messageText = "Reforged data detected"
@@ -231,6 +232,18 @@ final class LauncherModel: ObservableObject {
         } catch {
             alert("Could not start the game", error.localizedDescription)
         }
+    }
+
+    private func moveDuplicateInizh(_ zero: String) {
+        let path = zero + "/Data/INI/INIZH.big"
+        guard FileManager.default.fileExists(atPath: path) else { return }
+        var backup = path + ".vanguard-backup"
+        var index = 1
+        while FileManager.default.fileExists(atPath: backup) {
+            backup = path + ".vanguard-backup" + String(index)
+            index += 1
+        }
+        try? FileManager.default.moveItem(atPath: path, toPath: backup)
     }
 
     private func containsReforgedGameData(_ zero: String) -> Bool {
