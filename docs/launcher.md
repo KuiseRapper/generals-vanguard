@@ -8,6 +8,16 @@ It does **not** ship EA's game files. The game build it installs is the fork's `
 scripts; Zero Hour itself must already be installed, because the game reads its `*.big` files from
 that installation. A Steam copy still starts through Steam.
 
+It looks for **Zero Hour**, not the base game: the `InstallPath` under
+`HKCU`/`HKLM\SOFTWARE\Electronic Arts\EA Games\Command and Conquer Generals Zero Hour` (both
+registry views), then Steam's `libraryfolders.vdf` and the EA app's default folders. A folder counts
+only if it holds `INIZH.big`. If the registry key is missing or points at a folder without that file
+and a real Zero Hour folder is found elsewhere, the launcher writes the per-user key so the game finds
+it. The launcher window shows which Zero Hour folder it is using.
+
+It starts the game with `-rk7`, the marker `WinMain.cpp` requires; starting `generals.exe` directly
+shows *"Please start Generals Vanguard from its launcher."*
+
 ## Using it
 
 1. Download `VanguardLauncher.exe` from the
@@ -35,13 +45,13 @@ The manifest names the two files and their SHA-256 hashes:
 ```json
 {
   "launcher": {
-    "version": "0.3.1",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.1/VanguardLauncher.exe",
+    "version": "0.3.2",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.2/VanguardLauncher.exe",
     "sha256": "..."
   },
   "game": {
-    "version": "0.3.1",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.1/VanguardGame.zip",
+    "version": "0.3.2",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.2/VanguardGame.zip",
     "sha256": "...",
     "size": 12345678
   }
@@ -101,14 +111,14 @@ assets on a GitHub release:
 Run it by pushing a tag:
 
 ```
-git tag v0.3.1
-git push origin v0.3.1
+git tag v0.3.2
+git push origin v0.3.2
 ```
 
 or from the Actions tab (**Run workflow**) with the version, or:
 
 ```
-gh workflow run release.yml --ref develop -f version=v0.3.1
+gh workflow run release.yml --ref develop -f version=v0.3.2
 ```
 
 The workflow needs **Read and write permissions** for `GITHUB_TOKEN` in the repository's
