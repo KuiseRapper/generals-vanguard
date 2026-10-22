@@ -23,6 +23,37 @@ on top.
 
 ## Now
 
+### Russia's art from Rise of the Reds and ShockWave
+Russia still builds China/USA models. The owner's direction (2026-10-23) is to adapt the community
+mods instead of authoring a fourth set: **Rise of the Reds** already has a Russian Federation and an
+ECA faction with models, textures, cameos, icons and sounds; **ShockWave** has ~100 units and
+structures whose look can be borrowed for the less Russian slots. Take a small, credited set first:
+the Command Bunker, power plant, barracks, war factory, air field and the T-90/BMP-3/MiG-25/Mi-24,
+with their cameos, then replace `ObjectReskin`/`ButtonImage` in one commit per asset group.
+*First step:* unpack a mod archive (`bigfile.py` reads its `.big`) into `docs/modding/rotR-*`, list
+what each model's INI calls, and pick the 10 assets. Blocked here on 2026-10-23: ModDB's download
+mirror sits behind a Cloudflare challenge this machine cannot pass; the archives have to be fetched
+on the owner's machine (or a non-challenged mirror found).
+*Credit:* SWR Productions (Rise of the Reds) and the ShockWave team, in `NOTICE.md` and the release
+notes, exactly as the GPL/EA terms require.
+
+### Mod manager in the launcher
+The owner wants GenPatcher-style mod management: search, install, enable/disable and uninstall
+community mods from the launcher, without hand-copying `.big`s. Design the manifest first (mod id,
+version, files, hashes, `-mod` launch argument), then the panel. Mods that change `INIZH.big` or
+`Window` need the same per-mod data-folder injection the launcher already does for its own package.
+*First step:* a `mods.json` schema and one local test mod (a renamed copy of our own data) installed
+and removed by the launcher.
+
+### Performance: VSync by default, a frame cap, and a Vulkan option
+The owner sees GPU coil whine while Zero Hour runs: the debug line shows ~118 fps on a 61 Hz panel, so
+the renderer is unbounded. First fix is the cheapest: **VSync on by default** (and remember the
+choice), then a frame cap to the display's refresh. After that, make the SDL3 GPU backend selectable
+(D3D11 stays the default on Windows; Vulkan is the experimental option the macOS Metal path already
+proves the shape of) and measure frame time and GPU power on the owner's Windows box.
+*First step:* default VSync and a `-fpslimit <hz>` switch, with a headless run proving nothing in the
+simulation changes.
+
 ### 0. AI expansion: choose another dock when the first one cannot take a centre
 The **illegal spot** half is fixed (2026-10-21), and it was three defects, not one: `buildBySupplies`
 offset a supply centre by a fixed three pathfind cells, inside the engine's `SupplyBuildBorder`;

@@ -7,8 +7,9 @@ Ordered work lives in [BACKLOG.md](BACKLOG.md); this file explains the thinking.
 Two rules the project already follows: no AI claim without a headless batch behind it
 (`ai-batch.sh`), and no change to `LICENSE.md`, upstream's data names or EA's own game strings.
 
-Performance is parked at the owner's request (2026-10-16) - it is item 7 in the backlog, and section
-3b here is only the reasoning.
+Performance is back at the owner's request (2026-10-23): GPU coil whine while Zero Hour runs in the
+background, unstable frames, and the question of a Vulkan backend. It is now first-class in
+[BACKLOG.md](BACKLOG.md); section 3b is the reasoning and the first steps.
 
 ---
 
@@ -107,13 +108,22 @@ players), then run faction against faction.
 | **QoL pass** - control-group persistence, stances, rally points, match speed, windowed and resolution options. | Small annoyances compound over hundreds of matches. | Small each. |
 | **The endgame fixes** (section 1). | Removes the worst experience reported so far. | See above. |
 
-## 3b. Performance (parked - backlog item 7)
+## 3b. Performance (owner request 2026-10-23 - backlog)
 
-For when it comes back: the upscaled overlay art is the dominant memory cost
+The reported symptom is coil whine from the GPU while Zero Hour is merely open. The debug line shows
+the renderer at ~118 fps on a 61 Hz panel, so the first fix is not clever: **cap the frame rate**.
+VSync on by default, then an explicit cap, then frame pacing. After that: the upscaled overlay art is
+the dominant memory cost
 (`ReforgedTextures.big` 1.07 GB, `ReforgedTerrain.big` 227 MB), so a "classic art" option is the best
 win per hour. Then the re-path storms (a 60,000-frame match costs ~5-6 million pathfinder cell
 expansions), persisting the BIG archive index, shipping a precompiled shader cache, and job-system
 tuning.
+
+**Vulkan.** The renderer already has two backends: D3D11 on Windows and SDL3's Metal path on macOS
+(the same SDL3 GPU abstraction). A Vulkan backend is the same SDL3 GPU API with `SDL_GPU_VULKAN`, so
+it is an option switch, not a rewrite: ship D3D11 as the default, add `-gpu vulkan` as experimental,
+and compare frame time, GPU power and coil whine on the owner's Windows machine before changing any
+default.
 
 ## 4. New content: three generals, then one new faction
 
