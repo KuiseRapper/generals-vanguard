@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -521,6 +522,12 @@ void Win32Mouse::initCursorResources(void)
 
 				cursorResources[cursor][direction]=LoadCursorFromFile(resourcePath);
 				DEBUG_ASSERTCRASH(cursorResources[cursor][direction], ("MissingCursor %s\n",resourcePath));
+				// A portable install carries no Data\Cursors of its own (the retail ANIs are EA's), and
+				// SetCursor(NULL) below would then leave the game with no pointer at all: the player
+				// cannot click the menus.  The system arrow keeps the mouse usable; the launcher links
+				// the player's own Data\Cursors so the game's own cursors load where they exist.
+				if (cursorResources[cursor][direction] == NULL)
+					cursorResources[cursor][direction] = ::LoadCursor(NULL, IDC_ARROW);
 			}
 		}
 //		SetCursor(cursorResources[cursor][m_directionFrame]);
