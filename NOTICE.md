@@ -68,3 +68,13 @@ right to use them (LICENSE.md, additional terms). They appear here only to say w
 
 No game assets are in this repository. Running the game needs an installed, legitimately obtained copy of
 Command & Conquer Generals Zero Hour.
+
+## Rise of the Reds art (third-party, not GPL)
+
+The Russian buildings' models (`GeneralsMD/Code/Data/Art/W3D/RB*.W3D`) and their textures
+(`GeneralsMD/Code/Data/Art/Textures/RB*.dds`, `RTScaffold.dds`, `RTWall.dds`) are adapted from
+**Rise of the Reds 1.8** (SWR Productions, 2012), the Zero Hour mod, which the owner of this fork
+directed the Russia faction to use. They are **not** covered by this project's GPL and remain the
+property of their authors. The extraction, the file mapping and the INI wiring are documented in
+[docs/modding/rotr-1.8.md](docs/modding/rotr-1.8.md); remove those files and the `ReplaceModule`
+blocks in `Data/INI/RussiaReforged.ini` if that use is not licensed.
