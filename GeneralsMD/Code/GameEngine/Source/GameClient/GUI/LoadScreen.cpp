@@ -1372,7 +1372,12 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 		// the main original factions don't have associated generals; a side built on one of them (the
 		// fork's own fourth sides) wears the portrait of the faction it is built on
 		AsciiString imageName;
-		if (pt->getBaseSide() == "USA")
+		// A fork faction has no GeneralPersona of its own yet, so it wears a portrait of its own: the
+		// Russia load portrait (a red star, RUSSIA, Generals Vanguard) rather than the base side's
+		// logo, which would show the China dragon and say nothing about who is loading.
+		if (pt->getName() == "FactionRussia")
+			portrait = TheMappedImageCollection->findImageByName("SAFactionLogoLg_RU");
+		else if (pt->getBaseSide() == "USA")
 			portrait = TheMappedImageCollection->findImageByName("SAFactionLogoLg_US");
 		else if (pt->getBaseSide() == "GLA")
 			portrait = TheMappedImageCollection->findImageByName("SUFactionLogoLg_GLA");

@@ -1216,6 +1216,10 @@ TOOLTIP:RussiaArmy
 "Russia: a fire plan before the tanks move, and the densest ground-based air denial in the game."
 END
 
+CONTROLBAR:RussiaFeatures
+"Fire plans before the tanks move, and the densest ground-based air denial in the game."
+END
+
 OBJECT:RussiaCommandBunker
 "Command Bunker"
 END
