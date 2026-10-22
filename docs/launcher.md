@@ -35,13 +35,13 @@ The manifest names the two files and their SHA-256 hashes:
 ```json
 {
   "launcher": {
-    "version": "0.3.0",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.0/VanguardLauncher.exe",
+    "version": "0.3.1",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.1/VanguardLauncher.exe",
     "sha256": "..."
   },
   "game": {
-    "version": "0.3.0",
-    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.0/VanguardGame.zip",
+    "version": "0.3.1",
+    "url": "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.3.1/VanguardGame.zip",
     "sha256": "...",
     "size": 12345678
   }
@@ -101,14 +101,14 @@ assets on a GitHub release:
 Run it by pushing a tag:
 
 ```
-git tag v0.3.0
-git push origin v0.3.0
+git tag v0.3.1
+git push origin v0.3.1
 ```
 
 or from the Actions tab (**Run workflow**) with the version, or:
 
 ```
-gh workflow run release.yml --ref develop -f version=v0.3.0
+gh workflow run release.yml --ref develop -f version=v0.3.1
 ```
 
 The workflow needs **Read and write permissions** for `GITHUB_TOKEN` in the repository's
