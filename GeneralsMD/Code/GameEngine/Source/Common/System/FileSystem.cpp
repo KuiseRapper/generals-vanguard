@@ -548,6 +548,18 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 		return TRUE;
 	if (starts("data\\ini\\mappedimages\\handcreated\\reforged") && ends(".ini"))
 		return TRUE;
+	// Generals Vanguard's Russia art and its MappedImages masters.
+	if (starts("data\\ini\\mappedimages\\handcreated\\russia") && ends(".ini"))
+		return TRUE;
+	if (starts("art\\textures\\ru"))
+		return TRUE;
+	if (p == "art\\textures\\sccsiberianfront.tga")
+		return TRUE;
+	if (p == "data\\english\\art\\textures\\titlescreenuserinterface.tga")
+		return TRUE;
+	// Data\English is copied to Run\English, not under Data in the package.
+	if (p == "english\\art\\textures\\titlescreenuserinterface.tga")
+		return TRUE;
 	return p == "data\\patch.str"
 		|| starts("data\\turkish\\") || starts("data\\german\\")
 		|| starts("art\\textures\\reforged")

@@ -1,4 +1,9 @@
 CMakeLists.txt
+Data/Art/Textures/RUIcons.tga
+Data/Art/Textures/RULoadScreen.tga
+Data/Art/Textures/RULogo.tga
+Data/Art/Textures/RUScoreScreen.tga
+Data/Art/Textures/RUSideIcon.tga
 Data/Art/Textures/ReforgedBarAmericaCenter.tga
 Data/Art/Textures/ReforgedBarAmericaLeft.tga
 Data/Art/Textures/ReforgedBarAmericaRight.tga
@@ -29,6 +34,7 @@ Data/Art/Textures/ReforgedMineLedRed.tga
 Data/Art/Textures/ReforgedSignalAttack.tga
 Data/Art/Textures/ReforgedSignalDefend.tga
 Data/Art/Textures/ReforgedSignalLook.tga
+Data/Art/Textures/SCCSiberianFront.tga
 Data/Cinema/aurorablast.txt
 Data/Cinema/aurorafog.txt
 Data/Cinema/blastcheck.txt
@@ -155,6 +161,7 @@ Data/INI/MappedImages/HandCreated/ReforgedHudGlaPowers.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudHelpbox.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudObsCommandBar.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudObsPlayerWindow.ini
+Data/INI/MappedImages/HandCreated/RussiaIcons.ini
 Data/INI/ObjectCreationListReforged.ini
 Data/INI/ParticleSystemReforged.ini
 Data/INI/PlayerTemplateReforged.ini

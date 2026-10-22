@@ -1552,3 +1552,29 @@ END
 CONTROLBAR:ToolTipRussiaFieldRepair
 "Repair friendly vehicles in the area."
 END
+
+; Russia's unique powers, sciences and radar.
+CONTROLBAR:RussiaSiberianFront
+"Siberian Front"
+END
+CONTROLBAR:ToolTipRussiaSiberianFront
+"A blizzard of EMP over a wide area: enemy units and defences are disabled. Does not destroy the target like a nuclear missile."
+END
+SCIENCE:RussiaSiberianFront
+"Siberian Front"
+END
+CONTROLBAR:RussiaMiGInferno
+"MiG Inferno"
+END
+CONTROLBAR:ToolTipRussiaMiGInferno
+"Five MiGs drop two napalm missiles each, leaving a burning field behind."
+END
+SCIENCE:RussiaMiGInferno
+"MiG Inferno"
+END
+CONTROLBAR:UpgradeRussiaRadar
+"Radar"
+END
+CONTROLBAR:ToolTipRussiaRadar
+"Build the radar to see the minimap and the battlefield."
+END
