@@ -8,15 +8,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>VanguardLauncher</AssemblyName>
     <RootNamespace>VanguardLauncher</RootNamespace>
-    <Version>0.3.2</Version>
+    <Version>0.4.0</Version>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <DebugType>none</DebugType>
+    <ApplicationIcon>Assets\Vanguard.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\VanguardLauncher.Core\VanguardLauncher.Core.csproj" />
+    <EmbeddedResource Include="Assets\Background.png" />
   </ItemGroup>
 </Project>

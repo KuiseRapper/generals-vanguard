@@ -1,17 +1,31 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
 namespace VanguardLauncher;
 
-/// <summary>What the launcher found of the player's own Zero Hour install.</summary>
-public sealed record ZeroHourInstall(string? Path, bool Found, bool BaseGeneralsOnly, bool Repaired);
+/// <summary>What the launcher found of the player's own Zero Hour install and its shared base assets.</summary>
+public sealed record ZeroHourInstall(
+    string? Path,
+    bool Found,
+    bool BaseGeneralsOnly,
+    bool Repaired,
+    string? BaseSource,
+    bool BaseReady);
+
+public enum BaseAssetResult
+{
+    Ready,
+    Linked,
+    Copied,
+    Missing,
+    Failed,
+}
 
 /// <summary>
-/// Find the Zero Hour folder, not the base game's.  The game itself reads
-/// HKCU/HKLM\SOFTWARE\Electronic Arts\EA Games\Command and Conquer Generals Zero Hour InstallPath
-/// (with the 32-bit view), so that is the first place to look; Steam's library folders and the EA
-/// app's default folders are the fallbacks.  A found folder is written to the per-user key when the
-/// key is missing or points at something without INIZH.big, because the game reads HKCU first.
+/// Find Zero Hour — not the base game — and connect the base game's .big files that Zero Hour shares.
+/// The game looks for them in ZH_Generals beside generals.exe (or the registered base install), so a
+/// portable launcher folder has to link that folder in from the player's own install.
 /// </summary>
 public static class ZeroHourLocator
 {
@@ -19,10 +33,14 @@ public static class ZeroHourLocator
         @"SOFTWARE\Electronic Arts\EA Games\Command and Conquer Generals Zero Hour";
     private const string GeneralsKey =
         @"SOFTWARE\Electronic Arts\EA Games\Generals";
+    private const string BaseArchive = "Textures.big";
 
-    public static ZeroHourInstall Detect()
+    public static ZeroHourInstall Detect(string? manualZeroHour = null, string? gameDirectory = null)
     {
         var candidates = new List<string?>();
+        var manual = Normalize(manualZeroHour);
+        if (manual is not null && File.Exists(Path.Combine(manual, "INIZH.big")))
+            candidates.Add(manual);
         candidates.AddRange(RegistryCandidates());
         candidates.AddRange(SteamCandidates());
         candidates.AddRange(DefaultCandidates());
@@ -38,11 +56,117 @@ public static class ZeroHourLocator
             }
         }
 
-        if (found is not null)
-            return new ZeroHourInstall(found, true, false, Repair(found));
+        var baseSource = FindBaseSource(found, manual);
+        var baseReady = gameDirectory is not null
+                        && HasBase(Path.Combine(gameDirectory, "ZH_Generals"));
 
-        var basePath = BaseGeneralsPath();
-        return new ZeroHourInstall(null, false, basePath is not null, false);
+        if (found is not null)
+            return new ZeroHourInstall(found, true, false, Repair(found), baseSource, baseReady);
+
+        var baseOnly = BaseGeneralsPath() is not null;
+        return new ZeroHourInstall(null, false, baseOnly, false, baseSource, baseReady);
+    }
+
+    /// <summary>
+    /// Make gameDirectory\ZH_Generals hold the base game's .big files.  A junction to the Zero Hour
+    /// install's own ZH_Generals is instant and copies nothing; if Windows refuses the junction, the
+    /// .big files are copied instead.
+    /// </summary>
+    public static BaseAssetResult PrepareBaseAssets(
+        string gameDirectory, string? manualZeroHour, out string message)
+    {
+        var target = Path.Combine(gameDirectory, "ZH_Generals");
+        if (HasBase(target))
+        {
+            message = "Base game files are linked.";
+            return BaseAssetResult.Ready;
+        }
+
+        var zeroHour = Detect(manualZeroHour);
+        var source = zeroHour.BaseSource;
+        if (source is null)
+        {
+            message = "Zero Hour's shared base-game files (Textures.big) were not found in the Zero Hour "
+                      + "install, the registered Generals install, or a Steam sibling folder.";
+            return BaseAssetResult.Missing;
+        }
+
+        try
+        {
+            RemoveDirectory(target);
+
+            // A clean base folder (ZH_Generals, or a separate Generals install) can be a junction:
+            // the game reads through it and nothing is copied.  A Zero Hour folder that carries the
+            // base .big files itself would expose INIZH.big through the link, so that case copies only
+            // the base archives.
+            if (!File.Exists(Path.Combine(source, "INIZH.big")) && TryJunction(target, source))
+            {
+                message = "Base game files linked from " + source;
+                return BaseAssetResult.Linked;
+            }
+
+            Directory.CreateDirectory(target);
+            var copied = 0;
+            foreach (var file in Directory.GetFiles(source, "*.big"))
+            {
+                var name = Path.GetFileName(file);
+                if (name.Contains("ZH", StringComparison.OrdinalIgnoreCase)
+                    || name.Equals("INIZH.big", StringComparison.OrdinalIgnoreCase))
+                    continue;
+                File.Copy(file, Path.Combine(target, name), true);
+                copied++;
+            }
+            if (copied == 0)
+            {
+                message = "The base game folder " + source + " has no .big files to copy.";
+                return BaseAssetResult.Missing;
+            }
+            message = $"Base game files copied from {source} ({copied} archives).";
+            return BaseAssetResult.Copied;
+        }
+        catch (Exception ex)
+        {
+            message = "Could not link the base game files: " + ex.Message;
+            return BaseAssetResult.Failed;
+        }
+    }
+
+    public static bool HasBase(string directory)
+        => File.Exists(Path.Combine(directory, BaseArchive));
+
+    private static string? FindBaseSource(string? zeroHour, string? manual)
+    {
+        var candidates = new List<string?>();
+        if (manual is not null)
+        {
+            candidates.Add(Path.Combine(manual, "ZH_Generals"));
+            candidates.Add(manual);
+        }
+        if (zeroHour is not null)
+        {
+            candidates.Add(Path.Combine(zeroHour, "ZH_Generals"));
+            candidates.Add(zeroHour);
+            var parent = Path.GetDirectoryName(zeroHour);
+            if (parent is not null)
+            {
+                candidates.Add(Path.Combine(parent, "Command & Conquer Generals"));
+                candidates.Add(Path.Combine(parent, "Command & Conquer(tm) Generals"));
+                candidates.Add(Path.Combine(parent, "Command and Conquer Generals"));
+                candidates.Add(Path.Combine(parent, "Command and Conquer The First Decade",
+                    "Command & Conquer(tm) Generals"));
+            }
+        }
+        candidates.Add(BaseGeneralsPath());
+        candidates.AddRange(SteamBaseCandidates());
+        candidates.AddRange(DefaultBaseCandidates());
+
+        foreach (var candidate in candidates)
+        {
+            var path = Normalize(candidate);
+            if (path is not null && HasBase(path))
+                return path;
+        }
+        return null;
     }
 
     private static IEnumerable<string?> RegistryCandidates()
@@ -69,6 +193,32 @@ public static class ZeroHourLocator
 
     private static IEnumerable<string?> SteamCandidates()
     {
+        foreach (var root in SteamRoots())
+        {
+            foreach (var library in SteamLibraries(root))
+            {
+                yield return Path.Combine(library, "steamapps", "common", "Command and Conquer Generals - Zero Hour");
+                yield return Path.Combine(library, "steamapps", "common", "Command & Conquer Generals - Zero Hour");
+                yield return Path.Combine(library, "steamapps", "common", "Command and Conquer Generals Zero Hour");
+            }
+        }
+    }
+
+    private static IEnumerable<string?> SteamBaseCandidates()
+    {
+        foreach (var root in SteamRoots())
+        {
+            foreach (var library in SteamLibraries(root))
+            {
+                yield return Path.Combine(library, "steamapps", "common", "Command and Conquer Generals");
+                yield return Path.Combine(library, "steamapps", "common", "Command & Conquer Generals");
+                yield return Path.Combine(library, "steamapps", "common", "Command and Conquer(tm) Generals");
+            }
+        }
+    }
+
+    private static IEnumerable<string?> SteamRoots()
+    {
         var roots = new List<string?>();
         try
         {
@@ -81,19 +231,21 @@ public static class ZeroHourLocator
         }
         roots.Add(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Steam"));
+        return roots;
+    }
 
+    private static IEnumerable<string> SteamLibraries(string? root)
+    {
         var libraries = new List<string>();
-        foreach (var root in roots)
+        var steam = Normalize(root);
+        if (steam is null)
+            return libraries;
+        libraries.Add(steam);
+        var vdf = Path.Combine(steam, "steamapps", "libraryfolders.vdf");
+        try
         {
-            var steam = Normalize(root);
-            if (steam is null)
-                continue;
-            libraries.Add(steam);
-            var vdf = Path.Combine(steam, "steamapps", "libraryfolders.vdf");
-            try
+            if (File.Exists(vdf))
             {
-                if (!File.Exists(vdf))
-                    continue;
                 foreach (var line in File.ReadLines(vdf))
                 {
                     var match = Regex.Match(line, "\"path\"\\s+\"([^\"]+)\"");
@@ -101,23 +253,12 @@ public static class ZeroHourLocator
                         libraries.Add(match.Groups[1].Value.Replace("\\\\", "\\"));
                 }
             }
-            catch
-            {
-                // A broken library file just means the default root is all we have.
-            }
         }
-
-        var names = new[]
+        catch
         {
-            "Command and Conquer Generals - Zero Hour",
-            "Command & Conquer Generals - Zero Hour",
-            "Command and Conquer Generals Zero Hour",
-        };
-        foreach (var library in libraries.Distinct(StringComparer.OrdinalIgnoreCase))
-        {
-            foreach (var name in names)
-                yield return Path.Combine(library, "steamapps", "common", name);
+            // A broken library file just means the default root is all we have.
         }
+        return libraries;
     }
 
     private static IEnumerable<string?> DefaultCandidates()
@@ -132,9 +273,20 @@ public static class ZeroHourLocator
         }
     }
 
+    private static IEnumerable<string?> DefaultBaseCandidates()
+    {
+        var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+        var programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+        foreach (var root in new[] { programFiles, programFilesX86 })
+        {
+            yield return Path.Combine(root, "EA Games", "Command and Conquer Generals");
+            yield return Path.Combine(root, "Electronic Arts", "Command and Conquer Generals");
+            yield return Path.Combine(root, "EA Games", "Command and Conquer(tm) Generals");
+        }
+    }
+
     private static bool Repair(string found)
     {
-        // If any readable Zero Hour key already points at a valid install, leave the registry alone.
         foreach (var candidate in RegistryCandidates())
         {
             var path = Normalize(candidate);
@@ -167,7 +319,7 @@ public static class ZeroHourLocator
                     using var root = RegistryKey.OpenBaseKey(hive, view);
                     using var key = root.OpenSubKey(GeneralsKey);
                     var path = Normalize(key?.GetValue("InstallPath") as string);
-                    if (path is not null && File.Exists(Path.Combine(path, "INIGEN.big")))
+                    if (path is not null && HasBase(path))
                         return path;
                 }
                 catch
@@ -177,6 +329,60 @@ public static class ZeroHourLocator
             }
         }
         return null;
+    }
+
+    private static bool TryJunction(string link, string target)
+    {
+        try
+        {
+            var info = new ProcessStartInfo("cmd.exe")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            info.ArgumentList.Add("/c");
+            info.ArgumentList.Add($"mklink /J \"{link}\" \"{target}\"");
+            using var process = Process.Start(info);
+            if (process is null)
+                return false;
+            process.WaitForExit(15000);
+            return process.ExitCode == 0 && HasBase(link);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void RemoveDirectory(string path)
+    {
+        FileAttributes attributes;
+        try
+        {
+            attributes = File.GetAttributes(path);
+        }
+        catch
+        {
+            return;
+        }
+        if ((attributes & FileAttributes.ReparsePoint) != 0)
+        {
+            var info = new ProcessStartInfo("cmd.exe")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            info.ArgumentList.Add("/c");
+            info.ArgumentList.Add($"rmdir \"{path}\"");
+            using var process = Process.Start(info);
+            process?.WaitForExit(15000);
+            return;
+        }
+        Directory.Delete(path, true);
     }
 
     private static string? Normalize(string? path)

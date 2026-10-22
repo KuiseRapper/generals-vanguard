@@ -106,7 +106,7 @@ public static class UpdateService
 
             var staging = gameDirectory + ".new";
             if (Directory.Exists(staging))
-                Directory.Delete(staging, true);
+                DeleteTree(staging);
             ZipFile.ExtractToDirectory(zip, staging);
 
             // A zip made with "GeneralsMD/Run/*" has generals.exe at the root; tolerate one wrapping folder too.
@@ -135,12 +135,12 @@ public static class UpdateService
 
             var old = gameDirectory + ".old";
             if (Directory.Exists(old))
-                Directory.Delete(old, true);
+                DeleteTree(old);
             if (Directory.Exists(gameDirectory))
                 Directory.Move(gameDirectory, old);
             Directory.Move(staging, gameDirectory);
             if (Directory.Exists(old))
-                Directory.Delete(old, true);
+                DeleteTree(old);
         }
         finally
         {
@@ -156,6 +156,33 @@ public static class UpdateService
         await DownloadFileAsync(release.Url, target, progress, ct);
         VerifySha256(target, release.Sha256);
         return target;
+    }
+
+    /// <summary>
+    /// Delete a tree without following a directory reparse point.  The game folder can hold
+    /// ZH_Generals as a junction to the player's own Zero Hour install; a recursive delete would walk
+    /// into it and remove their game files, so a link is removed as a link.
+    /// </summary>
+    private static void DeleteTree(string path)
+    {
+        if (!Directory.Exists(path))
+            return;
+        foreach (var entry in Directory.GetFileSystemEntries(path))
+        {
+            var attributes = File.GetAttributes(entry);
+            if ((attributes & FileAttributes.Directory) != 0)
+            {
+                if ((attributes & FileAttributes.ReparsePoint) != 0)
+                    Directory.Delete(entry, false);
+                else
+                    DeleteTree(entry);
+            }
+            else
+            {
+                File.Delete(entry);
+            }
+        }
+        Directory.Delete(path, false);
     }
 
     public static void TryDelete(string path)
