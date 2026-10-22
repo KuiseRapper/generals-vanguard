@@ -97,6 +97,22 @@ try
     listener.Stop();
     await server;
     Console.WriteLine("launcher selftest ok");
+
+    // --live installs the real latest release through the same code path.  It is optional because
+    // it needs the network and a 50 MB download; the local test above always runs.
+    if (args.Contains("--live"))
+    {
+        var live = await UpdateService.FetchManifestAsync(
+            "https://github.com/KuiseRapper/generals-vanguard/releases/latest/download/launcher.json");
+        var liveDir = Path.Combine(root, "live-game");
+        await UpdateService.InstallGameAsync(live.Game!, liveDir, null);
+        Assert(File.Exists(Path.Combine(liveDir, "generals.exe")), "live game exe installed");
+        Assert(File.Exists(Path.Combine(liveDir, "Data", "INI", "RussiaReforged.ini")),
+            "live game carries the Russia data");
+        Assert(File.ReadAllText(Path.Combine(liveDir, "version.txt")) == live.Game!.Version,
+            "live version recorded");
+        Console.WriteLine("live launcher update ok: " + live.Game.Version);
+    }
     return 0;
 }
 finally
