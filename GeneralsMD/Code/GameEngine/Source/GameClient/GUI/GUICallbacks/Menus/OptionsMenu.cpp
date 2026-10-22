@@ -2370,8 +2370,8 @@ void OptionsMenuInit( WindowLayout *layout, void *userData )
 
 	NameKeyType versionID = TheNameKeyGenerator->nameToKey( AsciiString("OptionsMenu.wnd:LabelVersion") );
 	GameWindow *labelVersion = TheWindowManager->winGetWindowFromId( NULL, versionID );
-	// The fork's release number rather than EA's registry "Version 1.04".
-	UnicodeString versionString( u"Reforged " );
+	// The fork's own name and release number rather than EA's registry "Version 1.04".
+	UnicodeString versionString( u"Generals Vanguard " );
 	UnicodeString releaseVersion;
 	releaseVersion.translate( TheVersion->getReleaseVersion() );
 	versionString.concat( releaseVersion );
