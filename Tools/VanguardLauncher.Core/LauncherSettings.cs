@@ -7,6 +7,7 @@ public sealed class LauncherSettings
 {
     public string? GamePath { get; set; }
     public string? ZeroHourPath { get; set; }
+    public bool ShortcutCreated { get; set; }
 
     /// <summary>The release asset the launcher asks for the manifest; the latest release by default.</summary>
     public string ManifestUrl { get; set; } =

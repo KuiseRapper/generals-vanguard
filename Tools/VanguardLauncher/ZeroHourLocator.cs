@@ -136,6 +136,71 @@ public static class ZeroHourLocator
         => File.Exists(Path.Combine(directory, BaseArchive));
 
     /// <summary>
+    /// The engine looks for Zero Hour's .big files beside the exe.  Reforged installs into the Zero
+    /// Hour folder; the portable launcher instead links every top-level .big from the Zero Hour
+    /// install into its game folder (hard links where Windows allows them, copies otherwise), so
+    /// INIZH.big and its Data\INI\Default\Weather.ini are found without touching the Steam install.
+    /// </summary>
+    public static (int Linked, int Copied, string Message) PrepareZeroHourArchives(
+        string gameDirectory, string? zeroHour)
+    {
+        if (zeroHour is null || !Directory.Exists(zeroHour))
+            return (0, 0, "Zero Hour folder not found.");
+        Directory.CreateDirectory(gameDirectory);
+        var linked = 0;
+        var copied = 0;
+        foreach (var source in Directory.GetFiles(zeroHour, "*.big"))
+        {
+            var target = Path.Combine(gameDirectory, Path.GetFileName(source));
+            if (File.Exists(target))
+                continue;
+            if (TryHardLink(target, source))
+            {
+                linked++;
+                continue;
+            }
+            try
+            {
+                File.Copy(source, target, false);
+                copied++;
+            }
+            catch
+            {
+                // A locked or unreadable archive is reported by the Weather check below.
+            }
+        }
+        var message = linked + copied == 0
+            ? "No Zero Hour .big files were found in " + zeroHour
+            : $"Zero Hour data: {linked} linked, {copied} copied.";
+        return (linked, copied, message);
+    }
+
+    private static bool TryHardLink(string link, string target)
+    {
+        try
+        {
+            var info = new ProcessStartInfo("cmd.exe")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            info.ArgumentList.Add("/c");
+            info.ArgumentList.Add($"mklink /H \"{link}\" \"{target}\"");
+            using var process = Process.Start(info);
+            if (process is null)
+                return false;
+            process.WaitForExit(15000);
+            return process.ExitCode == 0 && File.Exists(link);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Some Zero Hour SKUs ship a second INIZH.big in Data\INI.  The retail game deletes it on
     /// startup (relative to its own working directory), but Vanguard runs from its own game folder,
     /// so the duplicate survives and its GameData.ini wins — that is where a Reforged 3.x

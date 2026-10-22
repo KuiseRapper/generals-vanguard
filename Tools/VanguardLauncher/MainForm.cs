@@ -441,6 +441,11 @@ public sealed class MainForm : Form
     private async Task OnShownAsync()
     {
         _settings = SettingsStore.Load();
+        if (!_settings.ShortcutCreated)
+        {
+            _settings.ShortcutCreated = TryCreateShortcut();
+            SettingsStore.Save(_settings);
+        }
         _gameDir = GameLocator.Find(_settings.GamePath);
         RefreshState();
         if (_settings.CheckOnStartup)
@@ -704,6 +709,19 @@ public sealed class MainForm : Form
                     return;
             }
             var duplicate = await Task.Run(() => ZeroHourLocator.MoveDuplicateInizh(zeroHour.Path));
+            var archives = await Task.Run(() => ZeroHourLocator.PrepareZeroHourArchives(_gameDir, zeroHour.Path));
+            _baseInfo.Text = archives.Message;
+            var gameWeather = await Task.Run(() => ZeroHourLocator.HasInizhFile(_gameDir, "Weather.ini"));
+            if (!gameWeather)
+            {
+                var answer = MessageBox.Show(this,
+                    "The game folder still has no INIZH.big with Data\\INI\\Default\\Weather.ini. "
+                    + "The launcher could not link the Zero Hour archives (different drive, permission, "
+                    + "or the install is incomplete).\n\nPlay anyway?",
+                    "Zero Hour archives missing", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (answer != DialogResult.Yes)
+                    return;
+            }
             if (duplicate is not null)
                 _baseInfo.Text = "Moved the duplicate Data\\INI\\INIZH.big out of Zero Hour.";
             var prep = await Task.Run(() =>
@@ -733,6 +751,30 @@ public sealed class MainForm : Form
         finally
         {
             SetBusy(false);
+        }
+    }
+
+    private static bool TryCreateShortcut()
+    {
+        try
+        {
+            var shellType = Type.GetTypeFromProgID("WScript.Shell");
+            if (shellType is null)
+                return false;
+            dynamic shell = Activator.CreateInstance(shellType)!;
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                "Generals Vanguard.lnk");
+            dynamic shortcut = shell.CreateShortcut(path);
+            shortcut.TargetPath = Environment.ProcessPath ?? Application.ExecutablePath;
+            shortcut.WorkingDirectory = AppContext.BaseDirectory;
+            shortcut.IconLocation = Environment.ProcessPath ?? Application.ExecutablePath;
+            shortcut.Save();
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
