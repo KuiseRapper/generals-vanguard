@@ -555,6 +555,8 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 		return TRUE;
 	if (p == "art\\textures\\sccsiberianfront.tga")
 		return TRUE;
+	if (starts("art\\textures\\sccrussia"))
+		return TRUE;
 	if (p == "data\\english\\art\\textures\\titlescreenuserinterface.tga")
 		return TRUE;
 	// Data\English is copied to Run\English, not under Data in the package.
