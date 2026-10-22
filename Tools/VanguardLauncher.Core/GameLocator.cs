@@ -59,6 +59,9 @@ public static class GameLocator
         {
             WorkingDirectory = gameDirectory,
             UseShellExecute = true,
+            // WinMain refuses a direct start with "Please start Generals Vanguard from its launcher."
+            // unless this marker is present; it is the handshake the old Reforged launcher used.
+            Arguments = "-rk7",
         };
         return Process.Start(info) ?? throw new InvalidOperationException("The game did not start.");
     }

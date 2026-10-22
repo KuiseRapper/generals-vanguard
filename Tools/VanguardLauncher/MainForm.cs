@@ -13,6 +13,8 @@ public sealed class MainForm : Form
 
     private readonly Label _status = new();
     private readonly Label _detail = new();
+    private readonly Label _updateBanner = new();
+    private readonly Label _zeroHour = new();
     private readonly Label _versions = new();
     private readonly Button _play = new();
     private readonly Button _update = new();
@@ -63,19 +65,30 @@ public sealed class MainForm : Form
             Location = new Point(29, 64),
         };
 
+        _updateBanner.Text = "";
+        _updateBanner.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        _updateBanner.ForeColor = Color.FromArgb(244, 190, 74);
+        _updateBanner.BackColor = Color.FromArgb(48, 40, 22);
+        _updateBanner.AutoSize = false;
+        _updateBanner.TextAlign = ContentAlignment.MiddleLeft;
+        _updateBanner.Padding = new Padding(8, 0, 0, 0);
+        _updateBanner.Location = new Point(29, 88);
+        _updateBanner.Size = new Size(580, 24);
+        _updateBanner.Visible = false;
+
         _status.Text = "Starting\u2026";
         _status.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
         _status.AutoSize = false;
-        _status.Location = new Point(29, 110);
+        _status.Location = new Point(29, 118);
         _status.Size = new Size(580, 26);
 
         _detail.Text = "";
         _detail.ForeColor = Muted;
         _detail.AutoSize = false;
-        _detail.Location = new Point(29, 138);
+        _detail.Location = new Point(29, 146);
         _detail.Size = new Size(580, 42);
 
-        _progress.Location = new Point(29, 188);
+        _progress.Location = new Point(29, 190);
         _progress.Size = new Size(580, 10);
         _progress.Style = ProgressBarStyle.Continuous;
         _progress.Visible = false;
@@ -85,23 +98,29 @@ public sealed class MainForm : Form
         ConfigureButton(_browse, "Set game folder", 417, 216, 192, Panel, Color.White);
         ConfigureButton(_folder, "Open game folder", 29, 264, 184, Panel, Color.White);
 
+        _zeroHour.Text = "Zero Hour: looking\u2026";
+        _zeroHour.ForeColor = Muted;
+        _zeroHour.AutoSize = true;
+        _zeroHour.Font = new Font("Segoe UI", 8.5F);
+        _zeroHour.Location = new Point(29, 312);
+
         _versions.Text = $"Launcher {LauncherVersion}";
         _versions.ForeColor = Muted;
         _versions.AutoSize = true;
-        _versions.Location = new Point(29, 330);
+        _versions.Location = new Point(29, 334);
 
         _link.Text = "github.com/KuiseRapper/generals-vanguard/releases";
         _link.LinkColor = Muted;
         _link.ActiveLinkColor = Color.White;
         _link.VisitedLinkColor = Muted;
         _link.AutoSize = true;
-        _link.Location = new Point(29, 352);
+        _link.Location = new Point(29, 356);
         _link.LinkClicked += (_, _) => OpenUrl(UpdateService.ReleasePage);
 
         Controls.AddRange(new Control[]
         {
-            title, subtitle, _status, _detail, _progress, _play, _update, _browse, _folder,
-            _versions, _link,
+            title, subtitle, _updateBanner, _status, _detail, _progress, _play, _update, _browse,
+            _folder, _zeroHour, _versions, _link,
         });
 
         AcceptButton = _play;
@@ -155,6 +174,20 @@ public sealed class MainForm : Form
                     : $"Game {installed} at {_gameDir}";
             }
         }
+        var zeroHour = ZeroHourLocator.Detect();
+        if (zeroHour.Found)
+        {
+            _zeroHour.Text = "Zero Hour: found at " + zeroHour.Path + (zeroHour.Repaired ? " (path repaired)" : "");
+            _zeroHour.ForeColor = Muted;
+        }
+        else
+        {
+            _zeroHour.Text = zeroHour.BaseGeneralsOnly
+                ? "Zero Hour: only the base game was found - Zero Hour is required"
+                : "Zero Hour: not found - install Zero Hour (the base game is not enough)";
+            _zeroHour.ForeColor = Accent;
+        }
+
         _versions.Text = $"Launcher {LauncherVersion}  \u2022  Game {installed ?? "not installed"}";
         _play.Enabled = !_busy;
     }
@@ -193,16 +226,21 @@ public sealed class MainForm : Form
                 _detail.Text = _gameDir is null
                     ? "Download it with Check for updates."
                     : $"Installed {installed ?? "local build"} \u2192 {manifest.Game.Version}.";
+                _updateBanner.Text = $"Update available: game {manifest.Game.Version} \u2014 press Check for updates";
+                _updateBanner.Visible = true;
             }
             else if (launcherNewer)
             {
                 _status.Text = $"Launcher update {manifest.Launcher!.Version} available";
                 _detail.Text = "Use Check for updates to install it.";
+                _updateBanner.Text = $"Launcher update {manifest.Launcher.Version} available \u2014 press Check for updates";
+                _updateBanner.Visible = true;
             }
             else
             {
                 _status.Text = "Everything is up to date";
                 _detail.Text = $"Game {installed ?? manifest.Game!.Version} \u2022 launcher {LauncherVersion}.";
+                _updateBanner.Visible = false;
             }
         }
         catch (Exception ex)
@@ -287,7 +325,10 @@ public sealed class MainForm : Form
             }
 
             if (!gameNewer && !launcherNewer)
+            {
                 _status.Text = "Everything is up to date";
+                _updateBanner.Visible = false;
+            }
         }
         catch (Exception ex)
         {
@@ -315,6 +356,19 @@ public sealed class MainForm : Form
             if (_gameDir is null)
                 return;
         }
+
+        var zeroHour = ZeroHourLocator.Detect();
+        if (!zeroHour.Found)
+        {
+            var answer = MessageBox.Show(this,
+                zeroHour.BaseGeneralsOnly
+                    ? "Only the base game was found. Generals Vanguard is a Zero Hour mod and needs the Zero Hour expansion.\n\nPlay anyway?"
+                    : "Zero Hour was not found. Install Zero Hour from Steam or the EA app.\n\nPlay anyway?",
+                "Zero Hour not found", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (answer != DialogResult.Yes)
+                return;
+        }
+
         try
         {
             GameLocator.Start(_gameDir);
