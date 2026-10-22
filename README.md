@@ -178,11 +178,18 @@ played a full check match on a Steam Deck. A match between Windows and a Mac has
 ### Windows
 
 1. Have Zero Hour installed from Steam or the EA app.
-2. This fork has no launcher of its own: build it from this repository with one command (see
-   [Build it](#build-it)) and start the `generals.exe` it leaves in `GeneralsMD/Run/`.
+2. Download **VanguardLauncher.exe** from the
+   [latest release](https://github.com/KuiseRapper/generals-vanguard/releases/latest) and run it.
+3. Press **Play**. On the first run the launcher downloads the current Vanguard build into its own
+   `game` folder; later, **Check for updates** replaces that build with a newer release and updates
+   the launcher itself when a newer one is on the release.
 
-The build carries no game files of its own: it finds your Zero Hour folder and reads your `*.big`
-where they are. A Steam copy still starts through Steam.
+The launcher does not ship EA's game files: the game finds your Zero Hour install and reads its
+`*.big` where they are. A Steam copy still starts through Steam. If you build the game yourself,
+**Set game folder** points the launcher at the `generals.exe` in `GeneralsMD/Run`.
+
+The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, and
+[docs/launcher.md](docs/launcher.md) has the manifest, the update path and how a release is cut.
 
 ### macOS and Linux
 
