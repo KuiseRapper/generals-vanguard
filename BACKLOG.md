@@ -71,16 +71,18 @@ Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 ### 6. Russia: the skeleton and its first systems play; finish the faction
 **Owner's ruling (2026-10-17): go big immediately.** The skeleton is **done** (2026-10-21): a fourth
 side with twelve buildings and twelve units on reused art, its own command sets, AI build list and
-skirmish scripts, plus its first systems - **Igla** (Motostrelki gain an anti-air missile),
-**ERA/Shtora** (+400 health to every T-90), **Infantry Training**, **Aircraft Armour**,
-**Artillery Training**, three base defences (S-300, Trench Line, Strongpoint), the **Missile Brigade**
-(superweapon), a small **air arm** (MiG-25, Mi-24) and the **Artillery Preparation** power. What it took, the general AI defects it found and the measurements are in
+skirmish scripts, plus its systems - **Igla** (Motostrelki gain an anti-air missile), **ERA/Shtora**
+(+400 health to every T-90), **Infantry Training**, **Aircraft Armour**, **Artillery Training**, the
+**Command Doctrine**, three base defences (S-300, Trench Line, Strongpoint), the **Missile Brigade**
+(superweapon), a small **air arm** (MiG-25, Mi-24) and **seven general's powers** (Artillery
+Preparation, Buratino Salvo, Scorched Earth, Radio-Electronic Strike, Long-Range Aviation, Guards
+Assault, Field Repair), all with AI scripts. What it took, the general AI defects it found and the measurements are in
 [russia-build-plan.md](docs/factions/russia-build-plan.md).
-*First step now:* **the rest of the powers** - Artillery Preparation works, but the science tree, the
-powers bar and Recon-Fire, Aerosol Screen, Buratino Salvo and VDV are still design. Then
-**balance** - 88 measured matches, 78 decided, Russia 69 is a faction that plays, not a balanced one;
-the random-faction matrix adds 1v1 18-3 (all three losses to China) and 2v2 14-7 (every loss against a
-GLA team), so China is the 1v1 counter and GLA is the 2v2 counter -
+*First step now:* **the art pass and the remaining design powers** - seven powers work and the AI uses
+them, but Recon-Fire, Aerosol Screen and VDV are still design and the borrowed models are placeholders.
+**Balance** is much closer: the random 24-match matrices went from 1v1 18-3 (85.7%) and 2v2 14-7
+(66.7%) to 1v1 12-7 (63.2%) and 2v2 13-10 (56.5%), with the 1v1 losses spread across the field.  The
+remaining balance work is a larger sample and the per-faction table -
 the artillery tier (Russia needs its own howitzer weapon), the Mobilized-to-Guards conversion, and the
 silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
 

@@ -135,6 +135,13 @@ under a SAM umbrella.
 - **Mi-24 Hind** — a flying BMP that puts infantry on top of a position without the slow ground approach.
 - **VDV drop** — where the strategic-lift fantasy lives, as a power rather than a transport fleet.
 
+**Implementation (2026-10-21):** seven powers are on the Command Bunker and unlocked by the Fire
+Direction Center's Command Doctrine: Artillery Preparation, Buratino Salvo (napalm), Scorched Earth
+(cluster mines), Radio-Electronic Strike (EMP), Long-Range Aviation (carpet bomb), Guards Assault
+(frenzy) and Field Repair.  The first five reuse the shipped barrage/napalm/mine/EMP/carpet effects;
+Recon-Fire, Aerosol Screen and VDV are still design and need their own effects.  The AI fires all
+seven.
+
 **Owner's revision (2026-10-21):** the original design deliberately had no air-superiority fighter.
 The owner asked for a MiG-25, which is exactly that, so the air arm now has one: a high-speed
 interceptor with air-to-air missiles and no ground attack.  The doctrine is still ground-led — the

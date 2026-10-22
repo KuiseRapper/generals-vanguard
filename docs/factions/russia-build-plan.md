@@ -134,8 +134,8 @@ Russia is a complete core faction now, not just a couple of buildings:
 | Units | 12 (Sapery, Supply Truck, Motostrelki, Spetsnaz, Kornet Team, BMP-3, T-72B, T-90, 2S19, Tunguska, MiG-25, Mi-24) | 11-15 |
 | Base defences | 3 (S-300 Battery, Trench Line, Strongpoint) | 1-2 |
 | Superweapon | 1 (Missile Brigade) | 1 |
-| Upgrades | 6 (capture, Igla, ERA/Shtora, Infantry Training, Aircraft Armour, Artillery Training) | 5-8 |
-| General's powers | 1 (Artillery Preparation) | several |
+| Upgrades | 7 (capture, Igla, ERA/Shtora, Infantry Training, Aircraft Armour, Artillery Training, Command Doctrine) | 5-8 |
+| General's powers | 7 (Artillery Preparation, Buratino Salvo, Scorched Earth, Radio-Electronic Strike, Long-Range Aviation, Guards Assault, Field Repair) | several |
 | Aircraft | 2 (MiG-25 interceptor, Mi-24 attack helicopter) | 5-7 |
 
 So the hole that is left is the **powers system** (one power works; the science tree, powers bar and the
@@ -237,6 +237,53 @@ a strong ally lifts a faction and a strong enemy lowers it.  It does say where R
 came from: all seven came against a team with at least one GLA general, and two were Russia plus an
 American ally against two GLA.  Russia remains above the field in 1v1 and in the
 middle of the 2v2 spread, with China the only side that beat it one-on-one.
+
+### Powers, AI coverage and balance pass, 2026-10-21
+
+The Command Bunker inherits seven of China's Command Centre power modules.  All seven now carry
+Russian names and buttons, and the Fire Direction Center's **Command Doctrine** unlock gates them:
+the player buys the (free) doctrine at the centre, and the AI's own script grants the sciences the
+moment its centre stands, so the AI uses the same powers without a science-purchase screen.
+
+| Power | Effect | AI |
+|---|---|---|
+| Artillery Preparation | three-wave barrage | existing fire script |
+| Buratino Salvo | thermobaric/napalm run | added always-on fire script |
+| Scorched Earth | cluster minefield | existing fire script |
+| Radio-Electronic Strike | EMP pulse | existing EMP script (no longer remapped to the missile) |
+| Long-Range Aviation | carpet bombing run | existing carpet script, aimed at the short carpet power the bunker has |
+| Guards Assault | frenzy buff on our own troops | added script, targets our base/damaged vehicle |
+| Field Repair | repairs our vehicles | added script, targets our most damaged vehicle |
+
+The **AI now uses the whole roster**, not a human-only subset: the Trench Line is an automatic
+structure in the AI build list, the Strongpoint comes from the mapped Bunker build actions, the
+Kornet Team from the mapped Tank Hunter teams, the Air Base/MiG-25/Mi-24 from the air teams, and all
+seven powers from the scripts above.  The AI buys the six ordinary upgrades; the doctrine is granted
+by its centre script.
+
+**Balance changes** (from the 85.7% / 66.7% matrices):
+
+- Borrowed building shells to their source costs: Thermal Power Plant 600 -> 1,000, Supply Centre
+  1,000 -> 1,500, Mobilization Plant 1,200 -> 2,000, Fire Direction Center 1,500 -> 2,000, Trench Line
+  800 -> 1,000.
+- T-72B 700 -> 800, T-90 1,600 -> 2,000, 2S19 1,400 -> 1,600.
+- The S-300 was a multi-role gun: the Patriot's copied set is ground-primary, air-tertiary.  It now
+  keeps only the anti-air slot, so it is a SAM and the Trench Line is the ground defence.
+- The seven powers are gated behind the Fire Direction Center's Command Doctrine instead of being
+  free from the opening Command Bunker.
+- The AI can place a superweapon outside the base edge when its footprint no longer fits inside.
+
+**After** (same random-faction method, fresh draws):
+
+| | 1v1 | 2v2 |
+|---|---|---|
+| Russia before | 18-3, 85.7% | 14-7, 66.7% |
+| **Russia after** | **12-7, 63.2%** | **13-10, 56.5%** |
+| Draws | 5 of 24 | 1 of 24 |
+
+The 1v1 losses are spread across the field (America Air Force twice, GLA Demolition twice, China Tank,
+GLA and GLA Toxin once each), not concentrated on one counter.  The 2v2 rate is a team result; the
+sample is 24 matches, so the intervals are wide, but the direction is consistent with the changes.
 
 ### Model audit, 2026-10-21
 

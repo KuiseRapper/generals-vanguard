@@ -3,6 +3,26 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-21 - Russia's powers, AI coverage and balance pass
+
+- **Seven general's powers**, all on the Command Bunker and all used by the AI: Artillery Preparation
+  (barrage), Buratino Salvo (napalm), Scorched Earth (cluster mines), Radio-Electronic Strike (EMP),
+  Long-Range Aviation (carpet bomb), Guards Assault (frenzy) and Field Repair.  Three had no AI script;
+  they have always-on fire scripts now.  Frenzy and repair target our own base or most damaged vehicle,
+  not the enemy's.
+- The powers are gated behind the Fire Direction Center's **Command Doctrine** instead of being free
+  from the opening.  The player buys the free doctrine; the AI's script grants the sciences when its
+  centre stands, so the AI uses all seven without a science screen.
+- **The AI uses the whole roster**: Trench Line (automatic), Strongpoint (mapped Bunker actions),
+  Kornet Team (mapped Tank Hunter teams), Air Base/MiG-25/Mi-24 (air teams) and all seven powers.
+- **Balance**: borrowed building shells to source costs (Thermal 600->1,000, Supply 1,000->1,500,
+  Mobilization 1,200->2,000, FDC 1,500->2,000, Trench 800->1,000); T-72B 700->800, T-90 1,600->2,000,
+  2S19 1,400->1,600; the S-300 keeps only its anti-air slot instead of being a multi-role gun; the
+  superweapon can be placed outside the base edge when its footprint no longer fits inside.
+- The same random 24-match matrices: **1v1 18-3 (85.7%) before, 12-7 (63.2%) after; 2v2 14-7 (66.7%)
+  before, 13-10 (56.5%) after**.  The 1v1 losses are now spread across the field instead of concentrated
+  on China.
+
 ## 2026-10-21 - Russia in the random-faction matrix
 
 - `Tools/Balance/faction_matrix.py` draws the non-Russian seats from the twelve lobby templates at
