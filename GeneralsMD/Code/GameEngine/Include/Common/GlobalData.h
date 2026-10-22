@@ -172,7 +172,7 @@ public:
 	AsciiString m_monitor;		///< the monitor the game is on, as its GDI device name ("\\.\DISPLAY2");
 														///< empty is the primary.  See Common/Monitors.h.
 	Int m_msaaLevel;					///< multisampling, as an index into the levels the options menu offers
-	Bool m_vsync;						///< wait for the monitor; off is the uncapped picture the frame-rate cap removal shipped
+	Bool m_vsync;						///< wait for the monitor; on by default since the uncapped picture made GPUs whine (2026-10-23)
 	Bool m_direct3D11;			///< draw and present through the Direct3D 11 backend; -d3d9 and -headless turn it off
 	AsciiString m_direct3D11DumpPath;	///< -dx11dump: where to write each generated program
 	AsciiString m_direct3D11PostChain;	///< -dx11post: the effects run over the finished D3D11 frame
