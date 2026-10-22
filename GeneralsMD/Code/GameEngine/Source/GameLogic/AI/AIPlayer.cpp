@@ -6778,7 +6778,10 @@ Bool AIPlayer::placeNear( const ThingTemplate *tmpl, const Coord3D *center, Real
 
 	// A building that stays home does not walk outward, and leaves the ring the others have reached
 	// alone: it tries every ring that can still be inside the base's edge, on every call.
-	const Bool home = staysHome( tmpl );
+	// A superweapon is the exception: its footprint is the largest in the game, and once the base has
+	// its defences there is no legal cell inside the base edge.  Let it walk outward like a forward
+	// building instead of failing with "no room" for the rest of the match.
+	const Bool home = staysHome( tmpl ) && !tmpl->isKindOf( KINDOF_FS_SUPERWEAPON );
 	const Real homeReachSqr = sqr( BASE_EDGE_REACH * m_baseRadius );
 	const Int rings = home ? HOME_PLACEMENT_RINGS : PLACEMENT_RINGS;
 	if( home )

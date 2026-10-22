@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -1422,6 +1423,45 @@ Object * AISkirmishPlayer::findDozer( const Coord3D *pos )
  */
 Bool AISkirmishPlayer::computeSuperweaponTarget(const SpecialPowerTemplate *power, Coord3D *retPos, Int playerNdx, Real weaponRadius)
 {
+	/* Frenzy and field repair are support powers: they only affect our own units, so the enemy-target
+		 search below would spend them on his base and help nobody.  Repair prefers our most damaged
+		 vehicle wherever it is; frenzy rallies on the base centre, where the defenders are. */
+	if( power->getSpecialPowerType() == SPECIAL_FRENZY || power->getSpecialPowerType() == SPECIAL_REPAIR_VEHICLES )
+	{
+		Object *best = NULL;
+		Real bestFraction = 1.0f;
+		if( power->getSpecialPowerType() == SPECIAL_REPAIR_VEHICLES )
+		{
+			Player::PlayerTeamList::const_iterator teamIt;
+			for( teamIt = m_player->getPlayerTeams()->begin(); teamIt != m_player->getPlayerTeams()->end(); ++teamIt )
+			{
+				for( DLINK_ITERATOR<Team> teamInstance = (*teamIt)->iterate_TeamInstanceList(); !teamInstance.done(); teamInstance.advance() )
+				{
+					Team *team = teamInstance.cur();
+					if( !team )
+						continue;
+					for( DLINK_ITERATOR<Object> memberIt = team->iterate_TeamMemberList(); !memberIt.done(); memberIt.advance() )
+					{
+						Object *obj = memberIt.cur();
+						if( !obj || !obj->isKindOf( KINDOF_VEHICLE ) || !obj->getBodyModule() )
+							continue;
+						Real fraction = obj->getBodyModule()->getHealth() / obj->getBodyModule()->getMaxHealth();
+						if( fraction < bestFraction )
+						{
+							bestFraction = fraction;
+							best = obj;
+						}
+					}
+				}
+			}
+		}
+		if( best != NULL )
+			*retPos = *best->getPosition();
+		else
+			*retPos = m_baseCenter;
+		retPos->z = TheTerrainLogic->getGroundHeight( retPos->x, retPos->y );
+		return TRUE;
+	}
 
 	Region2D bounds;
 	getPlayerStructureBounds(&bounds, playerNdx, FALSE, m_player->getPlayerIndex());

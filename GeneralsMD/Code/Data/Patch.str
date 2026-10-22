@@ -1507,3 +1507,48 @@ END
 CONTROLBAR:ToolTipRussiaArtilleryPreparation
 "Call a scheduled artillery barrage on a point. Three waves once the science is fully bought."
 END
+CONTROLBAR:RussiaBuratinoSalvo
+"&Buratino Salvo"
+END
+CONTROLBAR:ToolTipRussiaBuratinoSalvo
+"A thermobaric rocket run on a point."
+END
+CONTROLBAR:RussiaScorchedEarth
+"&Scorched Earth"
+END
+CONTROLBAR:ToolTipRussiaScorchedEarth
+"Lay a cluster minefield at a point."
+END
+CONTROLBAR:RussiaRadioElectronicStrike
+"&Radio-Electronic Strike"
+END
+CONTROLBAR:ToolTipRussiaRadioElectronicStrike
+"An EMP pulse that stops vehicles and structures in the area."
+END
+CONTROLBAR:RussiaLongRangeAviation
+"&Long-Range Aviation"
+END
+CONTROLBAR:ToolTipRussiaLongRangeAviation
+"A carpet bombing run on a point."
+END
+CONTROLBAR:RussiaGuardsAssault
+"&Guards Assault"
+END
+CONTROLBAR:ToolTipRussiaGuardsAssault
+"Friendly units in the area fight faster for a while."
+END
+UPGRADE:RussiaCommandDoctrine
+"Command Doctrine"
+END
+CONTROLBAR:UpgradeRussiaCommandDoctrine
+"&Command Doctrine"
+END
+CONTROLBAR:ToolTipRussiaCommandDoctrine
+"Unlocks the Command Bunker's general's powers: artillery, Buratino, mines, EMP, aviation, Guards assault and field repair."
+END
+CONTROLBAR:RussiaFieldRepair
+"&Field Repair"
+END
+CONTROLBAR:ToolTipRussiaFieldRepair
+"Repair friendly vehicles in the area."
+END
