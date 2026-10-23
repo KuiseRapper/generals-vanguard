@@ -33,6 +33,23 @@ the textures it names, then `ReplaceModule ModuleTag_01` (plus `Model = None` fo
 tags) on our `Russia*` reskins. Start with the T-90, BMP-3, MiG-25 and Mi-24, one commit per group,
 with a screenshot from a skirmish each time.
 *Licence:* SWR Productions' art, not GPL; see NOTICE.md. The owner directed its use.
+### Campaign chooser (Default / ShockWave / RotR)
+**Why it is not built yet: the data is missing, not the code.** The three story campaigns are not in
+the tree or in the combined package: `!!VanguardCombined.big` carries one `Data\INI\Campaign.ini`
+(ours, the retail USA/GLA/China missions) and `!Shw_challenge.big` carries ShockWave's Generals
+Challenge, but **no RotR campaign missions exist anywhere in the package**. RotR's campaign is the
+"separate pack" the combined plan already lists as open, and campaign maps are big files shipped with
+the mods, not something the fork can author.
+`CampaignManager::init()` also loads one fixed path (`Data\INI\Campaign.ini`) once at startup, so a
+real chooser needs (a) a re-entrant init that can swap the campaign set, (b) the three data sets
+present, (c) a shell screen that lists them, per faction.
+*First step:* build the RotR campaign pack first (its `Campaign.ini` plus maps into the combined
+mod), then a `-campaign <set>` switch that picks the INI before `CampaignManager::init`, then the
+menu over it.
+*Open question:* if "per faction" means choosing which mod's version of a faction the lobby offers
+(Default USA / ShockWave USA / RotR USA) rather than a story campaign, that is `-modfactions` plus a
+chooser UI instead, and it does not need the campaign pack. Say which and it is the first step.
+
 ### Mod manager in the launcher
 **macOS launcher: done and published (0.5.11).** Mods sheet with **ShockWave 1.201** and **Rise of the
 Reds 1.8** as checkboxes: "Update mods" installs a checked mod from the matching archive in
