@@ -48,6 +48,12 @@ exiting, so always give a batch a short `--timeout`.
 
 ## 1. Closing out a game against a spreading AI
 
+**Shipped 2026-10-23: the proliferation rule.** An AI that has had production and has none left, and
+is not winning, stops placing and rebuilding anything (see `updateConsolidation` in `AIPlayer.cpp`);
+what remains is finite.  Still open from the table below: the skirmish reveal toggle (off by default)
+and the "enemy structures: N" counter.
+
+
 **What actually happens.** Solo against two GLA AI. GLA builds cheap structures all over the map, so
 with two of them the map fills up, and the game cannot be closed by sweeping - you cannot patrol an
 entire map while probing for the last few buildings. It is not really *stealth*: it is **structure
@@ -76,7 +82,7 @@ flag to turn off.
 **What not to do:** nerf stealth or GLA's cheap buildings in *normal* play. Spreading and hiding are
 those factions' identities; the problem is only that a beaten AI keeps doing it forever.
 
-## 2. GLA is the strongest AI
+## 2. GLA is the strongest AI (owner: later)
 
 **Report.** GLA wins every AI game; "random" seemed to pick GLA four times in a row. Two separate
 questions, both checkable:
@@ -98,7 +104,7 @@ players), then run faction against faction.
 
 | Idea | Why it is fun | Cost |
 |---|---|---|
-| **Wave memory** - the AI remembers how its last waves went and changes lane, composition or target. | The "late game it repeats itself" complaint, and the biggest single AI win available. Already designed. | Moderate; gate and measure. |
+| **Wave memory** - *shipped in 0.5.15*, behind the skirmish box "AI wave memory" (on by default): the AI remembers which lane gained nothing and takes another. | Removes the worst part of "late game it repeats itself". | Done; the next step is per-lane composition, not just lane choice. |
 | **Per-match AI doctrines** - aggressive, defensive, economic, air-heavy, chosen at match start and visible to the player. | Makes opponents recognisable, and turns "the AI" into "that AI again". | Moderate: a doctrine field plus build-list selection. |
 | **Random maps in skirmish** - `Tools/RandomMapLab` already generates maps, and `-randommap` already works headless. | Infinite replayability for near-zero art cost. | Small-to-moderate: expose it in the menu. |
 | **Skirmish rule presets** - starting cash, no superweapons, fast build, sudden death, unit caps. | Big variety from a small UI; every preset changes how the game feels. | Small. |
@@ -119,7 +125,7 @@ win per hour. Then the re-path storms (a 60,000-frame match costs ~5-6 million p
 expansions), persisting the BIG archive index, shipping a precompiled shader cache, and job-system
 tuning.
 
-**VSync is on by default since 0.5.9**, which removes the idle 118 fps and the coil whine that came with it; what remains here is an explicit frame cap and the measurement.
+**VSync is on by default since 0.5.12**, which removes the idle 118 fps and the coil whine that came with it.  The rest of this section is a **separate pass** by the owner's call (2026-10-23): an explicit frame cap, then the Vulkan option and the measurement.
 
 **Vulkan.** The renderer already has two backends: D3D11 on Windows and SDL3's Metal path on macOS
 (the same SDL3 GPU abstraction). A Vulkan backend is the same SDL3 GPU API with `SDL_GPU_VULKAN`, so
@@ -127,67 +133,21 @@ it is an option switch, not a rewrite: ship D3D11 as the default, add `-gpu vulk
 and compare frame time, GPU power and coil whine on the owner's Windows machine before changing any
 default.
 
-## 4. New content: three generals, then one new faction
+## 4. (removed)
 
-### The three generals (start with USA)
-
-One new general per existing side, each a build list plus a couple of units and one signature power.
-Cheap, because they reuse art, and they exercise the whole pathway.
-
-1. **USA - "Vanguard"** (first): prototype technology - railgun, directed energy, drones. The mod's
-   own identity, and the most natural fit for the name.
-2. **China**: an attrition general - conscripts, heavy artillery, slow and relentless.
-3. **GLA**: an insurgent general - ambush, sabotage, salvage; the opposite pole to Vanguard.
-
-### The new faction
-
-Owner's candidates were Russia, Germany and Japan. **Japan is dropped** - too art-heavy and the biggest
-risk of drifting into science fiction - and Germany becomes the **EU / Coalition** faction. **Russia
-stays first.** The Japanese "networks and drones" idea can return later as a general's theme rather
-than as a whole army.
-
-Why Russia first:
-
-- The strongest identity of the three, and the clearest contrast with China. China is already the
-  cheap-swarm side; Russia can be the opposite - heavy, slow, durable, artillery-led, with only a
-  small air arm (an interceptor and an attack helicopter) and air denial from the ground.
-- The most natural model reuse: tank hulls, artillery, SAMs and heavy infantry can be adapted from
-  China and USA shapes with new silhouettes, which matches the "reuse and change them" plan.
-- It gives the AI a genuinely different playstyle to learn, which is worth as much as the player
-  content.
-
-Suggested mechanical identities - differentiation must be **mechanical**, not just stats, or the
-faction feels like a reskin:
-
-| | Identity | Signature mechanics |
-|---|---|---|
-| Russia | Ground war with a small air arm | Slow high-HP armour; long-range artillery with a creeping-barrage power; cheap large conscript squads; strong static AA; a MiG-25 interceptor and Mi-24 attack helicopter, no strategic bomber; slower but cheaper economy. |
-| EU / Coalition (Germany-led) | Precision and recovery | Fast mobile armour; recon drones that spot (an anti-hiding faction by design); repair and reclaim of wrecks; strong defensive turrets. |
-
-**What a faction actually costs.** Art is the real bill: models, textures, animations, voices, UI
-palette and side icon. Technically it is data - `PlayerTemplate` (with `m_side`, `m_sideIconImage`), a
-`CommandSet`, units and powers, strings - plus teams in the compiled `SkirmishScripts.scb` so the AI
-can play it, which the in-tree `Tools/ScbTool` can edit.
-
-**Read this first:** upstream has a `feature/turkey-faction` branch - a working reference for adding a
-whole side to this engine. Study it before designing anything of our own.
-
-**Spike before promising it:** a fourth *side* touches the skirmish UI layout, side icons, colours and
-any three-side assumptions in menus and score screens. A new *general* avoids all of that, which is
-why the generals come first.
+The three-generals and fourth-faction plan was dropped by the owner on 2026-10-23.  There is no
+Russia or EU faction to build in the base game: the commander's Russia and ECA armies come from Rise
+of the Reds, inside the combined mod, and the base game stays plain Zero Hour plus the fork's fixes.
+The abandoned plan is in the git history of this file.
 
 ## 5. What I would do first
 
-**The owner's ruling (2026-10-17): Russia is the priority. Go big now; the USA general waits in the
-backlog.** So the order is:
+The owner's order (2026-10-23):
 
-1. **Russia** (section 4) - the first new faction, and the biggest thing this project can do.
-2. **Finish the pathfinder bug**: the 20,000-cell cap still returns a truncated route (section 6).
-3. **Make the AI spend its money** - it banks 60-75% of income; measured, and the biggest
-   gameplay-quality issue left.
-4. **The endgame fixes** (section 1), including the stealth-remnant reveal.
-5. **Wave memory** - the AI variety win.
-6. **Fun batch** (section 3): doctrines, random maps, rule presets, post-game stats.
-7. **The USA general** - moved here from the front; it was to be the rehearsal for Russia, but the
-   owner would rather build Russia directly and learn on the real thing.
-8. **Round 3 balance** (mirrored positions) - only when faction tuning is actually wanted.
+1. **The AI endgame and variety**: the close-out rule and the wave memory are in; the reveal toggle,
+   the structure counter and the per-lane composition are the next pieces (sections 1 and 3).
+2. **The combined mod**: full Russia and ECA ports from Rise of the Reds (the Leopard path is fixed;
+   the rest is data and balance), then the campaign pack.
+3. **Performance, separately**: the frame cap and the Vulkan option are their own pass (section 3b).
+4. **Windows launcher parity**, and the backlog's hygiene items.
+5. **Fun batch** (section 3) once the above is settled.

@@ -3,6 +3,36 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-23 - The AI remembers, consolidates and asks another dock
+
+- **Wave memory, behind a skirmish check box, on by default.** `doWaves` records `(lane, power, the
+  win chance at the time)` for every wave; when the next wave goes down the same lane - or ninety
+  seconds pass - the chance is compared. A lane that gained less than three points of chance is
+  barred for two minutes, and the lane vote (or Easy/Medium's fallback) takes the next quietest road. `-nowavememory`
+  is the A/B control for batches; the skirmish box is `WaveMemory` in the options string, so replays
+  and LAN games carry it. Nothing here can touch production or the economy: worst case the army
+  alternates lanes. Measured: two 400,000-frame Hard matches on Alpine Assault logged seven wave
+  sends and four judgements, and seed 1 barred lane 0 at frame 29,498 for 120 s. No win-rate delta is
+  claimed yet - the six-match four-player A/B at 96 cells gave byte-identical matches, because with
+  the earlier two-strike rule no lane was barred in them.
+- **A beaten AI stops building.** `updateConsolidation` marks a computer that has had a factory,
+  barracks or airfield, has none left and is not winning; `processBaseBuilding`, `doEconomy`,
+  `doPower`, `doSuperweapons` and `doExpansion` then place nothing new. Its army keeps fighting, and
+  the buildings that stand are the finite list left to kill - the endgame spread the owner reported.
+- **An expansion asks another dock.** `buildBySupplies` used to give an expansion up when the chosen
+  dock had nowhere legal to build; now `findSupplyCenter` takes the docks already tried and the next
+  one is asked, up to three.
+- **The ravine work is merged** (owner's play-test): unreachable lanes out of the vote, Easy and
+  Medium around them, the split wave off a bad second road, and no more routes to the rim of a
+  ravine.
+- **ECA's Leopard path runs**: the probe's Solar Reactor prerequisite was missing, not the
+  Overlord-style draw - with the reactor beside the war factory the queue takes 3 of 3 Leopards
+  (`combined_eca.txt`), and Lynx + Leopard together in `combined_eca2.txt`.
+- **Roadmap and backlog**: Russia's art pass, the three-generals plan and the fourth faction are
+  removed (the base game stays plain Zero Hour; the combined mod carries RotR's Russia and ECA), the
+  campaign chooser lives in the backlog only, GLA-strength is deferred, and performance/Vulkan is its
+  own pass.
+
 ## 2026-10-23 - The game takes the front when it starts
 
 - **The window is raised on start** (`SdlGameEngine`, after `SDL_CreateWindow`). Measured on macOS

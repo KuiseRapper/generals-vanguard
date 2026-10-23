@@ -88,6 +88,11 @@ and `CHANGELOG.md:231` ends the pressure work with "The other eleven still ran t
 | D2 | Set the per-team `teamProductionPrioritySuccessIncrease` to 0 in the script data | same as E5 without an engine change | needs the script toolchain; changes the EXE CRC. Only worth it if the ratchet is real |
 | E6/E7 | Un-freeze `m_role`; re-plan the build list late | | **not worth it** — against upstream's stated design and the owner's "do not change what I enjoy" |
 
+**Shipped 2026-10-23: E1 and E2, both.** E2 is the lane reachability mask (the ravine work, merged);
+E1 is the wave-outcome memory behind the skirmish box "AI wave memory" (on by default, `-nowavememory`
+to A/B).  E1's rule as shipped: one non-improving wave (less than three points of chance) bars that
+lane for two minutes.  This paragraph stays for the record of the plan.
+
 **Recommended first move: E1 and E2 together, opt-in per rung so they can be A/B'd**, because they are
 the only changes that address "it never switches" without touching what already works. Everything here
 is simulation-affecting: it changes the HEADLESS CRC and invalidates replays, so each needs

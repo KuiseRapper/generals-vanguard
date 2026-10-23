@@ -21,18 +21,13 @@ on top.
 - **The AI review and the ravine review**, in `docs/ai/skirmish-ai.md` and
   `docs/ai/twilight-ravine.md`.
 
+- **AI expansion retry and the ravine merge (2026-10-23).** `buildBySupplies` asks the next dock
+  when one has nowhere legal to stand (up to three), and the five `ai/lane-reachability` commits -
+  unreachable lanes out of the vote, Easy/Medium going around them, the split wave off a bad road,
+  and `findClosestPath` no longer aiming at a ravine rim - are on `develop` after the owner's
+  Twilight Flame play-test. Details in the removed items' changelog entries.
 ## Now
 
-### Russia's art from Rise of the Reds and ShockWave
-**Buildings are done** (0.5.7/0.5.8): nine Russian buildings and their cameos/portraits come from
-Rise of the Reds 1.8; extraction and wiring are in [docs/modding/rotr-1.8.md](docs/modding/rotr-1.8.md).
-The same recipe covers the units: RotR's Russia objects are under
-`Data\INI\Object\Russia\{Infantry,Vehicles,Aircraft,Defences}\*.ini` in `!BetaRotrINI.big`, with the
-models in `!BetaRotrW3D.big`; take the model names from each object's `Draw` block, extract the W3D and
-the textures it names, then `ReplaceModule ModuleTag_01` (plus `Model = None` for the base's other draw
-tags) on our `Russia*` reskins. Start with the T-90, BMP-3, MiG-25 and Mi-24, one commit per group,
-with a screenshot from a skirmish each time.
-*Licence:* SWR Productions' art, not GPL; see NOTICE.md. The owner directed its use.
 ### Campaign chooser (Default / ShockWave / RotR)
 **Why it is not built yet: the data is missing, not the code.** The three story campaigns are not in
 the tree or in the combined package: `!!VanguardCombined.big` carries one `Data\INI\Campaign.ini`
@@ -64,52 +59,28 @@ update).
 **Windows launcher: still to do.** Same UI in `Tools/VanguardLauncher/MainForm.cs`, mods under
 `%USERPROFILE%\Documents\Generals Vanguard\Mods`, `GameLocator.Start` taking `-mod`.
 
-### Performance: VSync by default, a frame cap, and a Vulkan option
-The owner sees GPU coil whine while Zero Hour runs: the debug line shows ~118 fps on a 61 Hz panel, so
-the renderer is unbounded. First fix is the cheapest: **VSync on by default** (and remember the
-choice), then a frame cap to the display's refresh. After that, make the SDL3 GPU backend selectable
-(D3D11 stays the default on Windows; Vulkan is the experimental option the macOS Metal path already
-proves the shape of) and measure frame time and GPU power on the owner's Windows box.
-*First step:* default VSync and a `-fpslimit <hz>` switch, with a headless run proving nothing in the
-simulation changes.
-
-### 0. AI expansion: choose another dock when the first one cannot take a centre
-The **illegal spot** half is fixed (2026-10-21), and it was three defects, not one: `buildBySupplies`
-offset a supply centre by a fixed three pathfind cells, inside the engine's `SupplyBuildBorder`;
-`isLocationSafe` counted an inert Spy Satellite ping as an enemy; and it refused any centre whose site
-was within 300 units of the enemy, which on a 96-cell map is the player's own base. China's centre now
-completes on 3 of 4 measured seeds instead of never, and Russia's economy depends on it (see
-[russia-build-plan.md](docs/factions/russia-build-plan.md)). The numbers and the seven earlier attempts
-are in [ai-expansion-build-timer.md](docs/ai/ai-expansion-build-timer.md).
-What remains: when a dock yields no legal spot the AI re-asks the same dock and never chooses another
-(seed 0 asked at 14,725 after an earlier refusal).
-*First step:* dock selection on failure, with the gate in the doc (China's centre completes on every
-seed, then no regression).
-
-### 1. Close out the ravine work
-Five commits on `ai/lane-reachability`, cherry-picked to `ai/measure`. The mechanism is confirmed
-(orders into unreachable goals: 16 -> 4,207 refusals over 20 matched seeds); the **outcome is
-unproven** because 0 of 162 matches were decided.
-*First step:* the owner's Twilight Flame play-test, then merge or drop.
-
-*Then:* find a configuration where matches actually decide (smaller map, higher cap), so the next
-change can be judged on outcome rather than mechanism.
+### Performance: a frame cap and a Vulkan option (separate pass)
+**VSync on by default is done** (0.5.12: `m_vsync = TRUE`, the debug line's ~118 fps on a 61 Hz panel
+is what it fixes). What remains is deliberately its own pass, because the Vulkan backend is a large
+piece of work: an explicit `-fpslimit <hz>` cap, then the SDL3 GPU backend selectable (D3D11 stays
+the default on Windows; Vulkan is the experimental option the macOS Metal path proves the shape of),
+measured for frame time and GPU power on the owner's Windows box.
 
 ### 2. The AI cannot close a game out (endgame spread)
-Solo versus two GLA AI: cheap structures across the whole map, so the game cannot be closed by
-sweeping. The owner's top report now. See [ROADMAP.md](ROADMAP.md) section 1.
-*First step:* stop the proliferation - an AI with no production, or below a strength floor, stops
-placing and rebuilding - and reveal remaining AI structures to the last human.
+**The rule is in (2026-10-23); needs the owner's play-test.** Once an AI has had a factory, barracks
+or airfield and has none left, and the chance is not in its favour, it stops putting up anything new:
+no power, no defenses, no factories, no expansions, no tunnels, no rebuild (`updateConsolidation`,
+gated in `processBaseBuilding`, `doEconomy`, `doPower`, `doSuperweapons` and `doExpansion`). Its army
+keeps fighting, and what still stands is a finite list to clear. The reveal toggle and the "enemy
+structures: N" counter from [ROADMAP.md](ROADMAP.md) section 1 are still open.
 
 ### 3. Wave memory: the AI never adapts
-Designed, never written ([docs/ai/skirmish-ai.md](docs/ai/skirmish-ai.md), E1). The biggest AI variety
-win available.
-*First step:* write it behind a knob, then measure with `ai-batch.sh --extra`.
-
-### 4. GLA is the strongest AI
-Owner report. Needs numbers before any change. See [ROADMAP.md](ROADMAP.md) section 2.
-*First step:* `Tools/Balance` for unit-level numbers; then a decisive headless setup for
-faction-vs-faction win rates. Also check the seeded army pick, which is probably coincidence.
+**In (2026-10-23), behind the skirmish box "AI wave memory", on by default** (the design in
+[docs/ai/skirmish-ai.md](docs/ai/skirmish-ai.md), E1). A wave leaves with the AI's win chance at the
+time; when the next wave goes down the same lane, or ninety seconds pass, the chance is looked at
+again. A lane that gained nothing twice is barred for three minutes and the vote takes the next
+quietest road. `-nowavememory` is the A/B control for batches. The measured numbers are in the
+changelog entry for 0.5.15.
 
 ## Next
 
@@ -118,33 +89,18 @@ Wave memory; per-match AI doctrines; random maps in skirmish (`Tools/RandomMapLa
 skirmish rule presets; a post-game stats screen from telemetry we already collect; a General's
 Challenge ladder. See [ROADMAP.md](ROADMAP.md) section 3.
 
-### 6. Russia: the skeleton and its first systems play; finish the faction
-**Owner's ruling (2026-10-17): go big immediately.** The skeleton is **done** (2026-10-21): a fourth
-side with twelve buildings and twelve units on reused art, its own command sets, AI build list and
-skirmish scripts, plus its systems - **Igla** (Motostrelki gain an anti-air missile), **ERA/Shtora**
-(+400 health to every T-90), **Infantry Training**, **Aircraft Armour**, **Artillery Training**, the
-**Command Doctrine**, three base defences (S-300, Trench Line, Strongpoint), the **Missile Brigade**
-(superweapon), a small **air arm** (MiG-25, Mi-24) and **seven general's powers** (Artillery
-Preparation, Buratino Salvo, Scorched Earth, Radio-Electronic Strike, Long-Range Aviation, Guards
-Assault, Field Repair), all with AI scripts. What it took, the general AI defects it found and the measurements are in
-[russia-build-plan.md](docs/factions/russia-build-plan.md).
-*First step now:* **the art pass and the remaining design powers** - seven powers work and the AI uses
-them, but Recon-Fire, Aerosol Screen and VDV are still design and the borrowed models are placeholders.
-**Balance** is much closer: the random 24-match matrices went from 1v1 18-3 (85.7%) and 2v2 14-7
-(66.7%) to 1v1 12-7 (63.2%) and 2v2 13-10 (56.5%), with the 1v1 losses spread across the field.  The
-remaining balance work is a larger sample and the per-faction table -
-the artillery tier (Russia needs its own howitzer weapon), the Mobilized-to-Guards conversion, and the
-silhouette art pass. The windowed bar, portrait and Eva fallbacks still need the owner's play-test.
-
-The **three generals** (USA "Vanguard" first) move to *Later*: the owner would rather build the real
-faction directly than rehearse on a general.
-
 ### 7. Performance (parked by the owner)
 A "classic art" option (the upscaled overlay art is 1.07 GB of textures), the re-path storms, a
 persisted BIG index, a shipped shader cache, job-system tuning. See [ROADMAP.md](ROADMAP.md) section
 3b.
 
 ## Later
+
+### 4. GLA is the strongest AI
+*The owner will do this later.* Owner report. Needs numbers before any change. See
+[ROADMAP.md](ROADMAP.md) section 2. `Tools/Balance` for unit-level numbers; then a decisive headless
+setup for faction-vs-faction win rates. Also check the seeded army pick, which is probably
+coincidence.
 
 ### 8. Balance tooling
 `Tools/Balance` (`duel.py`, `siege.py`, `unitmatrix.py`, `compare.py`) exists to argue balance with

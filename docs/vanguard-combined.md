@@ -59,10 +59,15 @@ which is the whole point of using ShockWave as the base.
   3 of 3, `HEADLESS TALLY` 1 alive at frame 1200).
 - [ ] Full Russia port (AI, balance, remaining roster).
 - [x] ECA starts (RotR command centre, dozer, `EuropeWarFactory` spawns) and produces: the factory
-  queued 2 of 2 Lynx APCs. The Leopard specifically is refused by the scenario's `produce` even
-  though the button exists; it is a different (Overlord-style) unit, so this needs a closer look.
+  queued 2 of 2 Lynx APCs.
+- [x] **The Leopard path runs.** Its `Prerequisites` block names `EuropeSolarReactor`, and the probe
+  only spawned the factory, so the queue refused every Leopard with `CANMAKE_NO_PREREQ` - the
+  Overlord-style draw had nothing to do with it. With the reactor standing, `combined_eca.txt` queues
+  3 of 3 Leopards and `combined_eca2.txt` queues 2 of 2 Lynx APCs and 2 of 2 Leopards. A player (and
+  the AI, through RotR's build list) needs the same reactor, so this was the production path, not the
+  probe.
 - [x] ShockWave's generals still start alongside the new factions (`FactionAmericaAirForceGeneral`).
-- [ ] Full ECA port (Leopard production path, balance).
+- [ ] Full ECA port (the rest of the roster, AI, balance).
 - [ ] Campaign pack.
 
 ## Finding: how RotR 1.8 gets Russia and ECA into the game
