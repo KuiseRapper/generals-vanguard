@@ -1,0 +1,7 @@
+# Combined mod probe: ShockWave base plus RotR's Russian army, spawned at the player's start.
+30  spawn  0  RussiaTankRhino        4  start0:120:120
+30  spawn  0  RussiaVehicleBMP       3  start0:170:-80
+30  spawn  0  RussiaVehicleMSTA      2  start0:-170:130
+30  spawn  0  RussiaVehicleTunguska  2  start0:-150:-140
+30  spawn  0  RussiaVehicleSupplyTruck 1 start0:0:190
+90  tally  0  RussiaTankRhino

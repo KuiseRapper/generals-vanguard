@@ -52,16 +52,15 @@ let FeaturedMods: [FeaturedMod] = [
                            "RotR's reworked USA, China and GLA (not used by the combined mod)",
                            "Its campaign missions (separate pack, later)"]),
     FeaturedMod(id: "vanguardcombined", title: "Vanguard Combined 0.1",
-                detail: "Our own merge: ShockWave as the base, with Rise of the Reds' Russia and ECA on top. In development.",
+                detail: "Our own merge: ShockWave as the base, with Rise of the Reds' Russia and ECA on top. Official Vanguard mod.",
                 page: URL(string: "https://github.com/KuiseRapper/generals-vanguard")!,
                 archiveHints: ["vanguardcombined"], startID: "",
-                downloadURL: nil,
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/VanguardCombined-0.1.zip")!,
                 includes: ["ShockWave 1.201 as the base: USA, China and GLA, their generals, units, structures, defences, powers, UI and balance",
                            "Rise of the Reds' Russian Federation and ECA as two more armies, with their buildings, vehicles, aircraft, infantry, powers and cameos",
                            "Vanguard's fixes, AI work, performance and balance underneath both",
                            "RotR's campaign missions as a separate pack once the factions are stable",
-                           "Credits: SWR Productions for ShockWave and Rise of the Reds; Vanguard for the merge"],
-                bundled: true),
+                           "Credits: SWR Productions for ShockWave and Rise of the Reds; Vanguard for the merge"]),
 ]
 
 struct ModEntry: Identifiable {
