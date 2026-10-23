@@ -1311,6 +1311,10 @@ void GameLogic::startNewGame( Bool loadingSaveGame )
       m_peaceTimeEndFrame = TheGameInfo->getPeaceTime() * 60 * LOGICFRAMES_PER_SECOND;
       m_unitCap = TheGameInfo->getUnitLimit()
                   ? (UnsignedInt)UnitLimitPerPlayer( TheGameInfo->getNumNonObserverPlayers() ) : 0;
+      /* The skirmish screen's "AI wave memory" box.  GlobalData already holds the default (on) and
+         -nowavememory, the unattended A/B control, so the two are ANDed: the box can only clear it. */
+      if ( TheGlobalData )
+        TheWritableGlobalData->m_waveMemory = TheGlobalData->m_waveMemory && TheGameInfo->getWaveMemory();
       m_incomeSharing = TheGameInfo->getIncomeSharing();
       m_techRespawnDelay = TheGameInfo->getTechRespawn() * 60 * LOGICFRAMES_PER_SECOND;
       m_supplyPileLimit = TheGameInfo->getSupplyPileLimit();

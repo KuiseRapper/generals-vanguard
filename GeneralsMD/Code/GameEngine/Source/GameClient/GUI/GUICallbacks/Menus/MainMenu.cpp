@@ -877,6 +877,17 @@ void MainMenuUpdate( WindowLayout *layout, void *userData )
 	{
 		return;
 	}
+
+	/* A harness's way into the skirmish options screen, for a screenshot of its layout: a menu
+		 cannot be clicked by a run that has no mouse (the same reason -screenshot exists).  Once. */
+	static Bool openedSkirmishMenu = FALSE;
+	if( !openedSkirmishMenu && getenv( "ZH_OPEN_SKIRMISH_MENU" ) != NULL )
+	{
+		openedSkirmishMenu = TRUE;
+		TheShell->push( AsciiString( "Menus/SkirmishGameOptionsMenu.wnd" ) );
+		return;
+	}
+
 	if(DontShowMainMenu && justEntered)
 		justEntered = FALSE;
 	

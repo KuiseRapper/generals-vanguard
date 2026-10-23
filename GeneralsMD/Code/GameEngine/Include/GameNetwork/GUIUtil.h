@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -111,6 +112,7 @@ Int SupplyPileLimitFromComboBox(GameWindow *comboBox);
 void InitLobbyTabs(GameWindow *parent, const char *layoutFilename,
 									 const char *otherTabName, const char *otherWindowName);
 Bool LobbyTabClicked(NameKeyType controlID);
+void ShowLobbySettingsTab(void);	///< open the settings page, for a harness that must photograph it (ZH_OPEN_SKIRMISH_MENU)
 void ShutdownLobbyTabs(void);
 
 void EnableSlotListUpdates( Bool val );

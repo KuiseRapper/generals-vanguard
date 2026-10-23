@@ -23,6 +23,15 @@ GUI:Command&ConquerGenerals
 "Generals Vanguard"
 END
 
+// The skirmish screen's AI wave memory box.
+GUI:WaveMemory
+"AI wave memory"
+END
+
+TOOLTIP:WaveMemory
+"The computers remember which attack road gained nothing and try another. Off plays the original AI."
+END
+
 GUI:Stop
 "Stop"
 END

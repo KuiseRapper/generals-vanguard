@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -262,6 +263,11 @@ public:
   inline Bool getUnitLimit( void ) const;
   void setUnitLimit( Bool unitLimit );
 
+  // The skirmish screen's "AI wave memory": the computers remember which attack lane gained
+  // nothing and try another.  On is the default; off plays the AI the scripts describe.
+  inline Bool getWaveMemory( void ) const;
+  void setWaveMemory( Bool waveMemory );
+
   // The lobby's Pro Rules check box (PRO-RULES.md, the list ProRulesBanThing and its neighbours in
   // Player.h hold).  On is the default for a lobby this build made; a host too old to send it is off.
   inline Bool getProRules( void ) const;
@@ -307,6 +313,7 @@ protected:
   Bool m_oldFactionsOnly; // Only USA, China, GLA -- not USA Air Force General, GLA Toxic General, et al
   Int m_peaceTime; // minutes of enforced peace at the start of the match, 0 = off
   Bool m_unitLimit; // the lobby's unit limit is on
+  Bool m_waveMemory; // the skirmish screen's AI wave memory is on
   Bool m_proRules; // the lobby's Pro Rules are on
   Int m_incomeSharing; // an IncomeSharing, INCOME_SHARING_OFF = the retail game
   Int m_techRespawn; // minutes before a destroyed tech building comes back, 0 = never
@@ -340,6 +347,7 @@ void        GameInfo::setOldFactionsOnly( Bool oldFactionsOnly ) { m_oldFactions
 	 bot back out and it is still there. */
 Int         GameInfo::getPeaceTime( void ) const            { return hasAIPlayers() ? 0 : m_peaceTime; }
 Bool        GameInfo::getUnitLimit( void ) const            { return m_unitLimit; }
+Bool        GameInfo::getWaveMemory( void ) const           { return m_waveMemory; }
 Bool        GameInfo::getProRules( void ) const             { return m_proRules; }
 Int         GameInfo::getIncomeSharing( void ) const        { return m_incomeSharing; }
 Int         GameInfo::getTechRespawn( void ) const          { return m_techRespawn; }

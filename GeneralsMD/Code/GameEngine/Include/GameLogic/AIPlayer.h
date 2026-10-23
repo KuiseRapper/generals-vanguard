@@ -16,6 +16,7 @@
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 // Modified 2025-2026 by Olcay Seygan for Zero Hour Reforged; see the git history.
+// Modified 2026 by KuiseRapper for Generals Vanguard; see the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -262,7 +263,8 @@ public:
 
 	/// What a seat that predates the ladder (an old save, a replay, a script) plays at.
 	static AISkillLevel skillLevelForDifficulty(GameDifficulty difficulty);
-	void buildBySupplies(Int minimumCash, const AsciiString &thingName, Bool holdableOnly = FALSE ); ///< Builds a building by supplies. holdableOnly is the AI's own expansion: see findSupplyCenter, and no room beside the dock means no building
+	void buildBySupplies(Int minimumCash, const AsciiString &thingName, Bool holdableOnly = FALSE,
+											 const ObjectID *exclude = NULL, Int excludeCount = 0 ); ///< Builds a building by supplies. holdableOnly is the AI's own expansion: see findSupplyCenter, and no room beside one dock means the next dock is tried, not that the expansion is given up
 	void buildSpecificBuildingNearestTeam( const AsciiString &thingName, const Team *team );
 	void buildUpgrade(const AsciiString &upgrade ); ///< Builds an upgrade.
 	/// A team is about to be destroyed.
@@ -503,7 +505,7 @@ protected:
  	void queueSupplyTruck(void);
 	void updateBridgeRepair(void);
 	Bool dozerInQueue(void);
-	Object *findSupplyCenter(Int minSupplies, Bool holdableOnly = FALSE);	///< holdableOnly: within reach of home, on our side of the map, no enemy at it
+	Object *findSupplyCenter(Int minSupplies, Bool holdableOnly = FALSE, const ObjectID *exclude = NULL, Int excludeCount = 0);	///< holdableOnly: within reach of home, on our side of the map, no enemy at it; exclude: docks already tried and refused
 	void getPlayerStructureBounds(Region2D *bounds, Int playerNdx, Bool conservative = FALSE, Int observerNdx = -1 );
 
 	/// what a superweapon aimed here is worth, with the shots already on their way taken off
@@ -670,6 +672,10 @@ protected:
 	/** How hard this AI leans on its current enemy: its chance against him, looked at again on the
 		* wave tick, decides how big a wave has to be and whether the guards at home go as well. */
 	void updatePressure(void);
+	/** Sets m_consolidating: a beaten AI stops putting up anything new, so what is left of its
+		* sprawl is what the last human has to kill.  Looked at on the same tick as the pressure. */
+	void updateConsolidation(Real chance);
+	Bool isConsolidating(void) const { return m_consolidating; }
 	void sendIdleUnitsHunting(void);							///< attack units idle at the end of their road, and the guards once the enemy is finished
 	Bool holdsTeamsForWaves(void) const;					///< this rung parks attack teams at the current level
 	Bool readyToPush(void);												///< the economy is in and the opening is over: attack teams may leave home
@@ -704,6 +710,30 @@ protected:
 	AIPressure	m_pressure;
 	Real				m_knownEnemyPower;								///< his army as this AI believes it: what is in sight at least, less for each look at his base that does not find it, more for each look not taken
 	Int					m_pressureEnemy;									///< the player index that figure is about, -1 for nobody yet
+	Bool				m_consolidating;	///< beaten: no production left, or a hopeless army.  Then no new structures at all, so the last of its sprawl is what is left to kill
+	Bool				m_hadProduction;	///< it has had a factory, barracks or airfield: a base without one before that is opening, not beaten
+
+	/** Wave-outcome memory (the skirmish option "AI wave memory", on by default): what went down each
+		* lane, what it was worth, the chance when it left, and how many waves have left with nothing to
+		* show for it.  A lane used LANE_STRIKE_LIMIT times without the chance moving is left alone for a
+		* while, so the army tries another road instead of walking into the same guns.  Off, none of this
+		* is read or written and the AI is the one the scripts describe. */
+	enum { LANE_MEMORY_COUNT = 3, LANE_STRIKE_LIMIT = 1 };
+	struct LaneMemory
+	{
+		UnsignedInt	lastFrame;		///< when the last wave left down this lane; 0 for none pending
+		Real				lastChance;		///< this AI's win chance when it left
+		Real				lastPower;		///< what it sent
+		Int					strikes;			///< waves down it that moved nothing
+		UnsignedInt	barredUntil;	///< frame the lane is reopened; 0 for open
+	};
+	LaneMemory	m_lane[ LANE_MEMORY_COUNT ];
+	Real				m_winChance;		///< the chance updatePressure last worked out, for the lane memory
+	void settleLaneMemory(void);		///< judge the waves that have had time to tell
+	void judgeLane(Int lane);			///< compare this lane's pending wave with the chance now
+	void noteWaveSent(const AsciiString &lane, Real power);
+	Bool isLaneBarred(Int lane) const;
+	Bool waveMemoryOn(void) const;
 
 	/** Where the last few superweapons were aimed, so the next one does not land in the same crater
 		* while the one before it is still in the air. */

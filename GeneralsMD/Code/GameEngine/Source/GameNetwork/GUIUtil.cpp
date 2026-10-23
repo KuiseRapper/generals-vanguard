@@ -798,6 +798,11 @@ Bool LobbyTabClicked(NameKeyType controlID)
   return FALSE;
 }
 
+void ShowLobbySettingsTab(void)
+{
+  showLobbySettings( TRUE );
+}
+
 void ShutdownLobbyTabs(void)
 {
   theLobbySettingsPage = NULL;

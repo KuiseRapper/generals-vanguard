@@ -122,6 +122,7 @@ static NameKeyType comboBoxGameSpeedID = NAMEKEY_INVALID;
 static NameKeyType comboBoxSuperweaponsID = NAMEKEY_INVALID;
 static NameKeyType comboBoxStartingCashID = NAMEKEY_INVALID;
 static NameKeyType checkBoxUnitLimitID = NAMEKEY_INVALID;
+static NameKeyType checkBoxWaveMemoryID = NAMEKEY_INVALID;
 static NameKeyType comboBoxIncomeSharingID = NAMEKEY_INVALID;
 static NameKeyType comboBoxTechRespawnID = NAMEKEY_INVALID;
 static NameKeyType comboBoxSupplyPileLimitID = NAMEKEY_INVALID;
@@ -138,6 +139,7 @@ static GameWindow *textEntryPlayerName = NULL;
 static GameWindow *comboBoxSuperweapons = NULL;
 static GameWindow *comboBoxStartingCash = NULL;
 static GameWindow *checkBoxUnitLimit = NULL;
+static GameWindow *checkBoxWaveMemory = NULL;
 static GameWindow *comboBoxIncomeSharing = NULL;
 static GameWindow *comboBoxTechRespawn = NULL;
 static GameWindow *comboBoxSupplyPileLimit = NULL;
@@ -396,6 +398,7 @@ Bool SkirmishPreferences::write(void)
   setStartingCash( TheSkirmishGameInfo->getStartingCash() );
   setSuperweaponRestriction( TheSkirmishGameInfo->getSuperweaponRestriction() );
   setInt( "UnitLimit", TheSkirmishGameInfo->getUnitLimit() ? 1 : 0 );
+  setInt( "WaveMemory", TheSkirmishGameInfo->getWaveMemory() ? 1 : 0 );
   setInt( "IncomeSharing", TheSkirmishGameInfo->getIncomeSharing() );
   setInt( "TechRespawn", TheSkirmishGameInfo->getTechRespawn() );
   setInt( "SupplyPileLimit", TheSkirmishGameInfo->getSupplyPileLimit() );
@@ -1114,6 +1117,7 @@ void InitSkirmishGameGadgets( void )
   comboBoxSuperweaponsID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:ComboBoxSuperweapons" ) );
   comboBoxStartingCashID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:ComboBoxStartingCash" ) );
   checkBoxUnitLimitID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:CheckBoxUnitLimit" ) );
+  checkBoxWaveMemoryID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:CheckBoxWaveMemory" ) );
   comboBoxIncomeSharingID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:ComboBoxIncomeSharing" ) );
   comboBoxTechRespawnID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:ComboBoxTechRespawn" ) );
   comboBoxSupplyPileLimitID = TheNameKeyGenerator->nameToKey( AsciiString( "SkirmishGameOptionsMenu.wnd:ComboBoxSupplyPileLimit" ) );
@@ -1143,6 +1147,10 @@ void InitSkirmishGameGadgets( void )
   DEBUG_ASSERTCRASH(checkBoxUnitLimit, ("Could not find the checkBoxUnitLimit"));
   if ( checkBoxUnitLimit )
     UpdateUnitLimitCheckBox( checkBoxUnitLimit, TheSkirmishGameInfo, TRUE );
+  // the fork's own control too, and survivable the same way: a stale layout has no box
+  checkBoxWaveMemory = TheWindowManager->winGetWindowFromId( parentSkirmishGameOptions, checkBoxWaveMemoryID );
+  if ( checkBoxWaveMemory )
+    GadgetCheckBoxSetChecked( checkBoxWaveMemory, TheSkirmishGameInfo->getWaveMemory() );
   comboBoxIncomeSharing = TheWindowManager->winGetWindowFromId( parentSkirmishGameOptions, comboBoxIncomeSharingID );
   DEBUG_ASSERTCRASH(comboBoxIncomeSharing, ("Could not find the comboBoxIncomeSharing"));
   if ( comboBoxIncomeSharing )
@@ -1235,6 +1243,12 @@ void InitSkirmishGameGadgets( void )
 
 	// the settings page and the map info list share one rectangle; this opens on the info list
 	InitLobbyTabs( parentSkirmishGameOptions, "SkirmishGameOptionsMenu.wnd", "TabInfo", "ListboxInfo" );
+
+	/* A harness's way onto the settings page: ZH_OPEN_SKIRMISH_MENU opens this screen from the main
+		 menu (MainMenuUpdate) and this puts the page with the check boxes in front, so one run can
+		 photograph the layout it never gets to click. */
+	if( getenv( "ZH_OPEN_SKIRMISH_MENU" ) != NULL )
+		ShowLobbySettingsTab();
 }
 
 void skirmishUpdateSlotList( void )
@@ -1329,6 +1343,8 @@ void updateSkirmishGameOptions( void )
     UpdateSuperweaponComboBox( comboBoxSuperweapons, TheSkirmishGameInfo, TRUE );
   if ( checkBoxUnitLimit )
     UpdateUnitLimitCheckBox( checkBoxUnitLimit, TheSkirmishGameInfo, TRUE );
+  if ( checkBoxWaveMemory )
+    GadgetCheckBoxSetChecked( checkBoxWaveMemory, TheSkirmishGameInfo->getWaveMemory() );
   if ( comboBoxIncomeSharing )
     UpdateIncomeSharingComboBox( comboBoxIncomeSharing, TheSkirmishGameInfo, TRUE );
   if ( comboBoxTechRespawn )
@@ -1424,6 +1440,7 @@ void SkirmishGameOptionsMenuInit( WindowLayout *layout, void *userData )
   TheSkirmishGameInfo->setStartingCash( prefs.getStartingCash() );
   TheSkirmishGameInfo->setSuperweaponRestriction( prefs.getSuperweaponRestriction() );
   TheSkirmishGameInfo->setUnitLimit( prefs.getInt( "UnitLimit", 0 ) != 0 );
+  TheSkirmishGameInfo->setWaveMemory( prefs.getInt( "WaveMemory", 1 ) != 0 );
   TheSkirmishGameInfo->setIncomeSharing( prefs.getInt( "IncomeSharing", INCOME_SHARING_OFF ) );
   TheSkirmishGameInfo->setTechRespawn( prefs.getInt( "TechRespawn", 0 ) );
   TheSkirmishGameInfo->setSupplyPileLimit( prefs.getInt( "SupplyPileLimit", 0 ) );
@@ -1720,6 +1737,11 @@ WindowMsgHandledType SkirmishGameOptionsMenuSystem( GameWindow *window, Unsigned
 				if ( controlID == checkBoxUnitLimitID )
 				{
 					TheSkirmishGameInfo->setUnitLimit( GadgetCheckBoxIsChecked( control ) );
+					break;
+				}
+				if ( controlID == checkBoxWaveMemoryID )
+				{
+					TheSkirmishGameInfo->setWaveMemory( GadgetCheckBoxIsChecked( control ) );
 					break;
 				}
 				if ( LobbyTabClicked( (NameKeyType)controlID ) )

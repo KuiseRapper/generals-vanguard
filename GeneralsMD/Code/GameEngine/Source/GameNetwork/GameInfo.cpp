@@ -1,4 +1,4 @@
-﻿/*
+/*
 **	Command & Conquer Generals Zero Hour(tm)
 **	Copyright 2025 Electronic Arts Inc.
 **
@@ -403,6 +403,7 @@ void GameInfo::reset( void )
   m_startingCash = TheGlobalData->m_defaultStartingCash;
   m_peaceTime = 0;
   m_unitLimit = FALSE;
+  m_waveMemory = TRUE;
   m_proRules = TRUE;
   m_incomeSharing = INCOME_SHARING_OFF;
   m_techRespawn = 0;
@@ -824,6 +825,11 @@ void GameInfo::setUnitLimit( Bool unitLimit )
   m_unitLimit = unitLimit;
 }
 
+void GameInfo::setWaveMemory( Bool waveMemory )
+{
+  m_waveMemory = waveMemory;
+}
+
 void GameInfo::setProRules( Bool proRules )
 {
   m_proRules = proRules;
@@ -1200,10 +1206,10 @@ static AsciiString buildGameInfoAsciiString( const GameInfo *game, const AsciiSt
 	}
 
 	AsciiString optionsString;
-	optionsString.format("US=%d;M=%2.2x%s;MC=%X;MS=%d;SD=%d;C=%d;SR=%u;SC=%u;O=%c;PT=%d;UL=%d;PR=%d;IS=%d;TR=%d;PL=%d;", game->getUseStats(), game->getMapContentsMask(), newMapName.str(),
+	optionsString.format("US=%d;M=%2.2x%s;MC=%X;MS=%d;SD=%d;C=%d;SR=%u;SC=%u;O=%c;PT=%d;UL=%d;WM=%d;PR=%d;IS=%d;TR=%d;PL=%d;", game->getUseStats(), game->getMapContentsMask(), newMapName.str(),
 		game->getMapCRC(), game->getMapSize(), game->getSeed(), game->getCRCInterval(), game->getSuperweaponRestriction(),
 		game->getStartingCash().countMoney(), game->oldFactionsOnly() ? 'Y' : 'N', game->getPeaceTime(),
-		game->getUnitLimit() ? 1 : 0, game->getProRules() ? 1 : 0, game->getIncomeSharing(), game->getTechRespawn(),
+		game->getUnitLimit() ? 1 : 0, game->getWaveMemory() ? 1 : 0, game->getProRules() ? 1 : 0, game->getIncomeSharing(), game->getTechRespawn(),
 		game->getSupplyPileLimit() );
 
 	//add player info for each slot
@@ -1281,6 +1287,7 @@ Bool ParseAsciiStringToGameInfo(GameInfo *game, AsciiString options)
   UnsignedShort restriction = 0; // Always the default
   Int peaceTime = 0; // absent from the string = off, so an older host is still joinable
   Bool unitLimit = FALSE; // the same
+  Bool waveMemory = TRUE; // absent from the string = on, the skirmish default; -nowavememory sets it off
   Bool proRules = FALSE; // the same
   Int incomeSharing = INCOME_SHARING_OFF; // the same
   Int techRespawn = 0; // the same
@@ -1394,6 +1401,10 @@ Bool ParseAsciiStringToGameInfo(GameInfo *game, AsciiString options)
     else if (key.compare("UL") == 0 )
     {
       unitLimit = atoi(val.str()) != 0;
+    }
+    else if (key.compare("WM") == 0 )
+    {
+      waveMemory = atoi(val.str()) != 0;
     }
     else if (key.compare("PR") == 0 )
     {
@@ -1758,6 +1769,7 @@ Bool ParseAsciiStringToGameInfo(GameInfo *game, AsciiString options)
     game->setOldFactionsOnly( oldFactionsOnly );
     game->setPeaceTime( peaceTime );
     game->setUnitLimit( unitLimit );
+    game->setWaveMemory( waveMemory );
     game->setProRules( proRules );
     game->setIncomeSharing( incomeSharing );
     game->setTechRespawn( techRespawn );

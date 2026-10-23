@@ -2256,6 +2256,19 @@ Int parseUnitLimit(char *args[], int num)
 	return 1;
 }
 
+/* -nowavememory: turn the computers' wave-outcome memory off, which is the A/B control for the
+	 skirmish option of the same name (on by default).  A measurement of what the memory does, or a
+	 replay check of a match recorded without it, needs this: the skirmish menu is not there in an
+	 -autoskirmish run. */
+Int parseNoWaveMemory(char *args[], int num)
+{
+	if (TheWritableGlobalData)
+	{
+		TheWritableGlobalData->m_waveMemory = FALSE;
+	}
+	return 1;
+}
+
 /* -incomesharing <n>: the lobby's income sharing for an -autoskirmish run, 1 for the oil derricks
 	 and 2 for every steady income.  It goes into the slot list the command line builds, so the replay
 	 carries it; a network game has no such slot list and reads the host's options string. */
@@ -2902,6 +2915,7 @@ static CommandLineParam params[] =
 	{ "-teams", parseTeams },
 	{ "-peacetime", parsePeaceTime },
 	{ "-unitlimit", parseUnitLimit },
+	{ "-nowavememory", parseNoWaveMemory },
 	{ "-incomesharing", parseIncomeSharing },
 	{ "-techrespawn", parseTechRespawn },
 	{ "-superweapons", parseSuperweapons },

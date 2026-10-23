@@ -730,6 +730,7 @@ GlobalData::GlobalData()
 	m_autoSkirmishTeams = 0;				// 0 = not set: every slot fights every other slot
 	m_peaceTime = 0;								// no truce unless -peacetime asks for one
 	m_unitLimit = FALSE;						// no unit limit unless -unitlimit asks for one
+	m_waveMemory = TRUE;						// on unless the skirmish box is cleared, or -nowavememory says so
 	m_incomeSharing = 0;						// INCOME_SHARING_OFF unless -incomesharing asks
 	m_techRespawn = 0;							// a destroyed tech building stays destroyed unless -techrespawn asks
 	m_supplyPileLimit = 0;					// a supply pile takes any number of players unless -supplypilelimit asks

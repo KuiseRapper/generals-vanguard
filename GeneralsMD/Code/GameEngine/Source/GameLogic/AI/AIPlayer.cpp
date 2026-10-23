@@ -1,4 +1,4 @@
-﻿/*
+/*
 **	Command & Conquer Generals Zero Hour(tm)
 **	Copyright 2025 Electronic Arts Inc.
 **
@@ -410,6 +410,17 @@ m_role(AIROLE_AGGRESSIVE)
 	m_pressure = AIPRESSURE_NORMAL;
 	m_knownEnemyPower = 0.0f;
 	m_pressureEnemy = -1;
+	m_consolidating = FALSE;
+	m_hadProduction = FALSE;
+	m_winChance = 0.5f;
+	for( Int lane = 0; lane < LANE_MEMORY_COUNT; ++lane )
+	{
+		m_lane[ lane ].lastFrame = 0;
+		m_lane[ lane ].lastChance = 0.0f;
+		m_lane[ lane ].lastPower = 0.0f;
+		m_lane[ lane ].strikes = 0;
+		m_lane[ lane ].barredUntil = 0;
+	}
 	m_massTemplate = NULL;
 	m_massPickFrame = 0;
 	m_massSince = 0;
@@ -1363,6 +1374,10 @@ Object *AIPlayer::buildStructureWithDozer(const ThingTemplate *bldgPlan, BuildLi
 // ------------------------------------------------------------------------------------------------
 void AIPlayer::processBaseBuilding( void )
 {
+	/* Beaten (updateConsolidation): what is missing stays missing.  Rebuilding a factory here is
+		 what would put a beaten computer back into production with no army to protect it. */
+	if( isConsolidating() )
+		return;
 	//
 	// Refresh base buildings. Scan through list, if a building is missing,
 	// rebuild it, unless it's rebuild count is zero.
@@ -3451,9 +3466,10 @@ static Object *otherSideStructureNear( Player *player, const Object *dock )
 // ------------------------------------------------------------------------------------------------
 /** Build a supply center near a supply source with minimumCash or more resources. */
 // ------------------------------------------------------------------------------------------------
-void AIPlayer::buildBySupplies(Int minimumCash, const AsciiString& thingName, Bool holdableOnly)
+void AIPlayer::buildBySupplies(Int minimumCash, const AsciiString& thingName, Bool holdableOnly,
+															 const ObjectID *exclude, Int excludeCount)
 {
-	Object *bestSupplyWarehouse = findSupplyCenter(minimumCash, holdableOnly);
+	Object *bestSupplyWarehouse = findSupplyCenter(minimumCash, holdableOnly, exclude, excludeCount);
 	const ThingTemplate* tTemplate = TheThingFactory->findTemplate(thingName);
 	// tTemplate was dereferenced here and only null-checked a few lines further down, so a bad
 	// building name in the "Build supply center" script action faulted.
@@ -3590,8 +3606,24 @@ void AIPlayer::buildBySupplies(Int minimumCash, const AsciiString& thingName, Bo
 		}
 		TheTerrainVisual->removeAllBibs();	// isLocationLegalToBuild adds bib feedback, turn it off.  jba.
 		if (holdableOnly && blocked && !valid) {
-			// No room beside the dock.  A script's request still goes down on the taken spot and the
-			// dozer's flood looks for room; the AI's own expansion is not built.
+			/* No room beside this dock.  The AI's own expansion asks the next dock rather than giving the
+				 expansion up: a seed-0 batch had it re-ask the same dock at frame 14,725 after an earlier
+				 refusal and never expand at all.  A script's request still goes down on the taken spot and
+				 the dozer's flood looks for room. */
+			static const Int MAX_DOCKS_TRIED = 3;
+			if (excludeCount + 1 < MAX_DOCKS_TRIED) {
+				ObjectID tried[ MAX_DOCKS_TRIED ];
+				for (Int i = 0; i < excludeCount; ++i)
+					tried[ i ] = exclude[ i ];
+				tried[ excludeCount ] = bestSupplyWarehouse->getID();
+				DEBUG_LOG(("AI EXPAND frame %d player %d has no room by dock %d, asking the next dock\n",
+					TheGameLogic->getFrame(), m_player->getPlayerIndex(), bestSupplyWarehouse->getID()));
+				buildBySupplies(minimumCash, thingName, holdableOnly, tried, excludeCount + 1);
+			}
+			else if (TheGlobalData->m_debugSupplyCenterPlacement) {
+				DEBUG_LOG(("AI EXPAND frame %d player %d gave the expansion up: no room at the last dock tried\n",
+					TheGameLogic->getFrame(), m_player->getPlayerIndex()));
+			}
 			return;
 		}
 		location.z = 0; // All build list locations are ground relative.
@@ -3815,7 +3847,7 @@ void AIPlayer::buildSpecificBuildingNearestTeam( const AsciiString &thingName, c
 // ------------------------------------------------------------------------------------------------
 /** Find a supply center we haven't built a supply depot near yet. */
 // ------------------------------------------------------------------------------------------------
-Object *AIPlayer::findSupplyCenter(Int minimumCash, Bool holdableOnly)
+Object *AIPlayer::findSupplyCenter(Int minimumCash, Bool holdableOnly, const ObjectID *exclude, Int excludeCount)
 {
 	Object *bestSupplyWarehouse = NULL;
 	Real bestDistSqr = 0;
@@ -3836,6 +3868,11 @@ Object *AIPlayer::findSupplyCenter(Int minimumCash, Bool holdableOnly)
 		{
 			if (!obj->isKindOf(KINDOF_STRUCTURE)) continue;
 			if (!obj->isKindOf(KINDOF_SUPPLY_SOURCE)) continue;
+			// a dock an earlier call tried and had nowhere to build beside (buildBySupplies)
+			Bool excluded = FALSE;
+			for (Int e = 0; e < excludeCount; ++e)
+				if (obj->getID() == exclude[ e ]) { excluded = TRUE; break; }
+			if (excluded) continue;
 			// ... and one this AI has laid eyes on. This loop walks every object on the map, so
 			// without the test the AI expands to docks in shroud it has never been near.
 			if (!observerKnowsAbout(obj, m_player->getPlayerIndex())) continue;
@@ -5175,6 +5212,10 @@ void AIPlayer::doExpansion( void )
 	if( !m_player->getCanBuildBase() || !m_baseCenterSet )
 		return;
 
+	// beaten: no new expansion to hold (updateConsolidation)
+	if( isConsolidating() )
+		return;
+
 	//
 	// What this faction calls a supply centre: whatever is already flagged as one on the build
 	// list.  Faction-correct and mod-correct without a table, and if the AI has never had one it
@@ -5953,6 +5994,10 @@ void AIPlayer::doPower( void )
 	if( !m_player->getCanBuildBase() || !m_baseCenterSet )
 		return;
 
+	// beaten: no new power plant and no new defense (updateConsolidation)
+	if( isConsolidating() )
+		return;
+
 	if( !isPowerThin() )
 		return;
 	const Energy *energy = m_player->getEnergy();
@@ -6105,6 +6150,11 @@ void AIPlayer::doEconomy( void )
 	// a dark base buys its power plant before anything else: one Hard USA spent 9,560 on other things
 	// in the middle of a two-minute outage
 	if( !m_player->getEnergy()->hasSufficientPower() )
+		return;
+
+	// beaten: no new income, defenses, factories or tunnels; the army fights with what it has
+	// (updateConsolidation).  Placing them is what turned a lost game into a map to sweep.
+	if( isConsolidating() )
 		return;
 
 	// a tunnel pays back in the time every wave and every retreat saves, so it does not wait for the
@@ -6467,6 +6517,9 @@ void AIPlayer::doSuperweapons( void )
 	if( (TheGameLogic->getFrame() + phase) % SUPERWEAPON_CHECK_RATE != 0 )
 		return;
 	if( !m_player->getCanBuildBase() || !m_baseCenterSet || !m_player->getEnergy()->hasSufficientPower() )
+		return;
+	// beaten: no new superweapon or advanced tech building to hold on to (updateConsolidation)
+	if( isConsolidating() )
 		return;		// a dark base's superweapon clock is stopped anyway; the money goes to the plant
 
 	Object *dozer = NULL;
@@ -6898,6 +6951,96 @@ static Waypoint *findFarthestWaypointOnPath( const Coord3D *from, const AsciiStr
 }
 
 //----------------------------------------------------------------------------------------------------------
+/** The wave-outcome memory behind the skirmish option of the same name.  A wave leaves with the
+	* chance updatePressure last worked out; LANE_OUTCOME_FRAMES later, the chance is looked at again.
+	* If it has not moved by LANE_IMPROVEMENT the road gained nothing - the guns there are still the
+	* guns - and a lane that has done that LANE_STRIKE_LIMIT times is left alone for
+	* LANE_BARRED_FRAMES, so the next wave takes the second road the vote would have picked.  Nothing
+	* here can break production or the economy: the worst case is that the army alternates lanes. */
+static const UnsignedInt LANE_OUTCOME_FRAMES = 90 * LOGICFRAMES_PER_SECOND;
+static const UnsignedInt LANE_BARRED_FRAMES = 120 * LOGICFRAMES_PER_SECOND;
+static const Real LANE_IMPROVEMENT = 0.03f;	// the chance rises in steps of about a point; 3 of them is a front that moved
+
+Bool AIPlayer::waveMemoryOn( void ) const
+{
+	return TheGlobalData != NULL && TheGlobalData->m_waveMemory;
+}
+
+/** Which lane a label names, or -1 for a map's own label ("Special" and the like). */
+static Int laneMemoryIndex( const AsciiString &label )
+{
+	static const char *LANES[ 3 ] = { SKIRMISH_CENTER, SKIRMISH_FLANK, SKIRMISH_BACKDOOR };
+	for( Int i = 0; i < 3; ++i )
+		if( label.compareNoCase( LANES[ i ] ) == 0 )
+			return i;
+	return -1;
+}
+
+Bool AIPlayer::isLaneBarred( Int lane ) const
+{
+	if( !waveMemoryOn() || lane < 0 || lane >= LANE_MEMORY_COUNT )
+		return FALSE;
+	return m_lane[ lane ].barredUntil != 0 && TheGameLogic->getFrame() < m_lane[ lane ].barredUntil;
+}
+
+void AIPlayer::judgeLane( Int i )
+{
+	LaneMemory &lane = m_lane[ i ];
+	if( lane.lastFrame == 0 )
+		return;
+	const UnsignedInt now = TheGameLogic->getFrame();
+	const Bool improved = m_winChance >= lane.lastChance + LANE_IMPROVEMENT - 0.001f;	// an epsilon: 0.93 - 0.88 is not exactly 0.05 in float
+	if( improved )
+	{
+		if( lane.strikes > 0 )
+			--lane.strikes;
+	}
+	else
+		++lane.strikes;
+	DEBUG_LOG(("AI LANE MEMORY frame %d player %d lane %d: %.0f sent at chance %.2f after %d s, now %.2f: %s, %d strike(s)\n",
+		now, m_player->getPlayerIndex(), i, lane.lastPower, lane.lastChance,
+		(now - lane.lastFrame) / LOGICFRAMES_PER_SECOND, m_winChance,
+		improved ? "improved" : "nothing gained", lane.strikes));
+	lane.lastFrame = 0;
+	if( lane.strikes >= LANE_STRIKE_LIMIT )
+	{
+		lane.barredUntil = now + LANE_BARRED_FRAMES;
+		lane.strikes = 0;
+		DEBUG_LOG(("AI LANE MEMORY frame %d player %d bars lane %d for %d s\n", now,
+			m_player->getPlayerIndex(), i, LANE_BARRED_FRAMES / LOGICFRAMES_PER_SECOND));
+	}
+}
+
+void AIPlayer::settleLaneMemory( void )
+{
+	if( !waveMemoryOn() )
+		return;
+	const UnsignedInt now = TheGameLogic->getFrame();
+	for( Int i = 0; i < LANE_MEMORY_COUNT; ++i )
+		if( m_lane[ i ].lastFrame != 0 && now - m_lane[ i ].lastFrame >= LANE_OUTCOME_FRAMES )
+			judgeLane( i );
+}
+
+void AIPlayer::noteWaveSent( const AsciiString &laneLabel, Real power )
+{
+	if( !waveMemoryOn() )
+		return;
+	const Int lane = laneMemoryIndex( laneLabel );
+	if( lane < 0 )
+		return;
+	/* A wave still pending down this lane is judged now, not thrown away: a second wave down the
+		 same road means the first has had its chance to move the front, whatever the clock says.  The
+		 age bound in settleLaneMemory is only for waves nothing follows. */
+	judgeLane( lane );
+	settleLaneMemory();
+	m_lane[ lane ].lastFrame = TheGameLogic->getFrame();
+	m_lane[ lane ].lastChance = m_winChance;
+	m_lane[ lane ].lastPower = power;
+	DEBUG_LOG(("AI LANE MEMORY frame %d player %d sends a wave of %.0f down lane %d at chance %.2f\n",
+		m_lane[ lane ].lastFrame, m_player->getPlayerIndex(), power, lane, m_winChance));
+}
+
+//----------------------------------------------------------------------------------------------------------
 /** Which of the lanes an army can actually take, for the lane votes that read reachable[].  A lane is
 	* out of reach when the pathfinder cannot get a ground unit from from to the waypoint at the end it
 	* leads to.  Every lane reads reachable when the map has no such waypoint, or when this AI owns no
@@ -6964,6 +7107,11 @@ AsciiString AIPlayer::chooseApproachLabel( const Coord3D *from, const AsciiStrin
 	Real firepower[ LANE_COUNT ];
 	Bool reachable[ LANE_COUNT ];
 	buildLaneReachability( m_player, from, pathSuffix, LANE_COUNT, LANES, reachable );
+	// a road the wave memory has barred is as good as unreachable for this vote: the same skip the
+	// pathfinder's answer gets, so a barred lane cannot win on being quiet
+	for( Int i = 0; i < LANE_COUNT; ++i )
+		if( isLaneBarred( i ) )
+			reachable[ i ] = FALSE;
 	for( Int i = 0; i < LANE_COUNT; ++i )
 	{
 		AsciiString label;
@@ -7009,6 +7157,11 @@ AsciiString AIPlayer::secondApproachLabel( const Coord3D *from, const AsciiStrin
 	Real firepower[ LANE_COUNT ];
 	Bool reachable[ LANE_COUNT ];
 	buildLaneReachability( m_player, from, pathSuffix, LANE_COUNT, LANES, reachable );
+	// the wave memory's bars, as in chooseApproachLabel: a road that has been tried and gained
+	// nothing is not the second road either
+	for( Int i = 0; i < LANE_COUNT; ++i )
+		if( isLaneBarred( i ) )
+			reachable[ i ] = FALSE;
 	for( Int i = 0; i < LANE_COUNT; ++i )
 	{
 		firepower[ i ] = -1.0f;
@@ -8584,6 +8737,42 @@ Bool AIPlayer::leavesToFinish( const Object *obj ) const
 	* start had a USA at (4367,3119) watching an empty start at (4426,1630) beside its own base, its
 	* belief falling a tenth every two seconds, while the GLA it was fighting stood at (460,1679). */
 //----------------------------------------------------------------------------------------------------------
+/** What this player builds units in: a war factory, a barracks or an airfield. */
+static void noteProductionBuilding( Object *obj, void *userData )
+{
+	if( obj == NULL || obj->isEffectivelyDead() || !obj->isKindOf( KINDOF_STRUCTURE ) )
+		return;
+	if( obj->isKindOf( KINDOF_FS_WARFACTORY ) || obj->isKindOf( KINDOF_FS_BARRACKS ) ||
+			obj->isKindOf( KINDOF_FS_AIRFIELD ) )
+		*(Bool *)userData = TRUE;
+}
+
+/* The endgame spam.  A computer that has lost its factories goes on putting up structures with its
+	 dozers for the rest of the match - it can do nothing else - and the map fills with cheap buildings
+	 that must each be found and killed.  So once it has lost every production building and is not a
+	 match it is winning anyway, it stops building anything new: no power, no defenses, no expansions,
+	 no tunnels, no rebuild.  Its army keeps fighting with what it has, and what remains standing is
+	 what the last human has to clear, which is a finite list.  A rung that has not had a factory yet is
+	 opening, not beaten, so m_hadProduction gates the rule. */
+//----------------------------------------------------------------------------------------------------------
+void AIPlayer::updateConsolidation( Real chance )
+{
+	Bool production = FALSE;
+	m_player->iterateObjects( noteProductionBuilding, &production );
+	if( production )
+		m_hadProduction = TRUE;
+
+	const Real CONSOLIDATE_CHANCE = 0.5f;		// lost its factories and is not clearly ahead
+	Bool beaten = m_hadProduction && !production && chance < CONSOLIDATE_CHANCE;
+	if( beaten == m_consolidating )
+		return;
+	m_consolidating = beaten;
+	DEBUG_LOG(("AI CONSOLIDATE frame %d player %d %s building: production %d, chance %.2f\n",
+		TheGameLogic->getFrame(), m_player->getPlayerIndex(), beaten ? "stops" : "resumes",
+		production, chance));
+}
+
+//----------------------------------------------------------------------------------------------------------
 void AIPlayer::updatePressure( void )
 {
 	Player *enemy = getAiEnemy();
@@ -8635,6 +8824,8 @@ void AIPlayer::updatePressure( void )
 		myPower *= (Real)sqrt( armyAdvantage( myArmy, theirArmy ) );
 	}
 	const Real chance = aiWinChance( myPower, m_knownEnemyPower );
+	m_winChance = chance;		// the lane memory compares a later chance with the one a wave left at
+	updateConsolidation( chance );
 	AIPressure level = aiPressureLevel( chance, baseInSight, m_pressure );
 
 	// the guards stay while anybody else is still in the game to walk into the base they left
@@ -8761,7 +8952,9 @@ void AIPlayer::doWaves( void )
 
 	Coord3D center;
 	wave->getCenter( &center );
+	settleLaneMemory();		// a wave that has had its time is judged before this one is chosen
 	const AsciiString approach = chooseApproachLabel( &center, requested, pathSuffix );
+	noteWaveSent( approach, power );
 
 	/* A wave big enough to be two sends a third of itself down another road.  A player asked for the
 		 computer to come at him from more than one side; one column down the quietest road is one fight
@@ -8789,6 +8982,7 @@ void AIPlayer::doWaves( void )
 			flankGroup->add( obj );
 		}
 		sendWave( flankGroup, flank, pathSuffix, teams, flankPower, heldFrames, cause );
+		noteWaveSent( flank, flankPower );
 		power -= flankPower;
 	}
 	sendWave( wave, approach, pathSuffix, teams, power, heldFrames, cause );
