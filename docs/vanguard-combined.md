@@ -54,3 +54,32 @@ which is the whole point of using ShockWave as the base.
 - [ ] Full Russia port.
 - [ ] Full ECA port.
 - [ ] Campaign pack.
+
+## Finding: how RotR 1.8 gets Russia and ECA into the game
+
+RotR does **not** ship extra player templates. Its `PlayerTemplate.ini` has seven, the retail set,
+and it reuses the two America general slots:
+
+- `FactionAmericaLaserGeneral` has `BaseSide = Russia`, `DisplayName = INI:FactionRussia`,
+  `StartingBuilding = RussiaCommandCenter`, Russia sciences, Russia shortcut bar.
+- `FactionAmericaSuperWeaponGeneral` has `BaseSide = ECA`, the ECA base and sciences.
+
+The comment in the file says it plainly: "named as the Laser general to make them work on unofficial
+ZH Maps". A mod that only has those seven templates can be picked on stock maps because the map asks
+for a template name it recognises.
+
+**This is the central collision with ShockWave**, which uses those same slots for its own Laser and
+Super Weapon generals (and has seventeen templates). A combined mod cannot give both mods the slot.
+
+Our fork already proves the engine accepts *more* templates: the custom Russia faction was an extra
+`PlayerTemplate FactionRussia` and appeared in the lobby. So the combined mod's route is:
+
+1. Keep ShockWave's seventeen templates unchanged.
+2. Add **two new templates** (`FactionVanguardRussia`, `FactionVanguardECA`) with their own
+   `Side`/`BaseSide` values, pointing at RotR's `RussiaCommandCenter` and ECA starting building.
+3. Port RotR's Russia/ECA sides, objects, sciences, command sets and art under those templates.
+4. Check the map-start logic: skirmish start positions and any map scripts that name a side; the fork's
+   extra template already worked for skirmish, so this is the same path.
+
+That is the seam to build first, before importing a single unit: two new templates that show up next
+to ShockWave's generals in the lobby.
