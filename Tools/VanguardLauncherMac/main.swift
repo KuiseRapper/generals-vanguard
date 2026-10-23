@@ -306,10 +306,24 @@ final class LauncherModel: ObservableObject {
         let process = Process()
         process.executableURL = executable
         var arguments = ["-root", zeroHour]
-        if let id = activeMod, let mod = mods.first(where: { $0.id == id }) {
+        // The ticked mod wins; with a single mod installed and none ticked, mount that one, so an
+        // install always plays without a second step.
+        var modID = activeMod
+        if modID == nil, mods.count == 1 { modID = mods[0].id }
+        if let id = modID, let mod = mods.first(where: { $0.id == id }) {
             arguments += ["-mod", mod.url.path + "/"]
+            status = "Game started with \(mod.name)."
         }
         process.arguments = arguments
+        let log = "launch \(Date()): \(arguments.joined(separator: " "))\n"
+        if let data = log.data(using: .utf8) {
+            let path = support.appendingPathComponent("launch.log")
+            if let handle = try? FileHandle(forWritingTo: path) {
+                handle.seekToEndOfFile(); handle.write(data); try? handle.close()
+            } else {
+                try? data.write(to: path)
+            }
+        }
         process.currentDirectoryURL = gameApp
         do {
             try process.run()
