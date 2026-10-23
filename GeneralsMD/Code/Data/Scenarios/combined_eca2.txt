@@ -1,0 +1,5 @@
+30    spawn    0  EuropeWarFactory       1  start0:0:190
+60    produce  0  EuropeWarFactory       EuropeVehicleLynxApc 2
+60    produce  0  EuropeWarFactory       EuropeTankLeopard 2
+600   tally    0  EuropeVehicleLynxApc
+600   tally    0  EuropeTankLeopard
