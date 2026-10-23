@@ -20,6 +20,25 @@ struct Manifest: Codable {
     let notes: String?
 }
 
+struct FeaturedMod: Identifiable {
+    let id: String
+    let title: String
+    let detail: String
+    let page: URL
+    let archiveHints: [String]
+}
+
+let FeaturedMods: [FeaturedMod] = [
+    FeaturedMod(id: "shockwave", title: "ShockWave 1.201",
+                detail: "USA, China and GLA get the mod's units and structures. Put Shw_noinstl.zip in Downloads, or use Get.",
+                page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
+                archiveHints: ["shw_noinstl", "shockwave"]),
+    FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
+                detail: "The Russian Federation and the ECA. Put ROTRBeta_18_Noinstl.zip in Downloads, or use Get.",
+                page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
+                archiveHints: ["rotrbeta_18_noinstl", "rotr"]),
+]
+
 struct ModEntry: Identifiable {
     let id: String
     let name: String
@@ -42,13 +61,16 @@ final class LauncherModel: ObservableObject {
     @Published var mods: [ModEntry] = []
     @Published var activeMod: String? = UserDefaults.standard.string(forKey: "ActiveMod")
     @Published var showMods = false
+    @Published var modsPending: [String: Bool] = [:]
+    @Published var modsBusy = false
+    @Published var modsProgress = 0.0
 
     var modsDir: URL { support.appendingPathComponent("Mods", isDirectory: true) }
 
     let launcherVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0"
-    // The 0.4.1 release asset named launcher-mac.json is 404 on GitHub; the 0.4.0 copy works and
-    // is kept up to date for macOS.
-    let manifestURL = URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.4.0/launcher-mac.json")!
+    // "latest" points at whatever release is newest, so a release that publishes launcher-mac.json
+    // is picked up without pinning a tag. The older builds pinned v0.4.0 and never saw an update.
+    let manifestURL = URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/latest/download/launcher-mac.json")!
     let hero: NSImage?
     let support: URL
 
@@ -172,16 +194,46 @@ final class LauncherModel: ObservableObject {
             installed = fetched.game.version
             status = "Game \(fetched.game.version) installed."
             showUpdate = false
-            if Self.newer(fetched.launcher.version, launcherVersion) {
-                status = "Game installed. A newer launcher is available; open the downloaded DMG."
-                if let launcherURL = URL(string: fetched.launcher.url) {
-                    NSWorkspace.shared.open(launcherURL)
-                }
+            if Self.newer(fetched.launcher.version, launcherVersion), let launcherURL = URL(string: fetched.launcher.url) {
+                status = "Installing launcher \(fetched.launcher.version)…"
+                let (launcherFile, _) = try await URLSession.shared.download(from: launcherURL)
+                replaceLauncher(with: launcherFile)
             }
         } catch {
             status = "Update failed."
             alert("Update failed", error.localizedDescription)
         }
+    }
+
+    /// Replace the running .app with the copy in the downloaded DMG and start it again, so an
+    /// update does not ask the player to drag anything out of a disk image.
+    private func replaceLauncher(with dmg: URL) {
+        let current = Bundle.main.bundlePath
+        let script = """
+        #!/bin/sh
+        sleep 2
+        WORK="$(mktemp -d /tmp/vanguard-launcher.XXXXXX)"
+        if [ "\(dmg.pathExtension)" = "zip" ]; then
+            unzip -q -o "\(dmg.path)" -d "$WORK" || exit 1
+            rm -rf "\(current)"
+            ditto "$WORK/VanguardLauncher.app" "\(current)"
+        else
+            hdiutil attach -nobrowse -quiet "\(dmg.path)" -mountpoint "$WORK" || exit 1
+            rm -rf "\(current)"
+            ditto "$WORK/VanguardLauncher.app" "\(current)"
+            hdiutil detach "$WORK" -quiet
+        fi
+        rm -f "\(dmg.path)"
+        open "\(current)"
+        """
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("vanguard-update.sh")
+        try? script.write(to: path, atomically: true, encoding: .utf8)
+        try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: path.path)
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", "\(path.path) > /tmp/vanguard-update.log 2>&1 &"]
+        try? process.run()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { NSApp.terminate(nil) }
     }
 
     private func unzip(_ archive: URL, to directory: URL) throws {
@@ -269,6 +321,9 @@ final class LauncherModel: ObservableObject {
             return ModEntry(id: url.lastPathComponent, name: name, version: version, url: url)
         }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         if let active = activeMod, !mods.contains(where: { $0.id == active }) { setActiveMod(nil) }
+        for featured in FeaturedMods {
+            modsPending[featured.id] = mods.contains(where: { $0.id == featured.id })
+        }
     }
 
     func setActiveMod(_ id: String?) {
@@ -285,7 +340,63 @@ final class LauncherModel: ObservableObject {
         panel.message = "Choose a mod archive (.zip) or a .big file"
         guard panel.runModal() == .OK, let url = panel.url else { return }
         let base = url.deletingPathExtension().lastPathComponent
-        let safe = base.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
+        do {
+            try installArchive(url, as: base)
+            refreshMods()
+            status = "Installed \(base)."
+        } catch {
+            alert("Could not install the mod", error.localizedDescription)
+        }
+    }
+
+    func installFeatured(_ featured: FeaturedMod) throws {
+        let downloads = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Downloads")
+        let keys: Set<URLResourceKey> = [.contentModificationDateKey]
+        let files = (try? FileManager.default.contentsOfDirectory(at: downloads, includingPropertiesForKeys: Array(keys))) ?? []
+        let hints = featured.archiveHints.map { $0.lowercased() }
+        let archive = files
+            .filter { $0.pathExtension.lowercased() == "zip" }
+            .filter { file in hints.contains { file.lastPathComponent.lowercased().contains($0) } }
+            .sorted { a, b in
+                let da = (try? a.resourceValues(forKeys: keys))?.contentModificationDate ?? .distantPast
+                let db = (try? b.resourceValues(forKeys: keys))?.contentModificationDate ?? .distantPast
+                return da > db
+            }
+            .first
+        guard let archive else {
+            NSWorkspace.shared.open(featured.page)
+            throw NSError(domain: "Vanguard", code: 10, userInfo: [NSLocalizedDescriptionKey:
+                "No \(featured.title) archive in Downloads. The ModDB page is open; download the no-installer zip there, then press Update mods again."])
+        }
+        try installArchive(archive, as: featured.id)
+    }
+
+    func applyMods() {
+        guard !modsBusy else { return }
+        modsBusy = true
+        modsProgress = 0
+        let desired = modsPending
+        Task {
+            var failures: [String] = []
+            for (index, featured) in FeaturedMods.enumerated() {
+                let want = desired[featured.id] ?? false
+                let installed = mods.first(where: { $0.id == featured.id })
+                do {
+                    if want, installed == nil { try installFeatured(featured) }
+                    if !want, let installed { try FileManager.default.removeItem(at: installed.url) }
+                } catch {
+                    failures.append(featured.title)
+                }
+                modsProgress = Double(index + 1) / Double(FeaturedMods.count)
+                refreshMods()
+            }
+            modsBusy = false
+            status = failures.isEmpty ? "Mods updated." : "Could not update: \(failures.joined(separator: ", "))."
+        }
+    }
+
+    private func installArchive(_ url: URL, as name: String) throws {
+        let safe = name.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
         let folder = modsDir.appendingPathComponent(safe, isDirectory: true)
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
@@ -304,14 +415,12 @@ final class LauncherModel: ObservableObject {
             }
             let json = folder.appendingPathComponent("mod.json")
             if !FileManager.default.fileExists(atPath: json.path) {
-                let data = try JSONSerialization.data(withJSONObject: ["name": base, "version": "1.0"], options: [.prettyPrinted])
+                let data = try JSONSerialization.data(withJSONObject: ["name": name, "version": "1.0"], options: [.prettyPrinted])
                 try data.write(to: json)
             }
-            refreshMods()
-            status = "Installed \(base)."
         } catch {
             try? FileManager.default.removeItem(at: folder)
-            alert("Could not install the mod", error.localizedDescription)
+            throw error
         }
     }
 
@@ -589,10 +698,40 @@ struct ModsView: View {
             Text("Mods")
                 .font(.system(size: 22, weight: .bold))
                 .foregroundColor(.white)
-            Text("Install a mod archive or a .big; Play then mounts the selected mod after the base game.")
+            Text("Install a mod archive or a .big; Play mounts the selected mod after the base game.")
                 .font(.system(size: 12))
                 .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
-            List(model.mods) { mod in
+            ForEach(FeaturedMods) { featured in
+                HStack(alignment: .top) {
+                    Toggle("", isOn: Binding(
+                        get: { model.modsPending[featured.id] ?? false },
+                        set: { model.modsPending[featured.id] = $0 }))
+                        .toggleStyle(.checkbox)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(featured.title).foregroundColor(.white)
+                        Text(featured.detail)
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                    }
+                    Spacer()
+                    Button("Get") { NSWorkspace.shared.open(featured.page) }
+                        .buttonStyle(.plain)
+                        .foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.30))
+                }
+            }
+            if model.modsBusy {
+                ProgressView(value: model.modsProgress).frame(maxWidth: 280)
+            }
+            HStack {
+                Button(model.modsBusy ? "Updating\u{2026}" : "Update mods") { model.applyMods() }
+                    .disabled(model.modsBusy)
+                Spacer()
+                Text(model.modsBusy ? "Installing or removing mod files\u{2026}" : "Checked mods are installed; unchecked ones are removed.")
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+            }
+            Divider()
+            List(model.mods.filter { mod in !FeaturedMods.contains(where: { $0.id == mod.id }) }) { mod in
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(mod.name).foregroundColor(.white)

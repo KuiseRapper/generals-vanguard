@@ -34,15 +34,18 @@ tags) on our `Russia*` reskins. Start with the T-90, BMP-3, MiG-25 and Mi-24, on
 with a screenshot from a skirmish each time.
 *Licence:* SWR Productions' art, not GPL; see NOTICE.md. The owner directed its use.
 ### Mod manager in the launcher
-**macOS launcher: done (in source).** `Tools/VanguardLauncherMac/main.swift` has a Mods sheet: install a
-`.zip` (or a single `.big`) into `~/Library/Application Support/GeneralsVanguard/Mods/<name>/`, uninstall
-it, and pick the active one; Play passes `-mod "<abs path>/"`, which the engine already supports (a
-folder's `*.big` files are mounted over retail, later `-mod` wins, fork-owned files still win over
-every mod). The engine test ran with `-mod` and a ShockWave `.big` mounted.
+**macOS launcher: done and published (0.5.11).** Mods sheet with **ShockWave 1.201** and **Rise of the
+Reds 1.8** as checkboxes: "Update mods" installs a checked mod from the matching archive in
+`~/Downloads` (or opens its ModDB page when there is none) and deletes an unchecked one, with a
+progress bar; custom `.zip`/`.big` install and uninstall are there too. Mods live under
+`~/Library/Application Support/GeneralsVanguard/Mods/<id>/`; Play passes `-mod "<abs path>/"`, which
+the engine already supports. The launcher also replaces itself from `launcher-mac.zip`/`.dmg` instead
+of asking the player to drag the app out of a disk image, and its manifest URL is
+`releases/latest/download/launcher-mac.json` (the old pin to v0.4.0 was why 0.4.x/0.5.3 never saw an
+update).
 
-**Windows launcher: still to do.** Same UI in `Tools/VanguardLauncher/MainForm.cs`, storing under
-`%USERPROFILE%\Documents\Generals Vanguard\Mods`, and `GameLocator.Start` taking the `-mod` argument.
-Until then a Windows player can pass `-mod` by hand or drop the mod's `.big` files next to the exe.
+**Windows launcher: still to do.** Same UI in `Tools/VanguardLauncher/MainForm.cs`, mods under
+`%USERPROFILE%\Documents\Generals Vanguard\Mods`, `GameLocator.Start` taking `-mod`.
 
 ### Performance: VSync by default, a frame cap, and a Vulkan option
 The owner sees GPU coil whine while Zero Hour runs: the debug line shows ~118 fps on a 61 Hz panel, so
