@@ -565,10 +565,13 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 		|| p == "art\\textures\\spotlight2.dds"
 		|| starts("art\\textures\\zhca_"))
 		return TRUE;
-	// The load screen's TitleScreen texture is deliberately not here: the fork used to ship its own
-	// Vanguard art at Data\English\Art\Textures\TitleScreenuserinterface.tga and claim it, which also
-	// kept every mod's own title art out.  The owner asked for the default screen, so retail's shows
-	// when nothing else supplies one and a mod's own copy wins when it does.
+	// The load screen's TitleScreen art: the fork's own Vanguard plate (owner's call, 2026-10-23: the
+	// screens carry Vanguard's branding, not the mods').
+	if (p == "data\\english\\art\\textures\\titlescreenuserinterface.tga")
+		return TRUE;
+	// Data\English is copied to Run\English, not under Data in the package.
+	if (p == "english\\art\\textures\\titlescreenuserinterface.tga")
+		return TRUE;
 	return p == "data\\patch.str"
 		|| starts("data\\turkish\\") || starts("data\\german\\")
 		|| starts("art\\textures\\reforged")

@@ -17034,10 +17034,10 @@ TEST(every_shipped_master_is_fork_owned_and_retail_files_are_not)
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\INI\\GameData.ini")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\INI\\Object\\AmericaTankReforged.ini")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\English\\Movies\\EA_LOGO.bik")));
-	// The load screen's title art went back to retail's (and a mod's own may replace it), so the
-	// path must stay out of the fork-owned set; the fork ships no file at it any more.
-	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\English\\Art\\Textures\\TitleScreenuserinterface.tga")));
-	CHECK(!FileSystem::isForkOwnedPath(AsciiString("English\\Art\\Textures\\TitleScreenuserinterface.tga")));
+	// The load screen's title art is the fork's Vanguard plate again (2026-10-23), so a mod cannot
+	// put its own over it.
+	CHECK(FileSystem::isForkOwnedPath(AsciiString("Data\\English\\Art\\Textures\\TitleScreenuserinterface.tga")));
+	CHECK(FileSystem::isForkOwnedPath(AsciiString("English\\Art\\Textures\\TitleScreenuserinterface.tga")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Art\\Textures\\AVPaladin.tga")));
 }
 

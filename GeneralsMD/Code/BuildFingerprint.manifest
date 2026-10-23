@@ -11,6 +11,7 @@ Data/Art/Textures/ReforgedBarChinaRight.tga
 Data/Art/Textures/ReforgedBarGLACenter.tga
 Data/Art/Textures/ReforgedBarGLALeft.tga
 Data/Art/Textures/ReforgedBarGLARight.tga
+Data/Art/Textures/ReforgedEndScreen.tga
 Data/Art/Textures/ReforgedGeneralsLogo.tga
 Data/Art/Textures/ReforgedHudAmericaCommandBar.dds
 Data/Art/Textures/ReforgedHudAmericaPowers.dds
@@ -144,6 +145,7 @@ Data/Cinema/v240_hook2.txt
 Data/Cinema/v240_md.txt
 Data/Cinema/v240_tank.txt
 Data/Cinema/wreckcheck.txt
+Data/English/Art/Textures/TitleScreenuserinterface.tga
 Data/German/Generals.str
 Data/INI/AIDataReforged.ini
 Data/INI/BalanceReforged.ini
@@ -153,6 +155,7 @@ Data/INI/ControlBarSchemeReforged.ini
 Data/INI/FXListReforged.ini
 Data/INI/FixesReforged.ini
 Data/INI/MappedImages/HandCreated/ReforgedBarChinaBeacon.ini
+Data/INI/MappedImages/HandCreated/ReforgedEndScreen.ini
 Data/INI/MappedImages/HandCreated/ReforgedGeneralsLogo.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudAmericaCommandBar.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudAmericaPowers.ini

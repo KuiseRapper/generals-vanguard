@@ -72,6 +72,8 @@ else
 	command -v perl > /dev/null || { echo "stage-overlay: perl is needed to write the INI files with CRLF" >&2; exit 1; }
 	find "$out/Data/INI" -type f -exec perl -pi -e 's/(?<!\r)\n/\r\n/' {} +
 	copy Patch.str Data/Patch.str
+	# the load screen's Vanguard plate; CMake's post-build puts it under Run/Data/English for Windows
+	copy English Data/English
 	copy Scripts Data/Scripts
 	copy Turkish Data/Turkish
 	copy German Data/German

@@ -1751,10 +1751,11 @@ add_custom_command(TARGET generals POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CMAKE_CURRENT_SOURCE_DIR}/Data/German
           ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Data/German
-  # The load screen's TitleScreen image is retail's again: the fork used to ship its own Vanguard
-  # art at Data\English\Art\Textures\TitleScreenuserinterface.tga, and a loose file beat EnglishZH.big
-  # for every mod.  The owner asked for the default art, so no copy is made and the archive's shows
-  # (a mod that ships its own now wins too, as no fork-owned rule claims the path any more).
+  # The load screen's TitleScreen plate: the fork's Vanguard art, a loose file so it wins over
+  # EnglishZH.big and over a mod's own copy.
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_CURRENT_SOURCE_DIR}/Data/English
+          ${CMAKE_CURRENT_SOURCE_DIR}/../Run/Data/English
   # The startup splash.  WinMain loads it from a loose file next to the exe, so
   # the fork's own artwork is a tracked master here rather than a hand-made file
   # in gitignored Run/.
