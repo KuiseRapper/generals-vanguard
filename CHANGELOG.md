@@ -3,6 +3,18 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-23 - The game takes the front when it starts
+
+- **The window is raised on start** (`SdlGameEngine`, after `SDL_CreateWindow`). Measured on macOS
+  arm64: a game started the way the launcher starts it - `Process.run()` from another application -
+  was **not** the frontmost application and was not active, so the player's first click in it was an
+  activation click. `SDL_RaiseWindow` is `[NSApp activateIgnoringOtherApps:YES]` plus
+  `makeKeyAndOrderFront` in SDL's Cocoa backend; the same probe then reported the game frontmost and
+  `active: true`. Never for `-hiddenwindow`.
+- **The window's state is logged**: focus gained and lost, minimised, restored, shown, hidden. The
+  owner reported a click in the game minimising it on macOS; which of those happened, and when, is
+  the line that tells a window-manager problem from ours.
+
 ## 2026-10-23 - Vanguard on the menu, Zero Hour's load screen
 
 - **The main menu's logo says VANGUARD.** `GeneralsLogo` was a region of retail's

@@ -226,6 +226,16 @@ void SdlGameEngine::createWindow( void )
 		m_request.windowed ? "windowed" : "fullscreen", m_request.borderless ? ", borderless" : "",
 		m_request.hidden ? ", hidden" : "" ));
 
+	/* Come to the front the way a Windows game does.  A game the launcher starts is a child of a process
+		 that stays frontmost, and a window made while another application is in front is neither key nor
+		 active: the first click in it is then an activation click, which on macOS can leave a fullscreen
+		 window behind the window the player was using.  SDL_RaiseWindow is [NSApp
+		 activateIgnoringOtherApps:YES] and makeKeyAndOrderFront in SDL's Cocoa backend, so the game owns the
+		 front before anybody clicks it.  Never for a hidden window: -hiddenwindow is a harness's, and
+		 stealing the front from a person at the keyboard is not what it asked for. */
+	if (!m_request.hidden)
+		SDL_RaiseWindow( m_window );
+
 	s_titledWindow = m_window;
 	TheApplicationWindowTitleHook = setTitleOfWindow;
 	setSdlMessageBoxOwner( m_window );
@@ -334,14 +344,27 @@ void SdlGameEngine::serviceWindowsOS( void )
 				break;
 
 			case SDL_EVENT_WINDOW_FOCUS_GAINED:
+				DEBUG_LOG(( "SdlGameEngine: window focused\n" ));
 				setIsActive( TRUE );
 				break;
 
 			case SDL_EVENT_WINDOW_FOCUS_LOST:
+				DEBUG_LOG(( "SdlGameEngine: window lost focus\n" ));
 				setIsActive( FALSE );
 				break;
 
 			default:
+				/* The window's own state is worth a line each: the owner reported a click in the game
+					 minimizing it on macOS (2026-10-23), and whether the OS minimized or hid it, and when it
+					 got the focus, is the difference between a window-manager problem and one of ours. */
+				switch (event.type)
+				{
+					case SDL_EVENT_WINDOW_MINIMIZED: DEBUG_LOG(( "SdlGameEngine: window minimized\n" )); break;
+					case SDL_EVENT_WINDOW_RESTORED: DEBUG_LOG(( "SdlGameEngine: window restored\n" )); break;
+					case SDL_EVENT_WINDOW_SHOWN: DEBUG_LOG(( "SdlGameEngine: window shown\n" )); break;
+					case SDL_EVENT_WINDOW_HIDDEN: DEBUG_LOG(( "SdlGameEngine: window hidden\n" )); break;
+					default: break;
+				}
 				SdlInput_dispatch( event );		// keys, text and the mouse (C3): SdlInput.h
 				break;
 		}
