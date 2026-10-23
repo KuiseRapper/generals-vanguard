@@ -28,17 +28,20 @@ struct FeaturedMod: Identifiable {
     let page: URL
     let archiveHints: [String]
     let startID: String
+    let downloadURL: URL
 }
 
 let FeaturedMods: [FeaturedMod] = [
     FeaturedMod(id: "shockwave", title: "ShockWave 1.201",
                 detail: "USA, China and GLA get the mod's units and structures. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
-                archiveHints: ["shw_noinstl"], startID: "31249"),
+                archiveHints: ["shw_noinstl"], startID: "31249",
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/ShockWave-1.1-noinstaller.zip")!),
     FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
                 detail: "The Russian Federation and the ECA. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
-                archiveHints: ["rotrbeta_18_noinstl"], startID: "49529"),
+                archiveHints: ["rotrbeta_18_noinstl"], startID: "49529",
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/RiseOfTheReds-1.8-noinstaller.zip")!),
 ]
 
 struct ModEntry: Identifiable {
@@ -398,8 +401,7 @@ final class LauncherModel: ObservableObject {
         downloadProgress[featured.id] = 0
         status = "Downloading \(featured.title)…"
         let downloader = ModDownloader(
-            page: featured.page,
-            start: URL(string: "https://www.moddb.com/downloads/start/\(featured.startID)")!,
+            url: featured.downloadURL,
             onProgress: { [weak self] value in
                 Task { @MainActor in self?.downloadProgress[featured.id] = value }
             },
@@ -795,64 +797,27 @@ struct ContentView: View {
     }
 }
 
-/// Automatic ModDB download. ModDB sits behind Cloudflare, so a plain URLSession gets a
-/// challenge page. Phase one loads the file page in a hidden WKWebView, which runs the challenge and
-/// leaves the clearance cookie in the shared store; phase two fetches the download start URL with
-/// those cookies and the same user agent, and the CDN redirect streams the archive.
-final class ModDownloader: NSObject, WKNavigationDelegate, URLSessionDownloadDelegate {
-    private let webView: WKWebView
-    private let page: URL
-    private let start: URL
+/// Downloads a mod package with URLSession and installs it. The archives are hosted on the
+/// project's 0.5.11 release because ModDB sits behind a Cloudflare challenge that a plain HTTP
+/// client cannot pass; the launcher's Download button is a real one-click install from there.
+final class ModDownloader: NSObject, URLSessionDownloadDelegate {
+    private let url: URL
     private let onProgress: (Double) -> Void
     private let onFinish: (Result<URL, Error>) -> Void
     private var session: URLSession?
-    private var moved = false
     private var finished = false
 
-    init(page: URL, start: URL, onProgress: @escaping (Double) -> Void,
+    init(url: URL, onProgress: @escaping (Double) -> Void,
          onFinish: @escaping (Result<URL, Error>) -> Void) {
-        let configuration = WKWebViewConfiguration()
-        configuration.websiteDataStore = .default()
-        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 2, height: 2), configuration: configuration)
-        self.page = page
-        self.start = start
+        self.url = url
         self.onProgress = onProgress
         self.onFinish = onFinish
         super.init()
-        webView.navigationDelegate = self
     }
 
     func startDownload() {
-        var request = URLRequest(url: page)
-        request.timeoutInterval = 60
-        webView.load(request)
-        // The challenge can keep the page "loading" for a while; fetch anyway after a wait, and
-        // again when it does report finished.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in self?.fetch() }
-    }
-
-    private func fetch() {
-        guard !moved else { return }
-        moved = true
-        webView.evaluateJavaScript("navigator.userAgent") { [weak self] value, _ in
-            guard let self else { return }
-            let userAgent = (value as? String) ?? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
-            self.webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-                let storage = HTTPCookieStorage.shared
-                storage.setCookies(cookies, for: self.start, mainDocumentURL: nil)
-                let configuration = URLSessionConfiguration.default
-                configuration.httpCookieStorage = storage
-                configuration.httpShouldSetCookies = true
-                configuration.httpAdditionalHeaders = ["User-Agent": userAgent, "Accept": "*/*"]
-                configuration.timeoutIntervalForRequest = 60
-                self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
-                self.session?.downloadTask(with: self.start).resume()
-            }
-        }
-    }
-
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        fetch()
+        session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+        session?.downloadTask(with: url).resume()
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64,
@@ -864,6 +829,12 @@ final class ModDownloader: NSObject, WKNavigationDelegate, URLSessionDownloadDel
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         guard !finished else { return }
         finished = true
+        let status = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? 0
+        guard status == 200 else {
+            onFinish(.failure(NSError(domain: "Vanguard", code: status, userInfo: [NSLocalizedDescriptionKey:
+                "The download server returned HTTP \(status)."])))
+            return
+        }
         let name = downloadTask.response?.suggestedFilename ?? "mod.zip"
         let destination = FileManager.default.temporaryDirectory.appendingPathComponent(name)
         try? FileManager.default.removeItem(at: destination)
@@ -878,9 +849,7 @@ final class ModDownloader: NSObject, WKNavigationDelegate, URLSessionDownloadDel
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         guard !finished, let error else { return }
         finished = true
-        let code = (task.response as? HTTPURLResponse)?.statusCode ?? 0
-        onFinish(.failure(NSError(domain: "Vanguard", code: code, userInfo: [NSLocalizedDescriptionKey:
-            "ModDB returned \(code == 0 ? "no response" : "HTTP \(code)"). \(error.localizedDescription)"])))
+        onFinish(.failure(error))
     }
 }
 
