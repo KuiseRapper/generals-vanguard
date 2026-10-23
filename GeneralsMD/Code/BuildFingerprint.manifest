@@ -26,6 +26,11 @@ Data/Art/Textures/ReforgedHudHelpbox.dds
 Data/Art/Textures/ReforgedHudObsCommandBar.dds
 Data/Art/Textures/ReforgedHudObsPlayerWindow.dds
 Data/Art/Textures/ReforgedLaserPink.tga
+Data/Art/Textures/ReforgedLoadChina.tga
+Data/Art/Textures/ReforgedLoadECA.tga
+Data/Art/Textures/ReforgedLoadGLA.tga
+Data/Art/Textures/ReforgedLoadRussia.tga
+Data/Art/Textures/ReforgedLoadUSA.tga
 Data/Art/Textures/ReforgedMineGlowBlue.tga
 Data/Art/Textures/ReforgedMineGlowRed.tga
 Data/Art/Textures/ReforgedMineLedBlue.tga
@@ -169,6 +174,7 @@ Data/INI/MappedImages/HandCreated/ReforgedHudGlaPowers.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudHelpbox.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudObsCommandBar.ini
 Data/INI/MappedImages/HandCreated/ReforgedHudObsPlayerWindow.ini
+Data/INI/MappedImages/HandCreated/ReforgedLoadScreens.ini
 Data/INI/ObjectCreationListReforged.ini
 Data/INI/ParticleSystemReforged.ini
 Data/INI/PlayerTemplateReforged.ini
