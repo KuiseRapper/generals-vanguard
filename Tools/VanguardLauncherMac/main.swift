@@ -28,7 +28,9 @@ struct FeaturedMod: Identifiable {
     let page: URL
     let archiveHints: [String]
     let startID: String
-    let downloadURL: URL
+    let downloadURL: URL?
+    let includes: [String]
+    var bundled: Bool = false
 }
 
 let FeaturedMods: [FeaturedMod] = [
@@ -36,12 +38,30 @@ let FeaturedMods: [FeaturedMod] = [
                 detail: "USA, China and GLA get the mod's units and structures. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
                 archiveHints: ["shw_noinstl"], startID: "31249",
-                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/ShockWave-1.1-noinstaller.zip")!),
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/ShockWave-1.1-noinstaller.zip")!,
+                includes: ["ShockWave's USA, China and GLA: extra generals, units, structures, defences and support powers",
+                           "ShockWave's UI, cameos and balance",
+                           "Its challenge maps and skirmish AI"]),
     FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
                 detail: "The Russian Federation and the ECA. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
                 archiveHints: ["rotrbeta_18_noinstl"], startID: "49529",
-                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/RiseOfTheReds-1.8-noinstaller.zip")!),
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/RiseOfTheReds-1.8-noinstaller.zip")!,
+                includes: ["Rise of the Reds' Russian Federation and European Continental Alliance factions",
+                           "Their buildings, vehicles, aircraft, infantry, powers and cameos",
+                           "RotR's reworked USA, China and GLA (not used by the combined mod)",
+                           "Its campaign missions (separate pack, later)"]),
+    FeaturedMod(id: "vanguardcombined", title: "Vanguard Combined 0.1",
+                detail: "Our own merge: ShockWave as the base, with Rise of the Reds' Russia and ECA on top. In development.",
+                page: URL(string: "https://github.com/KuiseRapper/generals-vanguard")!,
+                archiveHints: ["vanguardcombined"], startID: "",
+                downloadURL: nil,
+                includes: ["ShockWave 1.201 as the base: USA, China and GLA, their generals, units, structures, defences, powers, UI and balance",
+                           "Rise of the Reds' Russian Federation and ECA as two more armies, with their buildings, vehicles, aircraft, infantry, powers and cameos",
+                           "Vanguard's fixes, AI work, performance and balance underneath both",
+                           "RotR's campaign missions as a separate pack once the factions are stable",
+                           "Credits: SWR Productions for ShockWave and Rise of the Reds; Vanguard for the merge"],
+                bundled: true),
 ]
 
 struct ModEntry: Identifiable {
@@ -66,6 +86,7 @@ final class LauncherModel: ObservableObject {
     @Published var mods: [ModEntry] = []
     @Published var activeMod: String? = UserDefaults.standard.string(forKey: "ActiveMod")
     @Published var showMods = false
+    @Published var detailMod: FeaturedMod?
     @Published var modsPending: [String: Bool] = [:]
     @Published var modsBusy = false
     @Published var modsProgress = 0.0
@@ -410,12 +431,13 @@ final class LauncherModel: ObservableObject {
     /// Download straight from ModDB in a hidden WebKit view, which passes the site's browser check,
     /// and install the archive when it lands. Falls back to the page only if the download fails.
     func downloadFeatured(_ featured: FeaturedMod) {
+        guard let downloadURL = featured.downloadURL else { return }
         guard !downloading.contains(featured.id) else { return }
         downloading.insert(featured.id)
         downloadProgress[featured.id] = 0
         status = "Downloading \(featured.title)…"
         let downloader = ModDownloader(
-            url: featured.downloadURL,
+            url: downloadURL,
             onProgress: { [weak self] value in
                 Task { @MainActor in self?.downloadProgress[featured.id] = value }
             },
@@ -888,9 +910,9 @@ struct ModRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
                     Text(featured.title).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
-                    Text(model.activeMod == featured.id ? "ACTIVE" : (installed ? "INSTALLED" : (hasArchive ? "READY TO INSTALL" : "NOT INSTALLED")))
+                    Text(featured.bundled ? "IN DEVELOPMENT" : (model.activeMod == featured.id ? "ACTIVE" : (installed ? "INSTALLED" : (hasArchive ? "READY TO INSTALL" : "NOT INSTALLED"))))
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(model.activeMod == featured.id ? Color(red: 0.95, green: 0.79, blue: 0.30) : installed ? Color(red: 0.45, green: 0.82, blue: 0.55)
+                        .foregroundColor(featured.bundled ? Color(red: 0.55, green: 0.70, blue: 0.95) : model.activeMod == featured.id ? Color(red: 0.95, green: 0.79, blue: 0.30) : installed ? Color(red: 0.45, green: 0.82, blue: 0.55)
                                                    : (hasArchive ? Color(red: 0.95, green: 0.79, blue: 0.30)
                                                                  : Color(red: 0.55, green: 0.62, blue: 0.72)))
                         .padding(.horizontal, 6).padding(.vertical, 2)
@@ -902,7 +924,15 @@ struct ModRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 8)
-            if downloading {
+            Button { model.detailMod = featured } label: {
+                Image(systemName: "info.circle")
+            }
+            .buttonStyle(.plain)
+            .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
+            .help("What is in this mod?")
+            if featured.bundled {
+                Text("Ships with Vanguard").font(.system(size: 10)).foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+            } else if downloading {
                 ProgressView(value: model.downloadProgress[featured.id] ?? 0).frame(width: 90)
             } else if installed {
                 Button("Remove") { model.remove(featured) }.buttonStyle(.bordered)
@@ -989,6 +1019,81 @@ struct ModsView: View {
         }
         .padding(24)
         .frame(width: 660, height: 560)
+        .background(Color(red: 0.05, green: 0.07, blue: 0.11))
+        .sheet(item: $model.detailMod) { featured in
+            ModDetailView(model: model, featured: featured)
+        }
+    }
+}
+
+struct ModDetailView: View {
+    @ObservedObject var model: LauncherModel
+    let featured: FeaturedMod
+    private var installed: Bool { model.isInstalled(featured) }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(featured.title).font(.system(size: 22, weight: .bold)).foregroundColor(.white)
+                Spacer()
+                if featured.bundled {
+                    Text("IN DEVELOPMENT").font(.system(size: 10, weight: .bold))
+                        .foregroundColor(Color(red: 0.55, green: 0.70, blue: 0.95))
+                } else {
+                    Text(installed ? "INSTALLED" : "NOT INSTALLED").font(.system(size: 10, weight: .bold))
+                        .foregroundColor(installed ? Color(red: 0.45, green: 0.82, blue: 0.55) : Color(red: 0.55, green: 0.62, blue: 0.72))
+                }
+                Button { model.detailMod = nil } label: {
+                    Image(systemName: "xmark.circle.fill").font(.system(size: 20))
+                        .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+            }
+            Text(featured.detail)
+                .font(.system(size: 12))
+                .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
+            Text("WHAT IT INCLUDES")
+                .font(.system(size: 10, weight: .bold))
+                .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(featured.includes, id: \.self) { line in
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(red: 0.45, green: 0.82, blue: 0.55))
+                        Text(line)
+                            .font(.system(size: 12))
+                            .foregroundColor(Color(red: 0.85, green: 0.89, blue: 0.95))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            if !featured.bundled {
+                Text("Installs into \(model.modsDir.path)/\(featured.id)")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                    .lineLimit(1).truncationMode(.middle)
+            }
+            Spacer(minLength: 4)
+            HStack {
+                if !featured.bundled {
+                    if installed {
+                        Button("Remove") { model.remove(featured); model.detailMod = nil }
+                            .buttonStyle(.bordered)
+                    } else if model.downloading.contains(featured.id) {
+                        ProgressView(value: model.downloadProgress[featured.id] ?? 0).frame(width: 120)
+                    } else {
+                        Button("Download and install") { model.downloadFeatured(featured); model.detailMod = nil }
+                            .buttonStyle(.borderedProminent)
+                    }
+                }
+                Spacer()
+                Button("Close") { model.detailMod = nil }
+                    .buttonStyle(.bordered)
+            }
+        }
+        .padding(24)
+        .frame(width: 560, height: 430)
         .background(Color(red: 0.05, green: 0.07, blue: 0.11))
     }
 }
