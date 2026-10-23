@@ -1582,3 +1582,11 @@ END
 CONTROLBAR:ToolTipRussiaRadar
 "Build the radar to see the minimap and the battlefield."
 END
+
+SIDE:VanguardRussia
+"Russian Federation"
+END
+
+SIDE:VanguardECA
+"European Continental Alliance"
+END
