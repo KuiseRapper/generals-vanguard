@@ -1,5 +1,9 @@
 # ECA production probe: the European war factory should build Leopards.
+# The Leopard's prerequisite is the Solar Reactor, not the factory alone: without it the queue
+# refuses every one of them (canQueueCreateUnit: CANMAKE_NO_PREREQ), which is what "the produce is
+# refused even though the button exists" turned out to be.
 30    spawn    0  EuropeWarFactory       1  start0:0:190
+30    spawn    0  EuropeSolarReactor     1  start0:-260:0
 60    produce  0  EuropeWarFactory        EuropeTankLeopard 3
 600   tally    0  EuropeTankLeopard
 1200  tally    0  EuropeTankLeopard
