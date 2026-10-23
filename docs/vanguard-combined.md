@@ -49,7 +49,8 @@ which is the whole point of using ShockWave as the base.
 
 ## Progress
 - [x] Launcher lists the combined mod with a details sheet (in development).
-- [ ] Russia faction removed from Vanguard.
+- [x] Russia faction removed from Vanguard (template, data and art; the art and INIs are staged
+  under `build-mac/combined_staging/` for the mod).
 - [ ] Combined skeleton (Russia + ECA templates, one unit/building each).
 - [ ] Full Russia port.
 - [ ] Full ECA port.
