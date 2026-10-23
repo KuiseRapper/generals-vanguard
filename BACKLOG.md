@@ -34,12 +34,15 @@ tags) on our `Russia*` reskins. Start with the T-90, BMP-3, MiG-25 and Mi-24, on
 with a screenshot from a skirmish each time.
 *Licence:* SWR Productions' art, not GPL; see NOTICE.md. The owner directed its use.
 ### Mod manager in the launcher
-The owner wants GenPatcher-style mod management: search, install, enable/disable and uninstall
-community mods from the launcher, without hand-copying `.big`s. Design the manifest first (mod id,
-version, files, hashes, `-mod` launch argument), then the panel. Mods that change `INIZH.big` or
-`Window` need the same per-mod data-folder injection the launcher already does for its own package.
-*First step:* a `mods.json` schema and one local test mod (a renamed copy of our own data) installed
-and removed by the launcher.
+**macOS launcher: done (in source).** `Tools/VanguardLauncherMac/main.swift` has a Mods sheet: install a
+`.zip` (or a single `.big`) into `~/Library/Application Support/GeneralsVanguard/Mods/<name>/`, uninstall
+it, and pick the active one; Play passes `-mod "<abs path>/"`, which the engine already supports (a
+folder's `*.big` files are mounted over retail, later `-mod` wins, fork-owned files still win over
+every mod). The engine test ran with `-mod` and a ShockWave `.big` mounted.
+
+**Windows launcher: still to do.** Same UI in `Tools/VanguardLauncher/MainForm.cs`, storing under
+`%USERPROFILE%\Documents\Generals Vanguard\Mods`, and `GameLocator.Start` taking the `-mod` argument.
+Until then a Windows player can pass `-mod` by hand or drop the mod's `.big` files next to the exe.
 
 ### Performance: VSync by default, a frame cap, and a Vulkan option
 The owner sees GPU coil whine while Zero Hour runs: the debug line shows ~118 fps on a 61 Hz panel, so

@@ -20,6 +20,13 @@ struct Manifest: Codable {
     let notes: String?
 }
 
+struct ModEntry: Identifiable {
+    let id: String
+    let name: String
+    let version: String
+    let url: URL
+}
+
 @MainActor
 final class LauncherModel: ObservableObject {
     @Published var installed: String?
@@ -32,6 +39,11 @@ final class LauncherModel: ObservableObject {
     @Published var banner: String?
     @Published var manifest: Manifest?
     @Published var zeroHour = ""
+    @Published var mods: [ModEntry] = []
+    @Published var activeMod: String? = UserDefaults.standard.string(forKey: "ActiveMod")
+    @Published var showMods = false
+
+    var modsDir: URL { support.appendingPathComponent("Mods", isDirectory: true) }
 
     let launcherVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0"
     // The 0.4.1 release asset named launcher-mac.json is 404 on GitHub; the 0.4.0 copy works and
@@ -63,6 +75,7 @@ final class LauncherModel: ObservableObject {
         }
         installed = Self.readInstalled(gameDir)
         status = installed.map { "Game \($0) installed." } ?? "The game has not been installed yet."
+        refreshMods()
         Task { await check(silent: true) }
     }
 
@@ -224,7 +237,11 @@ final class LauncherModel: ObservableObject {
         }
         let process = Process()
         process.executableURL = executable
-        process.arguments = ["-root", zeroHour]
+        var arguments = ["-root", zeroHour]
+        if let id = activeMod, let mod = mods.first(where: { $0.id == id }) {
+            arguments += ["-mod", mod.url.path + "/"]
+        }
+        process.arguments = arguments
         process.currentDirectoryURL = gameApp
         do {
             try process.run()
@@ -232,6 +249,83 @@ final class LauncherModel: ObservableObject {
         } catch {
             alert("Could not start the game", error.localizedDescription)
         }
+    }
+
+    // MARK: - mods
+
+    func refreshMods() {
+        try? FileManager.default.createDirectory(at: modsDir, withIntermediateDirectories: true)
+        let keys: Set<URLResourceKey> = [.isDirectoryKey]
+        let items = (try? FileManager.default.contentsOfDirectory(at: modsDir, includingPropertiesForKeys: Array(keys))) ?? []
+        mods = items.compactMap { url in
+            guard (try? url.resourceValues(forKeys: keys))?.isDirectory == true else { return nil }
+            var name = url.lastPathComponent
+            var version = "1.0"
+            if let data = try? Data(contentsOf: url.appendingPathComponent("mod.json")),
+               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                name = obj["name"] as? String ?? name
+                version = obj["version"] as? String ?? version
+            }
+            return ModEntry(id: url.lastPathComponent, name: name, version: version, url: url)
+        }.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        if let active = activeMod, !mods.contains(where: { $0.id == active }) { setActiveMod(nil) }
+    }
+
+    func setActiveMod(_ id: String?) {
+        activeMod = id
+        if let id { UserDefaults.standard.set(id, forKey: "ActiveMod") }
+        else { UserDefaults.standard.removeObject(forKey: "ActiveMod") }
+    }
+
+    func installMod() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.message = "Choose a mod archive (.zip) or a .big file"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        let base = url.deletingPathExtension().lastPathComponent
+        let safe = base.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
+        let folder = modsDir.appendingPathComponent(safe, isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            if url.pathExtension.lowercased() == "big" {
+                try FileManager.default.copyItem(at: url, to: folder.appendingPathComponent(url.lastPathComponent))
+            } else {
+                try unzip(url, to: folder)
+                let top = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+                if top.count == 1, (try? top[0].resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
+                    let inner = top[0]
+                    for item in (try? FileManager.default.contentsOfDirectory(at: inner, includingPropertiesForKeys: nil)) ?? [] {
+                        try FileManager.default.moveItem(at: item, to: folder.appendingPathComponent(item.lastPathComponent))
+                    }
+                    try FileManager.default.removeItem(at: inner)
+                }
+            }
+            let json = folder.appendingPathComponent("mod.json")
+            if !FileManager.default.fileExists(atPath: json.path) {
+                let data = try JSONSerialization.data(withJSONObject: ["name": base, "version": "1.0"], options: [.prettyPrinted])
+                try data.write(to: json)
+            }
+            refreshMods()
+            status = "Installed \(base)."
+        } catch {
+            try? FileManager.default.removeItem(at: folder)
+            alert("Could not install the mod", error.localizedDescription)
+        }
+    }
+
+    func uninstallMod(_ entry: ModEntry) {
+        let box = NSAlert()
+        box.messageText = "Uninstall \(entry.name)?"
+        box.informativeText = "This deletes \(entry.url.path)."
+        box.addButton(withTitle: "Uninstall")
+        box.addButton(withTitle: "Cancel")
+        guard box.runModal() == .alertFirstButtonReturn else { return }
+        try? FileManager.default.removeItem(at: entry.url)
+        if activeMod == entry.id { setActiveMod(nil) }
+        refreshMods()
+        status = "Uninstalled \(entry.name)."
     }
 
     private func moveDuplicateInizh(_ zero: String) {
@@ -352,6 +446,11 @@ struct SideView: View {
                 .padding(.top, 26)
 
             Button("Check for updates") { Task { await model.check(silent: false) } }
+                .buttonStyle(FilledButtonStyle(background: Color(red: 0.08, green: 0.11, blue: 0.16),
+                                               foreground: .white))
+                .padding(.top, 12)
+
+            Button("Mods") { model.refreshMods(); model.showMods = true }
                 .buttonStyle(FilledButtonStyle(background: Color(red: 0.08, green: 0.11, blue: 0.16),
                                                foreground: .white))
                 .padding(.top, 12)
@@ -479,6 +578,45 @@ struct ContentView: View {
             }
         }
         .frame(width: 1000, height: 640)
+        .sheet(isPresented: $model.showMods) { ModsView(model: model) }
+    }
+}
+
+struct ModsView: View {
+    @ObservedObject var model: LauncherModel
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Mods")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundColor(.white)
+            Text("Install a mod archive or a .big; Play then mounts the selected mod after the base game.")
+                .font(.system(size: 12))
+                .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
+            List(model.mods) { mod in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(mod.name).foregroundColor(.white)
+                        Text("v\(mod.version)  \(mod.id)")
+                            .font(.system(size: 10))
+                            .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                    }
+                    Spacer()
+                    Button(model.activeMod == mod.id ? "Active" : "Use") { model.setActiveMod(mod.id) }
+                        .disabled(model.activeMod == mod.id)
+                    Button("Uninstall") { model.uninstallMod(mod) }
+                }
+            }
+            .frame(height: 260)
+            HStack {
+                Button("Install\u{2026}") { model.installMod() }
+                Button("Use none") { model.setActiveMod(nil) }
+                Spacer()
+                Button("Close") { model.showMods = false }
+            }
+        }
+        .padding(24)
+        .frame(width: 620, height: 430)
+        .background(Color(red: 0.05, green: 0.07, blue: 0.11))
     }
 }
 
