@@ -118,5 +118,9 @@ Trade-off: the two new templates now share their `Side` with ShockWave's Laser a
 generals, which is what makes RotR's AI scripts apply to them. Watch the lobby and the AI mirror
 matches for side bleed.
 
+A 12,000-frame observer match (Russia vs ECA, seed 11) runs clean and the AI builds its economy, but
+no side wins inside 200 seconds of game time - the attack side of RotR's skirmish AI still needs a
+tuning pass.
+
 Harness note: `-scenario` `tally` actions stop running once the match reaches its end state even
 though `-maxframes` keeps counting, so tallies past roughly frame 1,200 in these runs never fire.
