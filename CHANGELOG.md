@@ -3,6 +3,33 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-23 - Vanguard on the menu, Zero Hour's load screen
+
+- **The main menu's logo says VANGUARD.** `GeneralsLogo` was a region of retail's
+  `SCSmShellUserInterface512_001.tga` that spells "GENERALS ZERO HOUR" in the shared atlas. A
+  HandCreated mapped image now points it at `ReforgedGeneralsLogo.tga`, the fork's own wordmark
+  (white GENERALS, gold VANGUARD, the same type as the launcher and title art). HandCreated loads
+  after TextureSize_512 and INI_LOAD_OVERWRITE keeps the later block, so it wins; the Reforged name
+  keeps the texture the fork's whatever mod is loaded.
+- **The window title is "Generals Vanguard" whatever is loaded.** The title comes from
+  `GUI:Command&ConquerGenerals`; the retail CSF says "Command & Conquer Generals Zero Hour" and
+  ShockWave's `Generals.str` says "Command & Conquer Generals: ShockWave". `Data/Patch.str` is parsed
+  last and overrules both, so one line there settles it (and it is fork-owned, so no mod can put its
+  own name back).
+- **The load screen is retail's again.** The fork used to ship its own Vanguard art as a loose
+  `Data/English/Art/Textures/TitleScreenuserinterface.tga` and claim the path as fork-owned, which
+  beat EnglishZH.big *and* kept every mod's own title art out. The file is gone, the path is no
+  longer fork-owned, and the `TitleScreen` mapped image now resolves to the archive's art (or a
+  mod's, when it ships one). The owner asked for the default screen.
+- **The combined mod's two sides have names**: `SIDE:VanguardRussia` is "Russian Federation" and
+  `SIDE:VanguardECA` is "European Continental Alliance" (0.5.12, in `Patch.str`).
+- **The RotR textures the Russia models load are fork-owned**: `ExNewMuzzle.dds`, `PMRusFlag.dds`,
+  `spotlight2.dds` and `Zhca_*.tga` were shipped but not claimed, so a mod's copy could have
+  replaced the art on the fork's models. The test that walks `Code/Data` had been failing on them.
+- **The VSync tests match the shipped default.** `m_vsync` is TRUE since the frame cap work
+  ("capped by the monitor unless the player turns it off"); two tests still asserted FALSE and had
+  been failing since 646231ab.
+
 ## 2026-10-21 - Russia's powers, AI coverage and balance pass
 
 - **Seven general's powers**, all on the Command Bunker and all used by the AI: Artillery Preparation
