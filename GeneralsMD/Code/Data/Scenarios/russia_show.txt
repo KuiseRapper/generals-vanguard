@@ -1,0 +1,17 @@
+# Russia showcase: the units whose art came from Rise of the Reds, spawned around the player's
+# starting base so they can be looked at without touching the mouse. Driven entirely by -scenario.
+#
+#   generals -win -quickstart -noshellmap -autoskirmish 2 -side 0 FactionRussia
+#     -side 1 FactionAmerica -seed 1 -maxframes 900 -scenario russia_show
+#
+30  spawn  0  RussiaT72B        4  start0:120:120
+30  spawn  0  Russia2S19        2  start0:-170:130
+30  spawn  0  RussiaBMP3        3  start0:170:-80
+30  spawn  0  RussiaTunguska     2  start0:-150:-140
+30  spawn  0  RussiaSupplyTruck  1  start0:0:190
+30  spawn  0  RussiaMiG25        1  start0:0:-230
+90  tally  0  RussiaT72B
+90  tally  0  Russia2S19
+90  tally  0  RussiaBMP3
+90  tally  0  RussiaTunguska
+90  tally  0  RussiaMiG25

@@ -71,7 +71,7 @@ Command & Conquer Generals Zero Hour.
 
 ## Rise of the Reds art (third-party, not GPL)
 
-The Russian buildings' models (`GeneralsMD/Code/Data/Art/W3D/RB*.W3D`) and their textures
+The Russian buildings' and units' models (`GeneralsMD/Code/Data/Art/W3D/RB*.W3D`, `RV*.W3D`) and their textures
 (`GeneralsMD/Code/Data/Art/Textures/RB*.dds`, `RTScaffold.dds`, `RTWall.dds`) are adapted from
 **Rise of the Reds 1.8** (SWR Productions, 2012), the Zero Hour mod, which the owner of this fork
 directed the Russia faction to use. They are **not** covered by this project's GPL and remain the
