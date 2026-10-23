@@ -51,9 +51,10 @@ which is the whole point of using ShockWave as the base.
 - [x] Launcher lists the combined mod with a details sheet (in development).
 - [x] Russia faction removed from Vanguard (template, data and art; the art and INIs are staged
   under `build-mac/combined_staging/` for the mod).
-- [ ] Combined skeleton (Russia + ECA templates, one unit/building each).
-- [ ] Full Russia port.
-- [ ] Full ECA port.
+- [x] Combined skeleton: ShockWave base + `FactionVanguardRussia` and `FactionVanguardECA` start,
+  with RotR units spawned in a skirmish; shipped as `VanguardCombined-0.1.zip` and listed in the launcher.
+- [ ] Full Russia port (production, AI, text strings, balance).
+- [ ] Full ECA port (same).
 - [ ] Campaign pack.
 
 ## Finding: how RotR 1.8 gets Russia and ECA into the game
