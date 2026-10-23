@@ -1,4 +1,4 @@
-﻿/*
+/*
  * GameEngine boot coverage: the Phase 3 checkpoint.
  *
  * Linking gameengine.lib proves nothing on its own, so this brings up the
@@ -14056,7 +14056,7 @@ TEST(msaa_levels_map_to_the_counts_a_device_offers)
 	CHECK_EQ( msaaLevelForSamples( 64 ), OPTION_MSAA_LEVEL_COUNT - 1 );
 }
 
-TEST(vsync_is_off_until_the_player_asks)
+TEST(vsync_is_on_until_the_player_turns_it_off)
 {
 	const OptionDef *vsync = findOptionDef( "VSync" );
 	CHECK( vsync != NULL );
@@ -14068,12 +14068,14 @@ TEST(vsync_is_off_until_the_player_asks)
 	GlobalData *scratch = NEW GlobalData;
 	TheWritableGlobalData = scratch;
 
-	CHECK_EQ( scratch->m_vsync, FALSE );
+	// On by default since the frame cap work: an uncapped renderer ran at ~118 fps on a 61 Hz
+	// panel, which is the GPU power draw the owner reported, so the player turns VSync off.
+	CHECK_EQ( scratch->m_vsync, TRUE );
 
-	vsync->set( 1 );
-	CHECK_EQ( TheGlobalData->m_vsync, TRUE );
 	vsync->set( 0 );
 	CHECK_EQ( TheGlobalData->m_vsync, FALSE );
+	vsync->set( 1 );
+	CHECK_EQ( TheGlobalData->m_vsync, TRUE );
 
 	delete scratch;					// while it is the current one: a Debug build's ~GlobalData reads TheWritableGlobalData
 	TheWritableGlobalData = saved;
@@ -14102,7 +14104,7 @@ TEST(texture_filter_defaults_to_anisotropic)
 	// 2 is anisotropic. 0 anisotropy is "whatever the card offers", not a downgrade to off.
 	CHECK_EQ( scratch->m_textureFilterMode, 2 );
 	CHECK_EQ( scratch->m_anisotropyLevel, 0 );
-	CHECK_EQ( scratch->m_vsync, FALSE );
+	CHECK_EQ( scratch->m_vsync, TRUE );
 
 	delete scratch;					// while it is the current one: a Debug build's ~GlobalData reads TheWritableGlobalData
 	TheWritableGlobalData = saved;
@@ -16953,6 +16955,10 @@ TEST(every_shipped_master_is_fork_owned_and_retail_files_are_not)
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\INI\\GameData.ini")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\INI\\Object\\AmericaTankReforged.ini")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\English\\Movies\\EA_LOGO.bik")));
+	// The load screen's title art went back to retail's (and a mod's own may replace it), so the
+	// path must stay out of the fork-owned set; the fork ships no file at it any more.
+	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Data\\English\\Art\\Textures\\TitleScreenuserinterface.tga")));
+	CHECK(!FileSystem::isForkOwnedPath(AsciiString("English\\Art\\Textures\\TitleScreenuserinterface.tga")));
 	CHECK(!FileSystem::isForkOwnedPath(AsciiString("Art\\Textures\\AVPaladin.tga")));
 }
 

@@ -557,11 +557,18 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 		return TRUE;
 	if (starts("art\\textures\\sccrussia"))
 		return TRUE;
-	if (p == "data\\english\\art\\textures\\titlescreenuserinterface.tga")
+	// The loose textures that came with Rise of the Reds' models for the Russia units: the dozer,
+	// the infantry and the buildings name them, and a mod's own copy of one would show the wrong art
+	// on the fork's models.  Test: every_shipped_master_is_fork_owned_and_retail_files_are_not.
+	if (p == "art\\textures\\exnewmuzzle.dds"
+		|| p == "art\\textures\\pmrusflag.dds"
+		|| p == "art\\textures\\spotlight2.dds"
+		|| starts("art\\textures\\zhca_"))
 		return TRUE;
-	// Data\English is copied to Run\English, not under Data in the package.
-	if (p == "english\\art\\textures\\titlescreenuserinterface.tga")
-		return TRUE;
+	// The load screen's TitleScreen texture is deliberately not here: the fork used to ship its own
+	// Vanguard art at Data\English\Art\Textures\TitleScreenuserinterface.tga and claim it, which also
+	// kept every mod's own title art out.  The owner asked for the default screen, so retail's shows
+	// when nothing else supplies one and a mod's own copy wins when it does.
 	return p == "data\\patch.str"
 		|| starts("data\\turkish\\") || starts("data\\german\\")
 		|| starts("art\\textures\\reforged")
