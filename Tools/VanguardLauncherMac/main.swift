@@ -34,25 +34,8 @@ struct FeaturedMod: Identifiable {
 }
 
 let FeaturedMods: [FeaturedMod] = [
-    FeaturedMod(id: "shockwave", title: "ShockWave 1.201",
-                detail: "USA, China and GLA get the mod's units and structures. Downloads from ModDB automatically.",
-                page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
-                archiveHints: ["shw_noinstl"], startID: "31249",
-                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/ShockWave-1.1-noinstaller.zip")!,
-                includes: ["ShockWave's USA, China and GLA: extra generals, units, structures, defences and support powers",
-                           "ShockWave's UI, cameos and balance",
-                           "Its challenge maps and skirmish AI"]),
-    FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
-                detail: "The Russian Federation and the ECA. Downloads from ModDB automatically.",
-                page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
-                archiveHints: ["rotrbeta_18_noinstl"], startID: "49529",
-                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/RiseOfTheReds-1.8-noinstaller.zip")!,
-                includes: ["Rise of the Reds' Russian Federation and European Continental Alliance factions",
-                           "Their buildings, vehicles, aircraft, infantry, powers and cameos",
-                           "RotR's reworked USA, China and GLA (not used by the combined mod)",
-                           "Its campaign missions (separate pack, later)"]),
-    FeaturedMod(id: "vanguardcombined", title: "Vanguard Combined 0.1",
-                detail: "Our own merge: ShockWave as the base, with Rise of the Reds' Russia and ECA on top. Official Vanguard mod.",
+    FeaturedMod(id: "vanguardcombined", title: "Vanguard Combined",
+                detail: "The complete Vanguard game: ShockWave's armies and generals plus Rise of the Reds' Russian Federation and ECA.",
                 page: URL(string: "https://github.com/KuiseRapper/generals-vanguard")!,
                 archiveHints: ["vanguardcombined"], startID: "",
                 downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/VanguardCombined-0.1.zip")!,
@@ -61,6 +44,24 @@ let FeaturedMods: [FeaturedMod] = [
                            "Vanguard's fixes, AI work, performance and balance underneath both",
                            "RotR's campaign missions as a separate pack once the factions are stable",
                            "Credits: SWR Productions for ShockWave and Rise of the Reds; Vanguard for the merge"]),
+    FeaturedMod(id: "shockwave", title: "ShockWave 1.201",
+                detail: "ShockWave on its own: USA, China and GLA with its extra generals, units and balance.",
+                page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
+                archiveHints: ["shw_noinstl"], startID: "31249",
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/ShockWave-1.1-noinstaller.zip")!,
+                includes: ["ShockWave's USA, China and GLA: extra generals, units, structures, defences and support powers",
+                           "ShockWave's UI, cameos and balance",
+                           "Its challenge maps and skirmish AI"]),
+    FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
+                detail: "Rise of the Reds on its own: its Russian Federation and ECA, with its own take on the classic armies.",
+                page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
+                archiveHints: ["rotrbeta_18_noinstl"], startID: "49529",
+                downloadURL: URL(string: "https://github.com/KuiseRapper/generals-vanguard/releases/download/v0.5.11/RiseOfTheReds-1.8-noinstaller.zip")!,
+                includes: ["Rise of the Reds' Russian Federation and European Continental Alliance factions",
+                           "Their buildings, vehicles, aircraft, infantry, powers and cameos",
+                           "RotR's reworked USA, China and GLA (not used by the combined mod)",
+                           "Its campaign missions (separate pack, later)"]),
+
 ]
 
 struct ModEntry: Identifiable {
@@ -538,14 +539,26 @@ final class LauncherModel: ObservableObject {
             if url.pathExtension.lowercased() == "big" {
                 try FileManager.default.copyItem(at: url, to: folder.appendingPathComponent(url.lastPathComponent))
             } else {
-                try unzip(url, to: folder)
-                let top = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
-                if top.count == 1, (try? top[0].resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
-                    let inner = top[0]
+                let magic = (try? FileHandle(forReadingFrom: url).read(upToCount: 4)) ?? Data()
+                guard magic == Data([0x50, 0x4b, 0x03, 0x04]) else {
+                    throw NSError(domain: "Vanguard", code: 12, userInfo: [NSLocalizedDescriptionKey:
+                        "The download is not a zip file. Check the connection and try Download again."])
+                }
+                do { try unzip(url, to: folder) }
+                catch {
+                    throw NSError(domain: "Vanguard", code: 13, userInfo: [NSLocalizedDescriptionKey:
+                        "The download could not be unpacked, so it may be incomplete. Try Download again."])
+                }
+                // Ignore the macOS metadata folder when flattening a single top directory.
+                let visible = ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
+                    .filter { $0.lastPathComponent != "__MACOSX" && !$0.lastPathComponent.hasPrefix("._") && !$0.lastPathComponent.hasPrefix(".") }
+                if visible.count == 1, (try? visible[0].resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true {
+                    let inner = visible[0]
                     for item in (try? FileManager.default.contentsOfDirectory(at: inner, includingPropertiesForKeys: nil)) ?? [] {
                         try FileManager.default.moveItem(at: item, to: folder.appendingPathComponent(item.lastPathComponent))
                     }
                     try FileManager.default.removeItem(at: inner)
+                    try? FileManager.default.removeItem(at: folder.appendingPathComponent("__MACOSX"))
                 }
             }
             let json = folder.appendingPathComponent("mod.json")
@@ -557,7 +570,7 @@ final class LauncherModel: ObservableObject {
             guard contents.contains(where: { $0.pathExtension.lowercased() == "big" }) else {
                 try? FileManager.default.removeItem(at: folder)
                 throw NSError(domain: "Vanguard", code: 11, userInfo: [NSLocalizedDescriptionKey:
-                    "That archive is an installer, not a mod package. Use the no-installer release (the one with .big files)."])
+                    "This download has no .big files, so it is not a playable mod package. Try downloading it again."])
             }
         } catch {
             try? FileManager.default.removeItem(at: folder)
@@ -963,7 +976,7 @@ struct ModsView: View {
                 .buttonStyle(.plain)
                 .keyboardShortcut(.cancelAction)
             }
-            Text("Tick a mod to install and mount it, untick to remove it. Downloads go straight into the Mods folder.")
+            Text("Tick the one mod you want to play. Untick everything to play vanilla Zero Hour. Download installs a mod; Remove deletes its files.")
                 .font(.system(size: 11))
                 .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
             HStack(spacing: 8) {
@@ -1004,7 +1017,7 @@ struct ModsView: View {
                     }
                 }
             }
-            Text("The ticked mod is the one Play loads. Download installs it; Remove deletes its files.")
+            Text("Only one mod can be active. The ticked mod is what Play loads; no tick means vanilla Zero Hour.")
                 .font(.system(size: 10))
                 .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
             HStack(spacing: 10) {
