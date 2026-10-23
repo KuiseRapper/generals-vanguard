@@ -62,7 +62,7 @@ which is the whole point of using ShockWave as the base.
   queued 2 of 2 Lynx APCs. The Leopard specifically is refused by the scenario's `produce` even
   though the button exists; it is a different (Overlord-style) unit, so this needs a closer look.
 - [x] ShockWave's generals still start alongside the new factions (`FactionAmericaAirForceGeneral`).
-- [ ] Full ECA port (production fix, AI, balance).
+- [ ] Full ECA port (Leopard production path, balance).
 - [ ] Campaign pack.
 
 ## Finding: how RotR 1.8 gets Russia and ECA into the game
@@ -93,3 +93,22 @@ Our fork already proves the engine accepts *more* templates: the custom Russia f
 
 That is the seam to build first, before importing a single unit: two new templates that show up next
 to ShockWave's generals in the lobby.
+
+## AI: where RotR's data lives, and how far the merge got
+
+RotR ships its skirmish AI in a separate archive, `!BetaRotrAI.big`:
+
+- `Data/INI/Default/AIData.ini` — `SideInfo` and `SkirmishBuildList` blocks keyed to
+  `AmericaLaserGeneral` (Russia) and `AmericaSuperWeaponGeneral` (ECA).
+- `Data/Scripts/SkirmishScripts.scb` and `Scripts.ini` — the teams the AI builds.
+
+The combined mod's templates use new sides (`VanguardRussia`, `VanguardECA`), so those blocks have to
+be renamed to match and merged into ShockWave's `Default/AIData.ini` (itself one `AIData` block plus
+top-level `SkirmishBuildList` blocks).
+
+Attempted so far: renamed `SideInfo` + `SkirmishBuildList` blocks. The `SideInfo`-only merge parsed
+and the match ran, but the AI stayed idle; adding the build lists crashed initialisation
+("Uncaught Exception during initialization"), most likely a name the parser resolves and cannot find
+(a science or a structure template from RotR's AI scripts). Next: import RotR's
+`SkirmishScripts.scb`/`Scripts.ini` as well, then bisect the build lists to the first unknown name.
+The loose `AIData.ini` was removed again so the shipped 0.1 mod stays stable.
