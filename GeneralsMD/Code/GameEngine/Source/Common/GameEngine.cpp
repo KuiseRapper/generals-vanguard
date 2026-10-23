@@ -1187,9 +1187,6 @@ void GameEngine::init( int argc, char *argv[] )
 			 one of EA's that nothing fires broke under a mod whose Weapon.ini leaves it out (Contra's Paladin
 			 found no infantry laser and crashed); a new name here exists whatever Weapon.ini loaded. */
 		ini.load( AsciiString( "Data\\INI\\WeaponReforged.ini" ), INI_LOAD_OVERWRITE, &xferCRC );
-		/* Russia's own weapons.  They name projectiles, so they are kept out of WeaponReforged.ini,
-			 which a unit test parses on its own with no projectile store; the stores exist by here. */
-		ini.load( AsciiString( "Data\\INI\\WeaponRussiaReforged.ini" ), INI_LOAD_OVERWRITE, &xferCRC );
 		initFactionSubsystem(TheObjectCreationListStore,"TheObjectCreationListStore", MSGNEW("GameEngineSubsystem") ObjectCreationListStore(), &xferCRC, "Data\\INI\\Default\\ObjectCreationList.ini", "Data\\INI\\ObjectCreationList.ini");
 		/* Lists EA left out or got wrong, before any object names one: a list parsed again is cleared
 			 and replaced whole, and a new name is simply added. */
@@ -1222,8 +1219,6 @@ void GameEngine::init( int argc, char *argv[] )
 		/* Mistakes in EA's data for the nine generals, patched the same way: a copy that missed the
 			 original's change, a wrong faction's sound, an icon naming an upgrade that does not exist. */
 		ini.load( AsciiString( "Data\\INI\\FixesReforged.ini" ), INI_LOAD_MULTIFILE, &xferCRC );
-		// Russia's objects, reskins of existing templates, after everything they copy
-		ini.load( AsciiString( "Data\\INI\\RussiaReforged.ini" ), INI_LOAD_MULTIFILE, &xferCRC );
 
 	#ifdef DUMP_PERF_STATS///////////////////////////////////////////////////////////////////////////
 	GetPrecisionTimer(&endTime64);//////////////////////////////////////////////////////////////////
