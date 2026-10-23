@@ -6,6 +6,7 @@ import SwiftUI
 import AppKit
 import Foundation
 import CryptoKit
+import WebKit
 
 struct ReleaseInfo: Codable {
     let version: String
@@ -26,17 +27,18 @@ struct FeaturedMod: Identifiable {
     let detail: String
     let page: URL
     let archiveHints: [String]
+    let startID: String
 }
 
 let FeaturedMods: [FeaturedMod] = [
     FeaturedMod(id: "shockwave", title: "ShockWave 1.201",
-                detail: "USA, China and GLA get the mod's units and structures. Put Shw_noinstl.zip in Downloads, or use Get.",
+                detail: "USA, China and GLA get the mod's units and structures. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/cc-shockwave/downloads/shockwave-version-12")!,
-                archiveHints: ["shw_noinstl", "shockwave"]),
+                archiveHints: ["shw_noinstl"], startID: "31249"),
     FeaturedMod(id: "rotr", title: "Rise of the Reds 1.8",
-                detail: "The Russian Federation and the ECA. Put ROTRBeta_18_Noinstl.zip in Downloads, or use Get.",
+                detail: "The Russian Federation and the ECA. Downloads from ModDB automatically.",
                 page: URL(string: "https://www.moddb.com/mods/rise-of-the-reds/downloads/rotr-eca-beta-18-no-installer-mac-compatible")!,
-                archiveHints: ["rotrbeta_18_noinstl", "rotr"]),
+                archiveHints: ["rotrbeta_18_noinstl"], startID: "49529"),
 ]
 
 struct ModEntry: Identifiable {
@@ -64,8 +66,19 @@ final class LauncherModel: ObservableObject {
     @Published var modsPending: [String: Bool] = [:]
     @Published var modsBusy = false
     @Published var modsProgress = 0.0
+    @Published var downloading: Set<String> = []
+    @Published var downloadProgress: [String: Double] = [:]
+    private var downloaders: [String: ModDownloader] = [:]
 
-    var modsDir: URL { support.appendingPathComponent("Mods", isDirectory: true) }
+    var modsDir: URL {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Generals Vanguard", isDirectory: true)
+            .appendingPathComponent("Mods", isDirectory: true)
+        if (try? FileManager.default.createDirectory(at: documents, withIntermediateDirectories: true)) != nil {
+            return documents
+        }
+        return support.appendingPathComponent("Mods", isDirectory: true)
+    }
 
     let launcherVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0"
     // "latest" points at whatever release is newest, so a release that publishes launcher-mac.json
@@ -311,6 +324,12 @@ final class LauncherModel: ObservableObject {
         let items = (try? FileManager.default.contentsOfDirectory(at: modsDir, includingPropertiesForKeys: Array(keys))) ?? []
         mods = items.compactMap { url in
             guard (try? url.resourceValues(forKeys: keys))?.isDirectory == true else { return nil }
+            // A folder left by a failed install (an installer .exe, no .big) is not a mod.
+            let inside = (try? FileManager.default.contentsOfDirectory(at: url, includingPropertiesForKeys: nil)) ?? []
+            if !inside.contains(where: { $0.pathExtension.lowercased() == "big" }) {
+                try? FileManager.default.removeItem(at: url)
+                return nil
+            }
             var name = url.lastPathComponent
             var version = "1.0"
             if let data = try? Data(contentsOf: url.appendingPathComponent("mod.json")),
@@ -347,6 +366,85 @@ final class LauncherModel: ObservableObject {
         } catch {
             alert("Could not install the mod", error.localizedDescription)
         }
+    }
+
+    func isInstalled(_ featured: FeaturedMod) -> Bool {
+        guard let mod = mods.first(where: { $0.id == featured.id }) else { return false }
+        let files = (try? FileManager.default.contentsOfDirectory(at: mod.url, includingPropertiesForKeys: nil)) ?? []
+        return files.contains { $0.pathExtension.lowercased() == "big" }
+    }
+
+    func archiveInDownloads(_ featured: FeaturedMod) -> URL? {
+        let downloads = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Downloads")
+        let keys: Set<URLResourceKey> = [.contentModificationDateKey]
+        let files = (try? FileManager.default.contentsOfDirectory(at: downloads, includingPropertiesForKeys: Array(keys))) ?? []
+        let hints = featured.archiveHints.map { $0.lowercased() }
+        return files
+            .filter { $0.pathExtension.lowercased() == "zip" }
+            .filter { file in hints.contains { file.lastPathComponent.lowercased().contains($0) } }
+            .sorted { a, b in
+                let da = (try? a.resourceValues(forKeys: keys))?.contentModificationDate ?? .distantPast
+                let db = (try? b.resourceValues(forKeys: keys))?.contentModificationDate ?? .distantPast
+                return da > db
+            }
+            .first
+    }
+
+    /// Download straight from ModDB in a hidden WebKit view, which passes the site's browser check,
+    /// and install the archive when it lands. Falls back to the page only if the download fails.
+    func downloadFeatured(_ featured: FeaturedMod) {
+        guard !downloading.contains(featured.id) else { return }
+        downloading.insert(featured.id)
+        downloadProgress[featured.id] = 0
+        status = "Downloading \(featured.title)…"
+        let downloader = ModDownloader(
+            page: featured.page,
+            start: URL(string: "https://www.moddb.com/downloads/start/\(featured.startID)")!,
+            onProgress: { [weak self] value in
+                Task { @MainActor in self?.downloadProgress[featured.id] = value }
+            },
+            onFinish: { [weak self] result in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.downloading.remove(featured.id)
+                    self.downloaders[featured.id] = nil
+                    switch result {
+                    case .success(let file):
+                        do {
+                            try self.installArchive(file, as: featured.id)
+                            self.refreshMods()
+                            self.modsPending[featured.id] = true
+                            self.status = "Installed \(featured.title)."
+                        } catch {
+                            self.alert("Could not install the mod", error.localizedDescription)
+                        }
+                    case .failure(let error):
+                        self.alert("Download failed", error.localizedDescription)
+                    }
+                }
+            })
+        downloaders[featured.id] = downloader
+        downloader.startDownload()
+    }
+
+    func installFeaturedNow(_ featured: FeaturedMod) {
+        do {
+            try installFeatured(featured)
+            refreshMods()
+            modsPending[featured.id] = true
+            status = "Installed \(featured.title)."
+        } catch {
+            alert("Could not install the mod", error.localizedDescription)
+        }
+    }
+
+    func remove(_ featured: FeaturedMod) {
+        guard let installed = mods.first(where: { $0.id == featured.id }) else { return }
+        try? FileManager.default.removeItem(at: installed.url)
+        if activeMod == featured.id { setActiveMod(nil) }
+        modsPending[featured.id] = false
+        refreshMods()
+        status = "Removed \(featured.title)."
     }
 
     func installFeatured(_ featured: FeaturedMod) throws {
@@ -417,6 +515,12 @@ final class LauncherModel: ObservableObject {
             if !FileManager.default.fileExists(atPath: json.path) {
                 let data = try JSONSerialization.data(withJSONObject: ["name": name, "version": "1.0"], options: [.prettyPrinted])
                 try data.write(to: json)
+            }
+            let contents = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+            guard contents.contains(where: { $0.pathExtension.lowercased() == "big" }) else {
+                try? FileManager.default.removeItem(at: folder)
+                throw NSError(domain: "Vanguard", code: 11, userInfo: [NSLocalizedDescriptionKey:
+                    "That archive is an installer, not a mod package. Use the no-installer release (the one with .big files)."])
             }
         } catch {
             try? FileManager.default.removeItem(at: folder)
@@ -691,70 +795,216 @@ struct ContentView: View {
     }
 }
 
+/// Automatic ModDB download. ModDB sits behind Cloudflare, so a plain URLSession gets a
+/// challenge page. Phase one loads the file page in a hidden WKWebView, which runs the challenge and
+/// leaves the clearance cookie in the shared store; phase two fetches the download start URL with
+/// those cookies and the same user agent, and the CDN redirect streams the archive.
+final class ModDownloader: NSObject, WKNavigationDelegate, URLSessionDownloadDelegate {
+    private let webView: WKWebView
+    private let page: URL
+    private let start: URL
+    private let onProgress: (Double) -> Void
+    private let onFinish: (Result<URL, Error>) -> Void
+    private var session: URLSession?
+    private var moved = false
+    private var finished = false
+
+    init(page: URL, start: URL, onProgress: @escaping (Double) -> Void,
+         onFinish: @escaping (Result<URL, Error>) -> Void) {
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .default()
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 2, height: 2), configuration: configuration)
+        self.page = page
+        self.start = start
+        self.onProgress = onProgress
+        self.onFinish = onFinish
+        super.init()
+        webView.navigationDelegate = self
+    }
+
+    func startDownload() {
+        var request = URLRequest(url: page)
+        request.timeoutInterval = 60
+        webView.load(request)
+        // The challenge can keep the page "loading" for a while; fetch anyway after a wait, and
+        // again when it does report finished.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { [weak self] in self?.fetch() }
+    }
+
+    private func fetch() {
+        guard !moved else { return }
+        moved = true
+        webView.evaluateJavaScript("navigator.userAgent") { [weak self] value, _ in
+            guard let self else { return }
+            let userAgent = (value as? String) ?? "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+            self.webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                let storage = HTTPCookieStorage.shared
+                storage.setCookies(cookies, for: self.start, mainDocumentURL: nil)
+                let configuration = URLSessionConfiguration.default
+                configuration.httpCookieStorage = storage
+                configuration.httpShouldSetCookies = true
+                configuration.httpAdditionalHeaders = ["User-Agent": userAgent, "Accept": "*/*"]
+                configuration.timeoutIntervalForRequest = 60
+                self.session = URLSession(configuration: configuration, delegate: self, delegateQueue: nil)
+                self.session?.downloadTask(with: self.start).resume()
+            }
+        }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        fetch()
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64,
+                    totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        guard totalBytesExpectedToWrite > 0 else { return }
+        onProgress(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        guard !finished else { return }
+        finished = true
+        let name = downloadTask.response?.suggestedFilename ?? "mod.zip"
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+        try? FileManager.default.removeItem(at: destination)
+        do {
+            try FileManager.default.moveItem(at: location, to: destination)
+            onFinish(.success(destination))
+        } catch {
+            onFinish(.failure(error))
+        }
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        guard !finished, let error else { return }
+        finished = true
+        let code = (task.response as? HTTPURLResponse)?.statusCode ?? 0
+        onFinish(.failure(NSError(domain: "Vanguard", code: code, userInfo: [NSLocalizedDescriptionKey:
+            "ModDB returned \(code == 0 ? "no response" : "HTTP \(code)"). \(error.localizedDescription)"])))
+    }
+}
+
+struct ModRow: View {
+    @ObservedObject var model: LauncherModel
+    let featured: FeaturedMod
+    var installed: Bool { model.isInstalled(featured) }
+    var downloading: Bool { model.downloading.contains(featured.id) }
+    var hasArchive: Bool { model.archiveInDownloads(featured) != nil }
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Toggle("", isOn: Binding(
+                get: { model.modsPending[featured.id] ?? installed },
+                set: { model.modsPending[featured.id] = $0 }))
+                .toggleStyle(.checkbox)
+                .labelsHidden()
+                .padding(.top, 2)
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 8) {
+                    Text(featured.title).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
+                    Text(installed ? "INSTALLED" : (hasArchive ? "READY TO INSTALL" : "NOT INSTALLED"))
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(installed ? Color(red: 0.45, green: 0.82, blue: 0.55)
+                                                   : (hasArchive ? Color(red: 0.95, green: 0.79, blue: 0.30)
+                                                                 : Color(red: 0.55, green: 0.62, blue: 0.72)))
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Color.white.opacity(0.06), in: Capsule())
+                }
+                Text(featured.detail)
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 8)
+            if downloading {
+                ProgressView(value: model.downloadProgress[featured.id] ?? 0).frame(width: 90)
+            } else if installed {
+                Button("Remove") { model.remove(featured) }.buttonStyle(.bordered)
+            } else if hasArchive {
+                Button("Install") { model.installFeaturedNow(featured) }
+                    .buttonStyle(.borderedProminent)
+            } else {
+                Button("Download") { model.downloadFeatured(featured) }.buttonStyle(.borderedProminent)
+            }
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
 struct ModsView: View {
     @ObservedObject var model: LauncherModel
+    private var custom: [ModEntry] { model.mods.filter { mod in !FeaturedMods.contains(where: { $0.id == mod.id }) } }
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Mods")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.white)
-            Text("Install a mod archive or a .big; Play mounts the selected mod after the base game.")
-                .font(.system(size: 12))
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("Mods").font(.system(size: 22, weight: .bold)).foregroundColor(.white)
+                Spacer()
+                Button { model.showMods = false } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                }
+                .buttonStyle(.plain)
+                .keyboardShortcut(.cancelAction)
+            }
+            Text("Tick a mod to install and mount it, untick to remove it. Downloads go straight into the Mods folder.")
+                .font(.system(size: 11))
                 .foregroundColor(Color(red: 0.56, green: 0.64, blue: 0.75))
-            ForEach(FeaturedMods) { featured in
-                HStack(alignment: .top) {
-                    Toggle("", isOn: Binding(
-                        get: { model.modsPending[featured.id] ?? false },
-                        set: { model.modsPending[featured.id] = $0 }))
-                        .toggleStyle(.checkbox)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(featured.title).foregroundColor(.white)
-                        Text(featured.detail)
-                            .font(.system(size: 10))
-                            .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+            HStack(spacing: 8) {
+                Text(model.modsDir.path)
+                    .font(.system(size: 9, design: .monospaced))
+                    .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                    .lineLimit(1).truncationMode(.middle)
+                Button("Open folder") { NSWorkspace.shared.open(model.modsDir) }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10))
+                    .foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.30))
+            }
+            ScrollView {
+                VStack(spacing: 8) {
+                    ForEach(FeaturedMods) { featured in
+                        ModRow(model: model, featured: featured)
                     }
-                    Spacer()
-                    Button("Get") { NSWorkspace.shared.open(featured.page) }
-                        .buttonStyle(.plain)
-                        .foregroundColor(Color(red: 0.95, green: 0.79, blue: 0.30))
+                    if !custom.isEmpty {
+                        Text("OTHER MODS")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, 6)
+                        ForEach(custom) { mod in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(mod.name).foregroundColor(.white)
+                                    Text("Installed · v\(mod.version) · \(mod.id)")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
+                                }
+                                Spacer()
+                                Button("Remove") { model.uninstallMod(mod) }.buttonStyle(.bordered)
+                            }
+                            .padding(12)
+                            .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
                 }
             }
             if model.modsBusy {
-                ProgressView(value: model.modsProgress).frame(maxWidth: 280)
+                ProgressView(value: model.modsProgress).frame(maxWidth: .infinity)
             }
-            HStack {
+            HStack(spacing: 10) {
                 Button(model.modsBusy ? "Updating\u{2026}" : "Update mods") { model.applyMods() }
+                    .buttonStyle(.borderedProminent)
                     .disabled(model.modsBusy)
-                Spacer()
-                Text(model.modsBusy ? "Installing or removing mod files\u{2026}" : "Checked mods are installed; unchecked ones are removed.")
-                    .font(.system(size: 10))
-                    .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
-            }
-            Divider()
-            List(model.mods.filter { mod in !FeaturedMods.contains(where: { $0.id == mod.id }) }) { mod in
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(mod.name).foregroundColor(.white)
-                        Text("v\(mod.version)  \(mod.id)")
-                            .font(.system(size: 10))
-                            .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
-                    }
-                    Spacer()
-                    Button(model.activeMod == mod.id ? "Active" : "Use") { model.setActiveMod(mod.id) }
-                        .disabled(model.activeMod == mod.id)
-                    Button("Uninstall") { model.uninstallMod(mod) }
-                }
-            }
-            .frame(height: 260)
-            HStack {
-                Button("Install\u{2026}") { model.installMod() }
-                Button("Use none") { model.setActiveMod(nil) }
+                Button("Install from file\u{2026}") { model.installMod() }
+                    .buttonStyle(.bordered)
                 Spacer()
                 Button("Close") { model.showMods = false }
+                    .buttonStyle(.bordered)
+                    .keyboardShortcut(.defaultAction)
             }
         }
         .padding(24)
-        .frame(width: 620, height: 430)
+        .frame(width: 660, height: 560)
         .background(Color(red: 0.05, green: 0.07, blue: 0.11))
     }
 }
