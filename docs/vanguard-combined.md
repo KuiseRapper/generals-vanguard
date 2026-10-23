@@ -58,7 +58,10 @@ which is the whole point of using ShockWave as the base.
 - [x] Russian production: the war factory accepts and builds RotR Kodiaks (`SCENARIO:` queued
   3 of 3, `HEADLESS TALLY` 1 alive at frame 1200).
 - [ ] Full Russia port (AI, balance, remaining roster).
-- [ ] Full ECA port (same).
+- [x] ECA starts (RotR command centre, dozer, `EuropeWarFactory` spawns). Production through the
+  scenario harness still queues 0 Leopards, to investigate (the factory's command set lists them).
+- [x] ShockWave's generals still start alongside the new factions (`FactionAmericaAirForceGeneral`).
+- [ ] Full ECA port (production fix, AI, balance).
 - [ ] Campaign pack.
 
 ## Finding: how RotR 1.8 gets Russia and ECA into the game

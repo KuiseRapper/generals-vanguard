@@ -1,0 +1,5 @@
+# ECA production probe: the European war factory should build Leopards.
+30    spawn    0  EuropeWarFactory       1  start0:0:190
+60    produce  0  EuropeWarFactory        EuropeTankLeopard 3
+600   tally    0  EuropeTankLeopard
+1200  tally    0  EuropeTankLeopard
