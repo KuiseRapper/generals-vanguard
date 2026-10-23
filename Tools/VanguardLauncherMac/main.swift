@@ -415,8 +415,8 @@ final class LauncherModel: ObservableObject {
                         do {
                             try self.installArchive(file, as: featured.id)
                             self.refreshMods()
-                            self.modsPending[featured.id] = true
-                            self.status = "Installed \(featured.title)."
+                            self.setActiveMod(featured.id)
+                            self.status = "Installed \(featured.title); it loads on Play."
                         } catch {
                             self.alert("Could not install the mod", error.localizedDescription)
                         }
@@ -433,8 +433,8 @@ final class LauncherModel: ObservableObject {
         do {
             try installFeatured(featured)
             refreshMods()
-            modsPending[featured.id] = true
-            status = "Installed \(featured.title)."
+            setActiveMod(featured.id)
+            status = "Installed \(featured.title); it loads on Play."
         } catch {
             alert("Could not install the mod", error.localizedDescription)
         }
@@ -862,17 +862,21 @@ struct ModRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Toggle("", isOn: Binding(
-                get: { model.modsPending[featured.id] ?? installed },
-                set: { model.modsPending[featured.id] = $0 }))
+                get: { model.activeMod == featured.id },
+                set: { on in
+                    if on { model.setActiveMod(featured.id) }
+                    else if model.activeMod == featured.id { model.setActiveMod(nil) }
+                }))
                 .toggleStyle(.checkbox)
                 .labelsHidden()
+                .disabled(!installed)
                 .padding(.top, 2)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 8) {
                     Text(featured.title).font(.system(size: 13, weight: .semibold)).foregroundColor(.white)
-                    Text(installed ? "INSTALLED" : (hasArchive ? "READY TO INSTALL" : "NOT INSTALLED"))
+                    Text(model.activeMod == featured.id ? "ACTIVE" : (installed ? "INSTALLED" : (hasArchive ? "READY TO INSTALL" : "NOT INSTALLED")))
                         .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(installed ? Color(red: 0.45, green: 0.82, blue: 0.55)
+                        .foregroundColor(model.activeMod == featured.id ? Color(red: 0.95, green: 0.79, blue: 0.30) : installed ? Color(red: 0.45, green: 0.82, blue: 0.55)
                                                    : (hasArchive ? Color(red: 0.95, green: 0.79, blue: 0.30)
                                                                  : Color(red: 0.55, green: 0.62, blue: 0.72)))
                         .padding(.horizontal, 6).padding(.vertical, 2)
@@ -957,18 +961,15 @@ struct ModsView: View {
                     }
                 }
             }
-            if model.modsBusy {
-                ProgressView(value: model.modsProgress).frame(maxWidth: .infinity)
-            }
+            Text("The ticked mod is the one Play loads. Download installs it; Remove deletes its files.")
+                .font(.system(size: 10))
+                .foregroundColor(Color(red: 0.45, green: 0.53, blue: 0.64))
             HStack(spacing: 10) {
-                Button(model.modsBusy ? "Updating\u{2026}" : "Update mods") { model.applyMods() }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(model.modsBusy)
                 Button("Install from file\u{2026}") { model.installMod() }
                     .buttonStyle(.bordered)
                 Spacer()
                 Button("Close") { model.showMods = false }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
             }
         }
