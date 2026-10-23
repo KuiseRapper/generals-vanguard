@@ -223,3 +223,8 @@ grep -a "SCENARIO\|HEADLESS" \
 
 `SCENARIO:` lines report every spawn/produce the file asked for; `HEADLESS TALLY` reports what is
 still alive. This is the way to test a match without a window.
+
+**Close the instance when you are done with it.** A `-screenshot` run and a windowed menu run never
+exit on their own, so one left behind is a game the owner finds running (ten of them, on 2026-10-23).
+Give every run a `-logprefix` and kill it in the same command: `pkill -f -- "-logprefix"`. `pgrep -f
+"MacOS/generals"` must be empty when a pass is over.
