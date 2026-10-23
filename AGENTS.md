@@ -195,3 +195,14 @@ The abandoned first attempt (forked from `asaprockky/generals-reforged` by mista
 this repository at `../generals-vanguard.old/`: a full git bundle of both commits under `.archive/`,
 plus the same commits as patches in `.archive/patches/`. Nothing in it applies to this tree, but it
 is the record of the naming and licensing review, including the text of the credits and disclaimers.
+
+## Testing a match without a mouse or keyboard
+
+`-scenario <name>` plays a match from `Data/Scenarios/<name>.txt`: `spawn`, `produce`, `move`,
+`attack`, `power` and `tally` on a frame number. The scenario drives the whole run, so a windowed
+session can be screenshotted without touching the owner's mouse or keyboard, and a `-headless` one
+measures the same file for logic. `Data/Scenarios/russia_show.txt` is the Russia art showcase:
+spawns the imported units around the player's start. Launch it with `-win -quickstart -noshellmap
+-map "Maps\Alpine Assault\Alpine Assault.map" -autoskirmish 2 -side 0 FactionRussia -side 1
+FactionAmerica -seed 1 -maxframes 400 -scenario russia_show -noaudio`, then `screencapture -l
+<window id>`. Do not click into the window; nothing needs it.
