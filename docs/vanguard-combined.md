@@ -106,9 +106,17 @@ The combined mod's templates use new sides (`VanguardRussia`, `VanguardECA`), so
 be renamed to match and merged into ShockWave's `Default/AIData.ini` (itself one `AIData` block plus
 top-level `SkirmishBuildList` blocks).
 
-Attempted so far: renamed `SideInfo` + `SkirmishBuildList` blocks. The `SideInfo`-only merge parsed
-and the match ran, but the AI stayed idle; adding the build lists crashed initialisation
-("Uncaught Exception during initialization"), most likely a name the parser resolves and cannot find
-(a science or a structure template from RotR's AI scripts). Next: import RotR's
-`SkirmishScripts.scb`/`Scripts.ini` as well, then bisect the build lists to the first unknown name.
-The loose `AIData.ini` was removed again so the shipped 0.1 mod stays stable.
+**Working merge (0.2 candidate).** The crash was the build lists being placed outside the `AIData`
+block: ShockWave's file is one `AIData ... END` with the `SkirmishBuildList`s inside it. Placed
+inside, and with the two player templates' `Side` values set to RotR's own aliased side names
+(`AmericaLaserGeneral`, `AmericaSuperWeaponGeneral`) so RotR's `SkirmishScripts.scb` teams find
+them, the AI plays: in an observer match both seats go from 10,000 credits to ~30,000 and build.
+The mod carries loose `Data/INI/Default/AIData.ini`, `Data/INI/PlayerTemplate.ini`,
+`Data/Scripts/SkirmishScripts.scb` and `Scripts.ini` from RotR on top of the merged archive.
+
+Trade-off: the two new templates now share their `Side` with ShockWave's Laser and Super Weapon
+generals, which is what makes RotR's AI scripts apply to them. Watch the lobby and the AI mirror
+matches for side bleed.
+
+Harness note: `-scenario` `tally` actions stop running once the match reaches its end state even
+though `-maxframes` keeps counting, so tallies past roughly frame 1,200 in these runs never fire.
