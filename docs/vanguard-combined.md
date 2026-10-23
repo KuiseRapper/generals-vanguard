@@ -55,7 +55,9 @@ which is the whole point of using ShockWave as the base.
   with RotR units spawned in a skirmish; shipped as `VanguardCombined-0.1.zip` and listed in the launcher.
 - [x] Merged string table: ShockWave's `Generals.str` plus every RotR-only label, shipped as
   `Data/Generals.str` in the mod.
-- [ ] Full Russia port (production, AI, balance).
+- [x] Russian production: the war factory accepts and builds RotR Kodiaks (`SCENARIO:` queued
+  3 of 3, `HEADLESS TALLY` 1 alive at frame 1200).
+- [ ] Full Russia port (AI, balance, remaining roster).
 - [ ] Full ECA port (same).
 - [ ] Campaign pack.
 
