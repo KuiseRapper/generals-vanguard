@@ -31,6 +31,9 @@ Federation and an ECA faction.
 | `RussiaTunguska` | `RVTngska` | `Vehicles/Tunguska.ini` |
 | `RussiaSupplyTruck` | `RVSplyTrck` | `Vehicles/SupplyWarTruck.ini` |
 | `RussiaMiG25` | `RVMig` | `Aircraft/MiGBomber.ini` (`W3DModelDraw`) |
+| `RussiaSapery` | `RVDozer_m` | `Vehicles/Dozer.ini` (dozer, construction animation) |
+| `RussiaMotostrelki` | `RICnscrpt_SKN` | `Infantry/Conscript.ini` (skinned) |
+| `RussiaKornetTeam` | `RIRpgCcrpt_SKN` | `Infantry/RPGConscript.ini` (skinned) |
 
 Each model's `_D` (damaged), `_S` (snow), `_N` (night), `_SC` (under construction) and `_BF`
 (build-up) variants were extracted with it, and every texture the W3D files name (`.tga` in the
@@ -95,7 +98,7 @@ textures a model needs are the `.tga` names inside the W3D (`strings` finds them
 ## Still placeholder
 
 - Build-button cameos are still the base models' retail cameos.
-- Aircraft other than the MiG-25, and the infantry, are still China/USA models.
+- The remaining infantry, other aircraft and the superweapon effect.
 - The superweapon effect is ours, not RotR's.
 
 ## Licensing

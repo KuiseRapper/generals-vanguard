@@ -1,5 +1,6 @@
 CMakeLists.txt
 Data/Art/Textures/ExNewMuzzle.dds
+Data/Art/Textures/PMRusFlag.dds
 Data/Art/Textures/RBAirfield_1.dds
 Data/Art/Textures/RBAirfield_2.dds
 Data/Art/Textures/RBAirfield_2N.dds
@@ -105,6 +106,8 @@ Data/Art/Textures/RULoadScreen.tga
 Data/Art/Textures/RULogo.tga
 Data/Art/Textures/RUScoreScreen.tga
 Data/Art/Textures/RUSideIcon.tga
+Data/Art/Textures/RVIMR.dds
+Data/Art/Textures/RVIMR_D.dds
 Data/Art/Textures/RVMSTA.dds
 Data/Art/Textures/RVMSTA_D.dds
 Data/Art/Textures/RVMTP4A.dds
@@ -163,6 +166,8 @@ Data/Art/Textures/SCCSiberianFront.tga
 Data/Art/Textures/SNRUserInterface512_003.tga
 Data/Art/Textures/SNRUserInterface512_004.tga
 Data/Art/Textures/SNRUserInterface512_005.tga
+Data/Art/Textures/Zhca_RICnscrpt.tga
+Data/Art/Textures/Zhca_RIRpgCsrpt.tga
 Data/Art/Textures/spotlight2.dds
 Data/Art/W3D/RBAirfield.W3D
 Data/Art/W3D/RBAirfield_B.W3D
@@ -219,6 +224,17 @@ Data/Art/W3D/RBWepnBnkr_BF.W3D
 Data/Art/W3D/RBWepnBnkr_D.W3D
 Data/Art/W3D/RBWepnBnkr_S.W3D
 Data/Art/W3D/RBWepnBnkr_SC.W3D
+Data/Art/W3D/RICnscrpt_SKN.W3D
+Data/Art/W3D/RICnscrpt_SKNB.W3D
+Data/Art/W3D/RICnscrpt_SKNC.W3D
+Data/Art/W3D/RICnscrpt_SKND.W3D
+Data/Art/W3D/RICnscrpt_SKNE.W3D
+Data/Art/W3D/RICnscrpt_SKNF.W3D
+Data/Art/W3D/RIRpgCcrpt_SKN.W3D
+Data/Art/W3D/RVDozer_c.W3D
+Data/Art/W3D/RVDozer_cd.W3D
+Data/Art/W3D/RVDozer_m.W3D
+Data/Art/W3D/RVDozer_md.W3D
 Data/Art/W3D/RVMSTAS.W3D
 Data/Art/W3D/RVMSTASK.W3D
 Data/Art/W3D/RVMSTASK_D.W3D
