@@ -15,6 +15,14 @@ GUI:StartCustomMission
 "START GAME"
 END
 
+// The window title.  The retail CSF carries "Command & Conquer Generals Zero Hour" and every mod's
+// Data/Generals.str carries its own name ("Command & Conquer Generals: ShockWave" in ShockWave's).
+// Patch.str is parsed after both and overrules them, so the game is called Vanguard whatever mod is
+// loaded.  GameTextManager::init reads it and that is what sets the window title.
+GUI:Command&ConquerGenerals
+"Generals Vanguard"
+END
+
 GUI:Stop
 "Stop"
 END
