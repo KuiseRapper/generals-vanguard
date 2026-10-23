@@ -1,4 +1,4 @@
 # Does the combined mod's Russian war factory produce RotR tanks?
 30  spawn    0  RussiaWarFactory       1  start0:150:60
 60  produce  0  RussiaWarFactory        RussiaTankKodiak 3
-420 tally    0  RussiaTankKodiak
+2400 tally    0  RussiaTankKodiak

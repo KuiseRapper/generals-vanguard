@@ -206,3 +206,22 @@ spawns the imported units around the player's start. Launch it with `-win -quick
 -map "Maps\Alpine Assault\Alpine Assault.map" -autoskirmish 2 -side 0 FactionRussia -side 1
 FactionAmerica -seed 1 -maxframes 400 -scenario russia_show -noaudio`, then `screencapture -l
 <window id>`. Do not click into the window; nothing needs it.
+
+### Headless logs without touching the desktop
+
+A headless run still writes its debug log and replay into the *user data* folder, so with the real
+`HOME` the log can be unreadable to the agent. Point `HOME` at a folder inside the workspace and the
+whole run is self-contained, no window, no focus change:
+
+```
+cd build-mac && rm -rf fakehome && mkdir -p fakehome
+env HOME="$PWD/fakehome" "./Generals Vanguard.app/Contents/MacOS/generals" -root ~/zh-data/zerohour \
+  -headless -quickstart -noshellmap -map "Maps\Alpine Assault\Alpine Assault.map" \
+  -autoskirmish 2 -side 0 FactionVanguardRussia -side 1 FactionVanguardECA -seed 1 -maxframes 3000 \
+  -noaudio -mod "$PWD/combined/" -scenario combined_produce -logprefix prod
+grep -a "SCENARIO\|HEADLESS" \
+  "fakehome/Library/Application Support/Command and Conquer Generals Zero Hour Data/Logs/prodDebugLogFile.txt"
+```
+
+`SCENARIO:` lines report every spawn/produce the file asked for; `HEADLESS TALLY` reports what is
+still alive. This is the way to test a match without a window.
