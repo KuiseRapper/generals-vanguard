@@ -1440,7 +1440,9 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 	   The six mapped images behind it are the fork's own plates, and a mod that names the same images
 	   keeps working.  Observer and civilian templates are not playable and keep the layout's own
 	   background. */
-	if (skirmish && pt->isPlayableSide())
+	/* Generals are PlayableSide = No (they are picked as a general, not as a side), so the guard is
+	   the template's own image, not playability; an observer and a civilian have none of the plates. */
+	if (skirmish && !pt->isObserver() && !pt->getLoadScreen().isEmpty())
 	{
 		const Image *plate = TheMappedImageCollection->findImageByName( pt->getLoadScreen() );
 		if (plate != NULL)
