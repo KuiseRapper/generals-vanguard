@@ -149,8 +149,8 @@ try
         var liveDir = Path.Combine(root, "live-game");
         await UpdateService.InstallGameAsync(live.Game!, liveDir, null);
         Assert(File.Exists(Path.Combine(liveDir, "generals.exe")), "live game exe installed");
-        Assert(File.Exists(Path.Combine(liveDir, "Data", "INI", "RussiaReforged.ini")),
-            "live game carries the Russia data");
+        Assert(File.Exists(Path.Combine(liveDir, "Data", "INI", "BalanceReforged.ini")),
+            "live game carries the fork's balance data");
         Assert(File.ReadAllText(Path.Combine(liveDir, "version.txt")) == live.Game!.Version,
             "live version recorded");
         Console.WriteLine("live launcher update ok: " + live.Game.Version);
