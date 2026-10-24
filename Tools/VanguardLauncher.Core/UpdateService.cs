@@ -21,7 +21,7 @@ public static class UpdateService
     private static HttpClient CreateClient()
     {
         var client = new HttpClient { Timeout = TimeSpan.FromMinutes(60) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("VanguardLauncher/0.3");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("VanguardLauncher/0.6");
         return client;
     }
 
