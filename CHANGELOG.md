@@ -3,6 +3,18 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-24 - Purple shell accents, and a skirmish that ends
+
+- **The shell's blue button borders are Vanguard purple.** The `Buttons-*` pieces of
+  `SCSmShellUserInterface512_001.tga` are recoloured (the hover border light purple, the hover text
+  too), and the `.wnd` border colours follow; the retail backgrounds stay blue. The rest of the
+  atlas is untouched.
+- **A skirmish now declares its result when the last alliance is standing.** A 4v4 on Twilight
+  Flame marked all four enemies defeated and then sat there because the map's Victory script never
+  fired; the engine's own last-alliance check now runs the same Victory/Defeat action the script
+  would. Campaigns and LAN keep their scripts, and a `-headless` run is left to its frame limit.
+  Needs the owner's play-test.
+
 ## 2026-10-24 - The screens are Zero Hour's again; only the logo is ours
 
 - **Every custom screen plate is gone.** The splash, title/load screen, single-player load page,
