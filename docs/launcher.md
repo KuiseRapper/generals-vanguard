@@ -107,6 +107,18 @@ It serves a manifest and a zip from a local `HttpListener` and checks the manife
 refusal, the zip layout and the version comparison. The WinForms window itself can only be run on
 Windows.
 
+## Vanguard Combined on Windows
+
+The combined mod is a separate release asset, `VanguardCombined-0.1.zip`, not part of
+`VanguardGame.zip`; the game update never downloads it. To play it on Windows, extract that zip into
+the launcher's `game` folder (the one holding `generals.exe`) and press Play. No `-mod` switch is
+needed there: the game loads the archives and loose `Data` files from its own folder. The mod's
+`Data` files then override the game's, which is what its two extra factions need.
+
+**Check for updates replaces the whole `game` folder**, so extract the mod again after an update if
+it was installed there. The macOS launcher has a Mods sheet and keeps the mod in a folder of its own,
+passing `-mod`, so its updates leave the mod alone.
+
 ## Cutting a release
 
 `.github/workflows/release.yml` builds the game and the launcher on `windows-latest` and puts three
