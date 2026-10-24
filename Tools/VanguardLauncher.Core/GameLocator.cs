@@ -47,21 +47,30 @@ public static class GameLocator
 
     /// <summary>
     /// Start the game from its own folder.  Windows finds the installed Zero Hour through the registry;
-    /// there is no -root switch on this platform (that is the POSIX install root).
+    /// there is no -root switch on this platform (that is the POSIX install root).  A mod is mounted
+    /// with -mod and an absolute path, which the engine accepts as-is and remounts over retail.
     /// </summary>
-    public static Process Start(string gameDirectory)
+    public static Process Start(string gameDirectory, string? modDirectory = null)
     {
         var exe = Path.Combine(gameDirectory, "generals.exe");
         if (!File.Exists(exe))
             throw new FileNotFoundException("generals.exe was not found in the game folder.", exe);
+
+        var arguments = "-rk7";
+        if (!string.IsNullOrWhiteSpace(modDirectory))
+        {
+            if (!Directory.Exists(modDirectory))
+                throw new DirectoryNotFoundException("The selected mod folder is gone: " + modDirectory);
+            arguments += $" -mod \"{modDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)}\"";
+        }
 
         var info = new ProcessStartInfo(exe)
         {
             WorkingDirectory = gameDirectory,
             UseShellExecute = true,
             // WinMain refuses a direct start with "Please start Generals Vanguard from its launcher."
-            // unless this marker is present; it is the handshake the old Reforged launcher used.
-            Arguments = "-rk7",
+            // unless this marker is present; it is the handshake the launcher's game expects.
+            Arguments = arguments,
         };
         return Process.Start(info) ?? throw new InvalidOperationException("The game did not start.");
     }

@@ -5,7 +5,7 @@ using VanguardLauncher.Core;
 
 namespace VanguardLauncher;
 
-public sealed class MainForm : Form
+public sealed partial class MainForm : Form
 {
     private const int FormWidth = 1000;
     private const int FormHeight = 640;
@@ -38,8 +38,10 @@ public sealed class MainForm : Form
     private readonly Label _zeroHour = new();
     private readonly Label _baseInfo = new();
     private readonly Label _installSummary = new();
+    private readonly Label _modInfo = new();
     private readonly Button _play = new();
     private readonly Button _check = new();
+    private readonly Button _modsButton = new();
     private readonly Button _setFolder = new();
     private readonly Button _openFolder = new();
     private readonly LinkLabel _locateZeroHour = new();
@@ -58,18 +60,26 @@ public sealed class MainForm : Form
     private LauncherManifest? _manifest;
     private string? _gameDir;
     private bool _busy;
+    private readonly bool _installOnStart;
 
     private static string LauncherVersion
     {
         get
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return version is null ? "0.4.0" : $"{version.Major}.{version.Minor}.{version.Build}";
+            return version is null ? "0.6.0" : $"{version.Major}.{version.Minor}.{version.Build}";
         }
     }
 
-    public MainForm()
+    public MainForm() : this(Array.Empty<string>())
     {
+    }
+
+    public MainForm(string[] args)
+    {
+        _installOnStart = args.Any(argument =>
+            argument.Equals("--install", StringComparison.OrdinalIgnoreCase));
+
         Text = "Generals Vanguard";
         ClientSize = new Size(FormWidth, FormHeight);
         MinimumSize = MaximumSize = Size;
@@ -92,9 +102,14 @@ public sealed class MainForm : Form
         BuildBanner();
         BuildContent();
         BuildUpdateScreen();
+        BuildModsScreen();
         KeyDown += (_, e) =>
         {
-            if (e.KeyCode == Keys.Escape && !_busy)
+            if (e.KeyCode != Keys.Escape || _busy)
+                return;
+            if (_mods.Visible)
+                ShowMain();
+            else
                 Close();
         };
         Shown += async (_, _) => await OnShownAsync();
@@ -185,6 +200,9 @@ public sealed class MainForm : Form
         _update.Dock = DockStyle.Fill;
         _update.BackColor = Back;
         _update.Visible = false;
+        _mods.Dock = DockStyle.Fill;
+        _mods.BackColor = Back;
+        _mods.Visible = false;
 
         _hero.Location = new Point(0, 0);
         _hero.Size = new Size(600, _content.Height);
@@ -256,8 +274,20 @@ public sealed class MainForm : Form
         _check.Cursor = Cursors.Hand;
         _check.Click += async (_, _) => await CheckAsync(silent: false);
 
+        _modsButton.Text = "Mods";
+        _modsButton.Location = new Point(28, 322);
+        _modsButton.Size = new Size(344, 38);
+        _modsButton.BackColor = PanelBack;
+        _modsButton.ForeColor = Gold;
+        _modsButton.FlatStyle = FlatStyle.Flat;
+        _modsButton.FlatAppearance.BorderSize = 0;
+        _modsButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, 39, 58);
+        _modsButton.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
+        _modsButton.Cursor = Cursors.Hand;
+        _modsButton.Click += (_, _) => ShowModsScreen();
+
         _setFolder.Text = "Set game folder";
-        _setFolder.Location = new Point(28, 324);
+        _setFolder.Location = new Point(28, 370);
         _setFolder.Size = new Size(166, 30);
         _setFolder.BackColor = Back;
         _setFolder.ForeColor = Muted;
@@ -269,7 +299,7 @@ public sealed class MainForm : Form
         _setFolder.Click += (_, _) => SetGameFolder();
 
         _openFolder.Text = "Open game folder";
-        _openFolder.Location = new Point(206, 324);
+        _openFolder.Location = new Point(206, 370);
         _openFolder.Size = new Size(166, 30);
         _openFolder.BackColor = Back;
         _openFolder.ForeColor = Muted;
@@ -285,7 +315,7 @@ public sealed class MainForm : Form
         _status.Font = new Font("Segoe UI", 9F);
         _status.AutoSize = false;
         _status.AutoEllipsis = true;
-        _status.Location = new Point(28, 386);
+        _status.Location = new Point(28, 408);
         _status.Size = new Size(344, 20);
 
         _zeroHour.Text = "Zero Hour: looking\u2026";
@@ -293,7 +323,7 @@ public sealed class MainForm : Form
         _zeroHour.Font = new Font("Segoe UI", 8F);
         _zeroHour.AutoSize = false;
         _zeroHour.AutoEllipsis = true;
-        _zeroHour.Location = new Point(28, 410);
+        _zeroHour.Location = new Point(28, 430);
         _zeroHour.Size = new Size(344, 18);
 
         _baseInfo.Text = "";
@@ -301,7 +331,7 @@ public sealed class MainForm : Form
         _baseInfo.Font = new Font("Segoe UI", 8F);
         _baseInfo.AutoSize = false;
         _baseInfo.AutoEllipsis = true;
-        _baseInfo.Location = new Point(28, 430);
+        _baseInfo.Location = new Point(28, 450);
         _baseInfo.Size = new Size(344, 18);
 
         _installSummary.Text = "";
@@ -309,8 +339,16 @@ public sealed class MainForm : Form
         _installSummary.Font = new Font("Segoe UI", 8F);
         _installSummary.AutoSize = false;
         _installSummary.AutoEllipsis = true;
-        _installSummary.Location = new Point(28, 452);
+        _installSummary.Location = new Point(28, 470);
         _installSummary.Size = new Size(344, 18);
+
+        _modInfo.Text = "Mod: vanilla Vanguard";
+        _modInfo.ForeColor = Muted;
+        _modInfo.Font = new Font("Segoe UI", 8F);
+        _modInfo.AutoSize = false;
+        _modInfo.AutoEllipsis = true;
+        _modInfo.Location = new Point(28, 490);
+        _modInfo.Size = new Size(344, 18);
 
         _locateZeroHour.Text = "Locate Zero Hour";
         _locateZeroHour.LinkColor = Muted;
@@ -318,7 +356,7 @@ public sealed class MainForm : Form
         _locateZeroHour.VisitedLinkColor = Muted;
         _locateZeroHour.Font = new Font("Segoe UI", 8F);
         _locateZeroHour.AutoSize = true;
-        _locateZeroHour.Location = new Point(28, 480);
+        _locateZeroHour.Location = new Point(28, 512);
         _locateZeroHour.LinkClicked += (_, _) => LocateZeroHour();
 
         _releases.Text = "GitHub releases";
@@ -327,20 +365,21 @@ public sealed class MainForm : Form
         _releases.VisitedLinkColor = Muted;
         _releases.Font = new Font("Segoe UI", 8F);
         _releases.AutoSize = true;
-        _releases.Location = new Point(145, 480);
+        _releases.Location = new Point(145, 512);
         _releases.LinkClicked += (_, _) => OpenUrl(UpdateService.ReleasePage);
 
         _side.Controls.AddRange(new Control[]
         {
             _installKicker, _ready, _gameCaption, _gameVersion, _launcherCaption, _launcherVersion,
-            _play, _check, _setFolder, _openFolder, _status, _zeroHour, _baseInfo, _installSummary,
-            _locateZeroHour, _releases,
+            _play, _check, _modsButton, _setFolder, _openFolder, _status, _zeroHour, _baseInfo,
+            _installSummary, _modInfo, _locateZeroHour, _releases,
         });
 
         _main.Controls.Add(_hero);
         _main.Controls.Add(_side);
         _content.Controls.Add(_main);
         _content.Controls.Add(_update);
+        _content.Controls.Add(_mods);
         Controls.Add(_content);
     }
 
@@ -441,14 +480,18 @@ public sealed class MainForm : Form
     private async Task OnShownAsync()
     {
         _settings = SettingsStore.Load();
+        _activeMod = _settings.ActiveMod;
         if (!_settings.ShortcutCreated)
         {
             _settings.ShortcutCreated = TryCreateShortcut();
             SettingsStore.Save(_settings);
         }
         _gameDir = GameLocator.Find(_settings.GamePath);
+        RefreshMods();
         RefreshState();
-        if (_settings.CheckOnStartup)
+        if (_installOnStart)
+            await InstallLatestAsync();
+        else if (_settings.CheckOnStartup)
             await CheckAsync(silent: true);
     }
 
@@ -493,6 +536,7 @@ public sealed class MainForm : Form
         }
 
         _installSummary.Text = zeroHour.Repaired ? "Zero Hour registry path repaired." : "";
+        RefreshModSummary();
         _play.Enabled = !_busy;
     }
 
@@ -501,6 +545,7 @@ public sealed class MainForm : Form
         _busy = busy;
         _play.Enabled = !busy;
         _check.Enabled = !busy;
+        _modsButton.Enabled = !busy;
         _setFolder.Enabled = !busy;
         _openFolder.Enabled = !busy;
         _locateZeroHour.Enabled = !busy;
@@ -584,14 +629,18 @@ public sealed class MainForm : Form
         _cancel.Enabled = true;
         _updateProgress.Visible = false;
         _main.Visible = false;
+        _mods.Visible = false;
         _update.Visible = true;
+        _update.BringToFront();
         _banner.Visible = false;
     }
 
     private void ShowMain()
     {
         _update.Visible = false;
+        _mods.Visible = false;
         _main.Visible = true;
+        _main.BringToFront();
     }
 
     private async Task InstallUpdateAsync()
@@ -654,6 +703,7 @@ public sealed class MainForm : Form
 
             _updateStatus.Text = $"Game {_manifest.Game.Version} installed.";
             ShowMain();
+            RefreshMods();
             RefreshState();
             _status.Text = $"Game {_manifest.Game.Version} installed.";
         }
@@ -742,8 +792,11 @@ public sealed class MainForm : Form
                 if (answer != DialogResult.Yes)
                     return;
             }
-            GameLocator.Start(_gameDir);
-            _status.Text = "Game started.";
+            var mod = ActiveModDirectory();
+            GameLocator.Start(_gameDir, mod);
+            _status.Text = mod is null
+                ? "Game started."
+                : $"Game started with {ActiveModName()}.";
         }
         catch (Exception ex)
         {

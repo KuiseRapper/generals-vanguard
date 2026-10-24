@@ -136,10 +136,11 @@ public static class ZeroHourLocator
         => File.Exists(Path.Combine(directory, BaseArchive));
 
     /// <summary>
-    /// The engine looks for Zero Hour's .big files beside the exe.  Reforged installs into the Zero
-    /// Hour folder; the portable launcher instead links every top-level .big from the Zero Hour
-    /// install into its game folder (hard links where Windows allows them, copies otherwise), so
-    /// INIZH.big and its Data\INI\Default\Weather.ini are found without touching the Steam install.
+    /// The engine looks for Zero Hour's .big files beside the exe.  An older installer put the game
+    /// into the Zero Hour folder; the portable launcher instead links every top-level .big from the
+    /// Zero Hour install into its game folder (hard links where Windows allows them, copies
+    /// otherwise), so INIZH.big and its Data\INI\Default\Weather.ini are found without touching the
+    /// Steam install.
     /// </summary>
     public static (int Linked, int Copied, string Message) PrepareZeroHourArchives(
         string gameDirectory, string? zeroHour)
@@ -247,8 +248,8 @@ public static class ZeroHourLocator
     /// <summary>
     /// Some Zero Hour SKUs ship a second INIZH.big in Data\INI.  The retail game deletes it on
     /// startup (relative to its own working directory), but Vanguard runs from its own game folder,
-    /// so the duplicate survives and its GameData.ini wins — that is where a Reforged 3.x
-    /// UserDataLeafName comes from even after a Steam verify.  Move it aside once.
+    /// so the duplicate survives and its GameData.ini wins - that is where a mod's UserDataLeafName
+    /// comes from even after a Steam verify.  Move it aside once.
     /// </summary>
     public static string? MoveDuplicateInizh(string? zeroHour)
     {
@@ -287,43 +288,6 @@ public static class ZeroHourLocator
         try
         {
             var needle = Encoding.ASCII.GetBytes(fileName);
-            using var stream = File.OpenRead(path);
-            var buffer = new byte[(1 << 20) + needle.Length];
-            var carry = 0;
-            while (true)
-            {
-                var read = stream.Read(buffer, carry, buffer.Length - carry);
-                if (read <= 0)
-                    return false;
-                var total = carry + read;
-                if (buffer.AsSpan(0, total).IndexOf(needle) >= 0)
-                    return true;
-                carry = Math.Min(needle.Length - 1, total);
-                Buffer.BlockCopy(buffer, total - carry, buffer, 0, carry);
-            }
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// Upstream 3.2.0 added UserDataLeafName to GameData.ini.  This fork is based on 3.0.1 and
-    /// stops on that field, so a Zero Hour install carrying the Reforged 3.x data needs to be
-    /// restored to the 3.0.1 files before Vanguard can parse it.  The field is readable in the
-    /// unofficial INIZH.big; a vanilla one does not contain it.
-    /// </summary>
-    public static bool HasReforgedGameData(string? zeroHour)
-    {
-        if (zeroHour is null)
-            return false;
-        var path = Path.Combine(zeroHour, "INIZH.big");
-        if (!File.Exists(path))
-            return false;
-        try
-        {
-            var needle = Encoding.ASCII.GetBytes("UserDataLeafName");
             using var stream = File.OpenRead(path);
             var buffer = new byte[(1 << 20) + needle.Length];
             var carry = 0;

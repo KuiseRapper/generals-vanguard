@@ -94,6 +94,48 @@ try
     }
     Assert(failed, "a bad hash is refused");
 
+
+    // The mod manager: a packaged mod is unpacked into its own folder, listed, and removed.  The
+    // three offered mods are part of the launcher, but no package is downloaded by the test.
+    Assert(FeaturedMods.All.Count == 3, "three featured mods");
+    Assert(FeaturedMods.All.All(mod => Uri.TryCreate(mod.DownloadUrl, UriKind.Absolute, out _)),
+        "featured mod download urls");
+    var modPackage = Path.Combine(root, "mod-package");
+    var wrapper = Path.Combine(modPackage, "VanguardCombined");
+    Directory.CreateDirectory(Path.Combine(wrapper, "Data", "INI"));
+    File.WriteAllText(Path.Combine(wrapper, "!VanguardCombined.big"), "not a real big");
+    File.WriteAllText(Path.Combine(wrapper, "Data", "INI", "GameData.ini"), "data");
+    var modZip = Path.Combine(root, "VanguardCombined-0.1.zip");
+    ZipFile.CreateFromDirectory(modPackage, modZip);
+
+    var store = new ModStore(Path.Combine(root, "mods"));
+    var installedMod = store.Install(modZip, "vanguardcombined", "Vanguard Combined", "0.1");
+    Assert(File.Exists(Path.Combine(installedMod.Directory, "!VanguardCombined.big")),
+        "mod archive installed");
+    Assert(File.Exists(Path.Combine(installedMod.Directory, "Data", "INI", "GameData.ini")),
+        "mod data installed");
+    Assert(File.Exists(Path.Combine(installedMod.Directory, "mod.json")), "mod manifest written");
+    var listed = store.Scan();
+    Assert(listed.Count == 1 && listed[0].Name == "Vanguard Combined" && listed[0].Version == "0.1",
+        "installed mod listed");
+    store.Remove("vanguardcombined");
+    Assert(!Directory.Exists(installedMod.Directory), "mod removed");
+    var notAMod = Path.Combine(root, "not-a-mod.zip");
+    var notAModSource = Path.Combine(root, "not-a-mod");
+    Directory.CreateDirectory(notAModSource);
+    File.WriteAllText(Path.Combine(notAModSource, "readme.txt"), "nothing");
+    ZipFile.CreateFromDirectory(notAModSource, notAMod);
+    var refused = false;
+    try
+    {
+        store.Install(notAMod, "broken", "Broken", "1.0");
+    }
+    catch (InvalidDataException)
+    {
+        refused = true;
+    }
+    Assert(refused, "a package without a .big is refused");
+
     listener.Stop();
     await server;
     Console.WriteLine("launcher selftest ok");
