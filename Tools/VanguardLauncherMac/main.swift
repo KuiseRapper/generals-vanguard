@@ -619,22 +619,6 @@ final class LauncherModel: ObservableObject {
         }
     }
 
-    private func containsReforgedGameData(_ zero: String) -> Bool {
-        let path = zero + "/INIZH.big"
-        guard let handle = FileHandle(forReadingAtPath: path) else { return false }
-        defer { try? handle.close() }
-        let needle = Data("UserDataLeafName".utf8)
-        var carry = Data()
-        while true {
-            let chunk = handle.readData(ofLength: 1 << 20)
-            if chunk.isEmpty { return false }
-            var combined = carry
-            combined.append(chunk)
-            if combined.range(of: needle) != nil { return true }
-            carry = combined.suffix(needle.count - 1)
-        }
-    }
-
     func chooseZeroHour() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
