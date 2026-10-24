@@ -1,8 +1,8 @@
 # macOS launcher
 
-Download **`VanguardLauncher-mac.dmg`** from
+Download **`VanguardLauncher-mac.zip`** from
 [v0.5.18](https://github.com/KuiseRapper/generals-vanguard/releases/tag/v0.5.18) (0.6.0 is the
-Windows release), open it and drag **Generals Vanguard** to Applications.
+Windows release), unzip it and drag **Generals Vanguard** to Applications.
 
 The launcher:
 
