@@ -1,6 +1,23 @@
 # Generals Vanguard changes
 
-What this fork changed, newest first.  Add a change as a `## 2026-10-24 - One click on Windows, and the mods are in the launcher
+What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
+this line.  Upstream's own history is below, under its own title, and is not ours to edit.
+
+## 2026-10-24 - The screens are Zero Hour's again; only the logo is ours
+
+- **Every custom screen plate is gone.** The splash, title/load screen, single-player load page,
+  credits, Generals Challenge, faction load pages, end screens and the main menu's frame/backdrop are
+  the retail Zero Hour images again, forced over the mods' copies with `RetailScreens.ini` and loose
+  retail textures. The skirmish load screen is the retail one (faction logo and features, map
+  preview, player table); the 0.5.18 `ReforgedLoad*`/`ReforgedEndScreen`/`ReforgedScreenPlain` plates,
+  their mappings and the `LoadScreenImage` skirmish branch are removed.
+- **The only fork art on a screen is the logo.** The supplied Command & Conquer Generals VANGUARD
+  lockup replaces the Zero Hour wordmark on the splash, the title/load screen, the load page and the
+  main menu. `GeneralsLogo` points at `VanguardLogo.tga`; the old wordmark was inpainted out of the
+  retail splash and load-page textures so there is no double logo.
+- **`RetailScreens.ini`** names the retail images for the screens the mods replaced (credits,
+  challenge, faction pages, main-menu ruler, load pages, end banners, mission loads).
+## 2026-10-24 - One click on Windows, and the mods are in the launcher
 
 - **`VanguardSetup.exe` is the Windows download.** An Inno Setup 6 installer puts the launcher under
   `%LOCALAPPDATA%\Programs\Generals Vanguard` (writable, so self-update works), creates the Start
@@ -22,9 +39,6 @@ What this fork changed, newest first.  Add a change as a `## 2026-10-24 - One cl
   "Off is Vanguard" and the old-save message says "an older version of Vanguard", in English, German
   and Turkish. Internal data names (`*Reforged.ini`, `Reforged*.tga`, `Reforged*.big`) stay, because
   they are file keys, not branding.
-
-## <date> - <what>` section directly under
-this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
 ## 2026-10-24 - A skirmish loads on its faction's plate
 

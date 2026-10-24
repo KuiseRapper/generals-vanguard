@@ -15,7 +15,6 @@
 **	You should have received a copy of the GNU General Public License
 **	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-// Modified 2026 by KuiseRapper for Generals Vanguard; see NOTICE.md and the git history.
 
 ////////////////////////////////////////////////////////////////////////////////
 //																																						//
@@ -253,10 +252,6 @@ private:
 	GameWindow *m_portraitLocalGeneral;
 	GameWindow *m_featuresLocalGeneral;
 	GameWindow *m_nameLocalGeneral;
-
-	/// "MultiplayerLoadScreen.wnd:" or the skirmish layout's, chosen by init.  The window ids name
-	/// their layout file, so one init fills either layout.
-	AsciiString m_windowPrefix;
 
 };
 

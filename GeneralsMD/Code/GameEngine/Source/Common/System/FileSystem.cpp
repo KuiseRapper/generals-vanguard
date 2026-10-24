@@ -543,6 +543,7 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 	}
 	const auto starts = [&p](const char *prefix) { return p.compare(0, strlen(prefix), prefix) == 0; };
 	const auto ends = [&p](const char *suffix) { size_t n = strlen(suffix); return p.size() >= n && p.compare(p.size() - n, n, suffix) == 0; };
+	const auto starts_for = [](const std::string &path, const char *prefix) { return path.compare(0, strlen(prefix), prefix) == 0; };
 
 	if (starts("data\\ini\\") && p.find('\\', strlen("data\\ini\\")) == std::string::npos && ends("reforged.ini"))
 		return TRUE;
@@ -569,8 +570,34 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 	// screens carry Vanguard's branding, not the mods').
 	if (p == "data\\english\\art\\textures\\titlescreenuserinterface.tga")
 		return TRUE;
-	// Data\English is copied to Run\English, not under Data in the package.
-	if (p == "english\\art\\textures\\titlescreenuserinterface.tga")
+	// The owner's call (2026-10-24): the shell, load, splash and end screens are retail Zero Hour's
+	// again, with only the Vanguard logo on them.  These masters are what make a mod's own copy of a
+	// screen lose; see RetailScreens.ini for the definitions they pair with.
+	const auto englishScreen = [&p, &starts_for]() {
+		if (!starts_for(p, "data\\english\\art\\textures\\") && !starts_for(p, "english\\art\\textures\\"))
+			return FALSE;
+		return p.find("titlescreenuserinterface.tga") != std::string::npos
+			|| p.find("loadpageuserinterface.tga") != std::string::npos
+			|| p.find("returnloadpageuserinterface.tga") != std::string::npos
+			|| p.find("skirmish_loaduserinterface.tga") != std::string::npos
+			|| p.find("victorious.tga") != std::string::npos
+			|| p.find("defeated.tga") != std::string::npos;
+	};
+	if (englishScreen())
+		return TRUE;
+	if (p == "data\\ini\\mappedimages\\handcreated\\retailscreens.ini")
+		return TRUE;
+	if (p == "art\\textures\\vanguardlogo.tga"
+		|| p == "art\\textures\\creditscreenuserinterface.tga"
+		|| p == "art\\textures\\challengebackgroundminspec.dds"
+		|| p == "art\\textures\\mainmenuruleruserinterface.tga"
+		|| p == "art\\textures\\mainmenubackdropuserinterface.tga"
+		|| p == "art\\textures\\mp_loaduserinterface.tga"
+		|| p == "art\\textures\\mp_loaduserinterface_00b.tga"
+		|| starts("art\\textures\\missionload_")
+		|| p == "art\\textures\\safactionlogopage_ususerinterface.tga"
+		|| p == "art\\textures\\snfactionlogopage_chinauserinterface.tga"
+		|| p == "art\\textures\\sufactionlogopage_glauserinterface.tga")
 		return TRUE;
 	return p == "data\\patch.str"
 		|| starts("data\\turkish\\") || starts("data\\german\\")

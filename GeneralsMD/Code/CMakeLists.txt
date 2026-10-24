@@ -1906,14 +1906,6 @@ if(ZH_PLATFORM_POSIX)
   if(ZH_GAME_DATA)
     set_tests_properties(replay_check PROPERTIES ENVIRONMENT "ZH_DATA_DIR=${ZH_GAME_DATA}")
   endif()
-  # The skirmish load screen reads PlayerTemplate.LoadScreenImage, which was data no code read: one short
-  # headless skirmish must name the USA plate in its log.  Skipped without game data; see the script.
-  add_test(NAME skirmish_load_check
-           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Tests/run_skirmish_load_check.sh $<TARGET_FILE:generals>)
-  set_tests_properties(skirmish_load_check PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
-  if(ZH_GAME_DATA)
-    set_tests_properties(skirmish_load_check PROPERTIES ENVIRONMENT "ZH_DATA_DIR=${ZH_GAME_DATA}")
-  endif()
   # Port defect 33: no override leaves a unit without the locomotors EA gave it (a ReplaceModule of its AI
   # module discards them unless the block re-states them).  One short run of the game on its data.
   add_test(NAME locomotor_check

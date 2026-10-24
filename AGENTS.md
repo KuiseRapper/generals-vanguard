@@ -65,9 +65,13 @@ means re-running** `GeneralsMD/Code/Tools/fingerprint-manifest.sh`, or the
 `build_fingerprint_manifest` test fails. Editing an existing file's contents does not change the list
 — but it does change the fingerprint value, which is what LAN and replay compatibility key off.
 
-**Never commit game data.** No retail `.big`, art, audio or models. Upstream already agrees: its
-`.gitignore` drops `**/Tools/wnd/` as "game data [that] does not belong in the repo". What the repo
-does legitimately contain is the art EA released inside the source tree
+**Never commit game data**, with one owner-directed exception. No retail `.big`, audio or models,
+and no retail art except the **shell/load/splash/end screen images** restored on 2026-10-24: the
+owner asked for the original Zero Hour screens with only the Vanguard logo on them, so
+`RetailScreens.ini` and the retail textures it names are loose masters (and are listed in
+`FileSystem::isForkOwnedPath`, so a mod cannot put its own screen art back over them). Upstream
+already agrees about game data: its `.gitignore` drops `**/Tools/wnd/` as "game data [that] does not
+belong in the repo". What the repo otherwise contains is the art EA released inside the source tree
 (`Libraries/Source/WWVegas/WW3D2/RequiredAssets/`) and art upstream authored
 (`GeneralsMD/Code/Data/Art/Textures/Reforged*.tga`, `.dds`).
 
@@ -97,6 +101,11 @@ before changing any of it.
 - **Do not rename upstream-authored data names**: `GeneralsMD/Code/Data/INI/*Reforged.ini`,
   `Reforged*.tga`/`.dds`, and the labels that reference them. They are functional keys upstream
   authored; renaming them is churn with breakage risk and no user-visible gain.
+- **Screen art is retail Zero Hour's.** The splash, title/load, load pages, end screens, credits,
+  challenge and the shell background/frame draw the retail Zero Hour images, forced over the mods'
+  by `RetailScreens.ini` and loose retail textures. The only fork artwork on a screen is the supplied
+  Vanguard logo (`VanguardLogo.tga`, behind `GeneralsLogo`). Do not add custom screen plates; the
+  0.5.18 plates were removed by the owner's call.
 - No donation restriction applies to this base. (That came from TheSuperHackers' *data-patch* repo,
   which this tree does not use. EA's guidelines allow donations, with conditions.)
 
