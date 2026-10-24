@@ -575,13 +575,14 @@ Bool FileSystem::isForkOwnedPath(const AsciiString& filename)
 	// screen lose; see RetailScreens.ini for the definitions they pair with.
 	const auto englishScreen = [&p, &starts_for]() {
 		if (!starts_for(p, "data\\english\\art\\textures\\") && !starts_for(p, "english\\art\\textures\\"))
-			return FALSE;
+			return false;
 		return p.find("titlescreenuserinterface.tga") != std::string::npos
 			|| p.find("loadpageuserinterface.tga") != std::string::npos
 			|| p.find("returnloadpageuserinterface.tga") != std::string::npos
 			|| p.find("skirmish_loaduserinterface.tga") != std::string::npos
 			|| p.find("victorious.tga") != std::string::npos
-			|| p.find("defeated.tga") != std::string::npos;
+			|| p.find("defeated.tga") != std::string::npos
+			|| p.find("scsmshelluserinterface512_001.tga") != std::string::npos;
 	};
 	if (englishScreen())
 		return TRUE;
