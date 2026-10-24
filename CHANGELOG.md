@@ -1,6 +1,29 @@
 # Generals Vanguard changes
 
-What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
+What this fork changed, newest first.  Add a change as a `## 2026-10-24 - One click on Windows, and the mods are in the launcher
+
+- **`VanguardSetup.exe` is the Windows download.** An Inno Setup 6 installer puts the launcher under
+  `%LOCALAPPDATA%\Programs\Generals Vanguard` (writable, so self-update works), creates the Start
+  Menu and desktop shortcuts, and starts the launcher with `--install`. That path downloads the game,
+  checks its SHA-256, links the Zero Hour base files and pointers, and repairs the per-user Zero Hour
+  install path - all without administrator rights and without a manual folder move. The standalone
+  `VanguardLauncher.exe` and `VanguardGame.zip` stay on the release.
+- **The launcher has the Mods screen the Windows build was missing.** It lists **Vanguard Combined**,
+  **ShockWave 1.201** and **Rise of the Reds 1.8** before anything is downloaded, with each package's
+  size. Download is explicit; the package is unpacked into
+  `Documents\Generals Vanguard\Mods\<id>` with a `mod.json`, and Play mounts it with `-mod`. Ticking
+  one plays it; ticking none plays vanilla Vanguard. A game update cannot remove a mod, because mods
+  do not live in the launcher's `game` folder. Custom `.zip`/`.big` packages, Remove and Open mods
+  folder are there too.
+- The launcher is 0.6.0. The release workflow runs the launcher's self-test, builds the installer and
+  publishes four assets (`VanguardSetup.exe`, `VanguardLauncher.exe`, `VanguardGame.zip`,
+  `launcher.json`).
+- **The two visible "Reforged" strings are Vanguard's now:** the Classic Graphics tooltip says
+  "Off is Vanguard" and the old-save message says "an older version of Vanguard", in English, German
+  and Turkish. Internal data names (`*Reforged.ini`, `Reforged*.tga`, `Reforged*.big`) stay, because
+  they are file keys, not branding.
+
+## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
 ## 2026-10-24 - A skirmish loads on its faction's plate

@@ -10,7 +10,7 @@ for Command & Conquer: Generals Zero Hour - rebuilt from the source EA opened an
 <img src=".github/media/hero.jpg" alt="American tanks cross a stone bridge into a German village under an A-10 strike, long morning shadows over the stream" width="100%">
 
 [![release](https://img.shields.io/github/v/release/KuiseRapper/generals-vanguard?style=for-the-badge&label=release&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/releases/latest)
-[![last commit](https://img.shields.io/github/last-commit/KuiseRapper/generals-vanguard/main?style=for-the-badge&label=last%20commit&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/commits/main)
+[![last commit](https://img.shields.io/github/last-commit/KuiseRapper/generals-vanguard/develop?style=for-the-badge&label=last%20commit&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/commits/develop)
 [![stars](https://img.shields.io/github/stars/KuiseRapper/generals-vanguard?style=for-the-badge&labelColor=161b22&color=4459b6)](https://github.com/KuiseRapper/generals-vanguard/stargazers)
 [![license](https://img.shields.io/badge/license-GPL--3.0%20%2B%20EA%20terms-0d1117?style=for-the-badge&labelColor=161b22)](LICENSE.md)
 
@@ -37,6 +37,10 @@ than they cost, and the Dragon Tank, Quad Cannon, Paladin and Rocket Buggy were 
 changelog has every number behind it.
 
 No game data ships here. You need your own copy of Zero Hour.
+
+**On Windows, the download is `VanguardSetup.exe`.** It installs the launcher, puts the shortcuts in
+place, finds your Zero Hour install, connects the files the game shares and offers the three mods.
+See [Play it](#play-it).
 
 ## Where it runs
 
@@ -177,21 +181,28 @@ played a full check match on a Steam Deck. A match between Windows and a Mac has
 
 ### Windows
 
-1. Have Zero Hour installed from Steam or the EA app.
-2. Download **VanguardLauncher.exe** from the
+1. Have Zero Hour installed from Steam or the EA app. You need the expansion, not just base Generals.
+2. Download **VanguardSetup.exe** from the
    [latest release](https://github.com/KuiseRapper/generals-vanguard/releases/latest) and run it.
-3. Press **Play**. On the first run the launcher downloads the current Vanguard build into its own
-   `game` folder; later, **Check for updates** replaces that build with a newer release and updates
-   the launcher itself when a newer one is on the release.
+   It installs under `%LOCALAPPDATA%\Programs\Generals Vanguard`, which is writable so the launcher
+   can update itself, and creates the Start Menu and desktop shortcuts.
+3. Leave **Download and install the Generals Vanguard game now** ticked. The setup starts the launcher
+   with `--install`, which downloads the current game, checks its SHA-256, links the Zero Hour base
+   files and pointers into the game folder, and repairs the per-user Zero Hour install path if it
+   points at the wrong folder.
+4. Press **Mods**. **Vanguard Combined**, **ShockWave 1.201** and **Rise of the Reds 1.8** are
+   listed with nothing downloaded yet. Choose one and press **Download**, or leave all unticked to
+   play vanilla Vanguard. Then press **Play**.
 
-The launcher does not ship EA's game files: the game finds your Zero Hour install and reads its
-`*.big` where they are. Zero Hour's shared base-game files are linked in from the Zero Hour install
-automatically, so a separate Generals install is not needed. A Steam copy still starts through
-Steam. If you build the game yourself, **Set game folder** points the launcher at the `generals.exe`
-in `GeneralsMD/Run`.
+The installer does not ship EA's game files, and it does not ship a mod. The game finds your Zero
+Hour install and reads its `*.big` where they are. A Steam copy still starts through Steam. If you
+build the game yourself, **Set game folder** points the launcher at the `generals.exe` in
+`GeneralsMD/Run`.
 
-The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, and
-[docs/launcher.md](docs/launcher.md) has the manifest, the update path and how a release is cut.
+`VanguardLauncher.exe` is still on the release for anyone who would rather not run an installer;
+put it anywhere writable. The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, the
+installer's in `Tools/VanguardInstaller`, and [docs/launcher.md](docs/launcher.md) has the manifest,
+the mod paths, the update path and how a release is cut.
 
 ### macOS and Linux
 
@@ -208,8 +219,8 @@ because Zero Hour mounts both. Saves and replays go to
 `~/Library/Application Support/Command and Conquer Generals Zero Hour Data` on a Mac and
 `~/.local/share/Command and Conquer Generals Zero Hour Data` on Linux.
 
-The upscaled art has no download there. Copy the `Reforged*.big` files into `ReforgedArt/` in that
-folder by hand, or play at the original textures.
+The upscaled art has no download there. Play at the original textures, or move the art archives
+from a Windows install into the game's user-data art folder.
 
 <details>
 <summary>Settings the options screen does not show</summary>
@@ -401,16 +412,20 @@ is open for anything that is not an issue yet.
 
 ## Credits
 
-Electronic Arts released the source in 2025. Olcay Seygan's Zero Hour Reforged is the base this fork
-started from. İlyas Akın (ilyasakin) wrote the macOS, Linux and Windows
-ARM64 port. Fixes taken from [TheSuperHackers/GeneralsGameCode](https://github.com/TheSuperHackers/GeneralsGameCode),
-the community's CMake port of the same source, are credited where they landed, in the code and in the
-commits. Third-party libraries are fetched at pinned versions and keep their own licences;
+Electronic Arts released the source in 2025. Olcay Seygan's Zero Hour Reforged is the GPL base this
+fork started from. İlyas Akın (ilyasakin) wrote the macOS, Linux and Windows ARM64 port. Fixes taken
+from [TheSuperHackers/GeneralsGameCode](https://github.com/TheSuperHackers/GeneralsGameCode), the
+community's CMake port of the same source, are credited where they landed, in the code and in the
+commits. ShockWave and Rise of the Reds are by SWR Productions and keep their own credits and
+licences. Third-party libraries are fetched at pinned versions and keep their own licences;
 [NOTICE.md](NOTICE.md) lists who wrote what and under which licence.
 
 **Generals Vanguard** is the fork of that port - forked at `e81b9f6a` - and adds its own work on top.
-Vanguard modifications © 2026 KuiseRapper, under the same licence. What the fork changed is in
-[CHANGELOG.md](CHANGELOG.md); how it is maintained is in [AGENTS.md](AGENTS.md).
+It is a legal GPL-3.0-or-later fork, not the upstream project: the name, README, launcher, installer,
+window and menus are Vanguard's. Upstream is credited here and in [NOTICE.md](NOTICE.md) because the
+licence requires it, and its functional data file names stay in the tree so mods and saves keep
+working. Vanguard modifications © 2026 KuiseRapper, under the same licence. What the fork changed is
+in [CHANGELOG.md](CHANGELOG.md); how it is maintained is in [AGENTS.md](AGENTS.md).
 
 ## Licence and required notices
 

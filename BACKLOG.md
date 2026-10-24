@@ -26,10 +26,12 @@ on top.
   unreachable lanes out of the vote, Easy/Medium going around them, the split wave off a bad road,
   and `findClosestPath` no longer aiming at a ravine rim - are on `develop` after the owner's
   Twilight Flame play-test. Details in the removed items' changelog entries.
-- **Faction load screens (2026-10-24).** `PlayerTemplate.LoadScreenImage` is read again: a skirmish
-  builds `SkirmishLoadScreen.wnd` with the local faction's 800x600 Vanguard plate, the map name, a
-  compact player list, the map preview and progress; LAN and the Internet keep the retail screen.
-  `skirmish_load_check` holds the wiring and `ZH_LOADSCREEN_SHOT=1` photographs it.
+- **Screen art is retail Zero Hour's (2026-10-24).** The owner's call: no custom screen plates. The
+  splash, title/load, load pages, credits, challenge, faction pages, end screens and main-menu
+  frame/backdrop are the retail images, forced over the mods' by `RetailScreens.ini`. The only fork
+  art on a screen is the supplied Vanguard logo (`VanguardLogo.tga`), on the splash, title, load page
+  and main menu. The 0.5.18 plates, their mappings and the `LoadScreenImage` skirmish screen are
+  removed.
 ## Now
 
 ### Campaign chooser (Default / ShockWave / RotR)
@@ -49,19 +51,14 @@ menu over it.
 (Default USA / ShockWave USA / RotR USA) rather than a story campaign, that is `-modfactions` plus a
 chooser UI instead, and it does not need the campaign pack. Say which and it is the first step.
 
-### Mod manager in the launcher
-**macOS launcher: done and published (0.5.11).** Mods sheet with **ShockWave 1.201** and **Rise of the
-Reds 1.8** as checkboxes: "Update mods" installs a checked mod from the matching archive in
-`~/Downloads` (or opens its ModDB page when there is none) and deletes an unchecked one, with a
-progress bar; custom `.zip`/`.big` install and uninstall are there too. Mods live under
-`~/Library/Application Support/GeneralsVanguard/Mods/<id>/`; Play passes `-mod "<abs path>/"`, which
-the engine already supports. The launcher also replaces itself from `launcher-mac.zip`/`.dmg` instead
-of asking the player to drag the app out of a disk image, and its manifest URL is
-`releases/latest/download/launcher-mac.json` (the old pin to v0.4.0 was why 0.4.x/0.5.3 never saw an
-update).
-
-**Windows launcher: still to do.** Same UI in `Tools/VanguardLauncher/MainForm.cs`, mods under
-`%USERPROFILE%\Documents\Generals Vanguard\Mods`, `GameLocator.Start` taking `-mod`.
+### Mod manager and one-click installer
+**Both launchers are done.** The macOS launcher has its Mods sheet (0.5.11). The Windows launcher
+(0.6.0) has a **Mods** screen that lists Vanguard Combined, ShockWave 1.201 and Rise of the Reds 1.8
+before anything is downloaded, downloads on request into
+`%USERPROFILE%\Documents\Generals Vanguard\Mods\<id>`, and passes `-mod` on Play. The Windows
+release now carries **`VanguardSetup.exe`**, an Inno Setup installer that puts the launcher in
+`%LOCALAPPDATA%\Programs\Generals Vanguard`, creates the shortcuts, and starts the launcher with
+`--install` so the game download and the Zero Hour path repair happen in one step.
 
 ### Performance: a frame cap and a Vulkan option (separate pass)
 **VSync on by default is done** (0.5.12: `m_vsync = TRUE`, the debug line's ~118 fps on a 61 Hz panel

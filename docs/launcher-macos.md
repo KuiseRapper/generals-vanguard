@@ -10,6 +10,8 @@ The launcher:
 - looks for your Zero Hour folder at `~/zh-data/zerohour`, and otherwise asks you to pick the folder
   that holds `INIZH.big`;
 - launches the app as `Generals Vanguard.app/Contents/MacOS/generals -root <your Zero Hour folder>`;
+- offers **Vanguard Combined**, **ShockWave 1.201** and **Rise of the Reds 1.8** in its **Mods** sheet,
+  with nothing downloaded until you ask, and passes the selected one as `-mod`;
 - checks `launcher-mac.json` for a newer game and installs it after a SHA-256 check; a newer launcher
   itself is downloaded as a DMG and opened for the usual drag-to-Applications step.
 

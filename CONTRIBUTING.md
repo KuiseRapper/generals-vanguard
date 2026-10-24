@@ -36,7 +36,7 @@ docs: explain the pull request process
 Every pull request runs a check that reads the first line of each of its commits and fails the ones
 that do not match. Fix a failing message with `git rebase -i` on your own branch and force push it;
 nobody minds a rewritten pull request branch. The same check fails a merge commit inside the pull
-request, so bring your branch up to date with `git rebase main` rather than merging `main` into it.
+request, so bring your branch up to date with `git rebase develop` rather than merging `develop` into it.
 
 ## Before you open it
 
@@ -58,10 +58,10 @@ function or option names except the ones a player types into `Options.ini`.
 
 ## What happens to it
 
-A pull request that applies cleanly to `main` is squash merged. The commit message is written to
+A pull request that applies cleanly to `develop` is squash merged. The commit message is written to
 the rules above if yours was not, and you stay the author.
 
-A pull request that conflicts with `main`, or where only part of it is taken, is ported by hand.
+A pull request that conflicts with `develop`, or where only part of it is taken, is ported by hand.
 The commit that carries it names you as a co-author, the pull request is marked merged, and a
 comment on it says which parts went in.
 

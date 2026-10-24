@@ -14974,7 +14974,7 @@ GUI:ClassicGraphics
 END
 
 TOOLTIP:ClassicGraphics
-"Oyunun 2003'teki görünümü: kendi kaplamaları ve zemini, eski keskin gölgeler, kabartma ayrıntısı yok, parlama ve keskinleştirme yok. Kapalıyken Reforged. Oyun bir sonraki açılışında geçerli olur."
+"Oyunun 2003'teki görünümü: kendi kaplamaları ve zemini, eski keskin gölgeler, kabartma ayrıntısı yok, parlama ve keskinleştirme yok. Kapalıyken Vanguard. Oyun bir sonraki açılışında geçerli olur."
 END
 
 GUI:InfantryShadows
@@ -15582,7 +15582,7 @@ CONTROLBAR:Demo_ToolTipGLAScienceRebelAmbush
 END
 
 GUI:SaveFromOlderGame
-"Bu kayıt orijinal oyunla ya da Reforged'ın eski bir sürümüyle yapılmış, yüklenemez."
+"Bu kayıt orijinal oyunla ya da Vanguard'ın eski bir sürümüyle yapılmış, yüklenemez."
 END
 
 GUI:MapCorrupt
