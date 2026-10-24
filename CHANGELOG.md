@@ -3,6 +3,23 @@
 What this fork changed, newest first.  Add a change as a `## <date> - <what>` section directly under
 this line.  Upstream's own history is below, under its own title, and is not ours to edit.
 
+## 2026-10-24 - A skirmish loads on its faction's plate
+
+- **Faction load screens.** A skirmish now reads the local player's `PlayerTemplate.LoadScreenImage`
+  - data EA wrote and no code had read since the initial commit - and draws the five 800x600 Vanguard
+  plates (USA, China, GLA, ECA, Russia) behind the map name, a compact player list, the map preview
+  and each player's progress. LAN and the Internet keep the retail load screen with its full player
+  table. The layout is the fork's own `SkirmishLoadScreen.wnd`, chosen by game mode; both layouts
+  share their window names so one init fills either. `MappedImage` names behind the field are
+  `SAFactionLogoPage_*` and `ReforgedLoadRussia`, so a mod that names the same images keeps working.
+- **A load screen can be photographed.** `ZH_LOADSCREEN_SHOT=1` takes one picture while the load
+  screen is up. Before this, a shot asked for during a load was saved on the first frame of the
+  match instead (black, with the HUD on it), because the pending-shot block sat past the load
+  screen's `continue`. `skirmish_load_check` runs one headless skirmish and asserts the log names
+  the USA plate, so the wiring cannot be commented out again silently.
+- **The credits and Generals Challenge screens** carry the fork's plates too: the Challenge screen
+  uses a plain one, so "CHOOSE YOUR GENERAL" no longer runs through the wordmark.
+
 ## 2026-10-23 - The AI remembers, consolidates and asks another dock
 
 - **Wave memory, behind a skirmish check box, on by default.** `doWaves` records `(lane, power, the

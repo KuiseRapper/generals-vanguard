@@ -26,6 +26,10 @@ on top.
   unreachable lanes out of the vote, Easy/Medium going around them, the split wave off a bad road,
   and `findClosestPath` no longer aiming at a ravine rim - are on `develop` after the owner's
   Twilight Flame play-test. Details in the removed items' changelog entries.
+- **Faction load screens (2026-10-24).** `PlayerTemplate.LoadScreenImage` is read again: a skirmish
+  builds `SkirmishLoadScreen.wnd` with the local faction's 800x600 Vanguard plate, the map name, a
+  compact player list, the map preview and progress; LAN and the Internet keep the retail screen.
+  `skirmish_load_check` holds the wiring and `ZH_LOADSCREEN_SHOT=1` photographs it.
 ## Now
 
 ### Campaign chooser (Default / ShockWave / RotR)
@@ -126,15 +130,3 @@ stderr.
 *First step:* exit with a status and a stderr line, the way the base-game guards at
 `Win32BIGFileSystem.cpp:100` and `GameEngine.cpp:1024` already do.
 
-### 12. The 0.5.18 faction load plates are never drawn
-`ReforgedLoadScreens.ini` maps `SAFactionLogoPage_US`, `_China`, `_GLA`, `_EU` and
-`ReforgedLoadRussia` to five 800x600 Vanguard plates, and `PlayerTemplate.ini` names them as
-`LoadScreenImage` - but `PlayerTemplate::getLoadScreen()` has no live caller. The only two sites that
-would use it, `LoadScreen.cpp:1359` and `:1648`, are EA's own comments from the initial commit, and
-the screens that do load a match draw `MDSkirmishLoadB` (skirmish and LAN) or `MissionLoad_*` /
-`LoadPageHuge` (campaign and save). So no screen in game shows the new plates.
-*First step:* decide which screen they belong on. The multiplayer load layout puts its title bar
-over the plate's wordmark and its player table over the faction name, so restoring the old line
-there is not enough; the single-player layout is the one with room, and a skirmish-faction load page
-would need a layout of its own. Then photograph a match's load before claiming it - no harness can
-pause the load screen today.

@@ -253,6 +253,10 @@ private:
 	GameWindow *m_featuresLocalGeneral;
 	GameWindow *m_nameLocalGeneral;
 
+	/// "MultiplayerLoadScreen.wnd:" or the skirmish layout's, chosen by init.  The window ids name
+	/// their layout file, so one init fills either layout.
+	AsciiString m_windowPrefix;
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

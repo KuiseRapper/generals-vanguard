@@ -2614,6 +2614,14 @@ AGAIN:
 					TheInGameUI->draw();
 					if( TheMouse )
 						TheMouse->draw();	//keep applying the current cursor style so it remains hidden if needed.
+					/* A shot asked for while the load screen is up.  The pending-shot block below is
+					   past this branch's continue, so before this it stayed pending and was saved on
+					   the first frame of the match instead: black, with the HUD on it. */
+					if( s_screenShotPending )
+					{
+						s_screenShotPending = FALSE;
+						saveScreenShot();
+					}
 					WW3D::End_Render();	
 					continue;
 				}

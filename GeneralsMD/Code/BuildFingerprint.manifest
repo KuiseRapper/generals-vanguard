@@ -423,6 +423,7 @@ Data/Window/Menus/ShellGameLoadScreen.wnd
 Data/Window/Menus/SinglePlayerLoadScreen.wnd
 Data/Window/Menus/SinglePlayerMenu.wnd
 Data/Window/Menus/SkirmishGameOptionsMenu.wnd
+Data/Window/Menus/SkirmishLoadScreen.wnd
 Data/Window/Menus/SkirmishMapSelectMenu.wnd
 Data/Window/Menus/Victorious.wnd
 Data/Window/Menus/WOLBuddyOverlay.wnd
@@ -2999,6 +3000,7 @@ Tests/run_ini_crlf_check.sh
 Tests/run_locomotor_check.sh
 Tests/run_net_check.sh
 Tests/run_replay_check.sh
+Tests/run_skirmish_load_check.sh
 Tests/sdl_gpu_probe.cpp
 Tests/shader_cases.h
 Tests/terrain_golden.txt

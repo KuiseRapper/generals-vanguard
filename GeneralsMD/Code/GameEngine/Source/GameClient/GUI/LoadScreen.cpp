@@ -1339,14 +1339,33 @@ MultiPlayerLoadScreen::~MultiPlayerLoadScreen( void )
 //	TheAudio->stopAudio( AudioAffect_Music );
 }
 
+/// The window manager names a window after the layout file it came from.  Both load layouts name
+/// their windows alike, so the file prefix is the only thing that differs between them.
+static NameKeyType loadScreenWindowKey( const AsciiString &prefix, const char *suffix )
+{
+	AsciiString name( prefix );
+	name.concat( suffix );
+	return TheNameKeyGenerator->nameToKey( name );
+}
+
 void MultiPlayerLoadScreen::init( GameInfo *game )
 {
+	/* A skirmish is a local game whose players were chosen a screen ago, so it gets the fork's own
+	   layout: the local faction's Vanguard plate with a compact player list over it.  LAN and the
+	   Internet keep the retail load screen, where the map preview and the full player table are
+	   what a room of people needs to see. */
+	const Bool skirmish = TheGameLogic != NULL && TheGameLogic->getGameMode() == GAME_SKIRMISH;
+	const char *layoutName = skirmish ? "SkirmishLoadScreen" : "MultiplayerLoadScreen";
+
 	// create the layout of the load screen
-	m_loadScreen = TheWindowManager->winCreateFromScript( AsciiString( "Menus/MultiplayerLoadScreen.wnd" ) );
-	DEBUG_ASSERTCRASH(m_loadScreen, ("Can't initialize the Multiplayer loadscreen"));
+	AsciiString layoutPath;
+	layoutPath.format( "Menus/%s.wnd", layoutName );
+	m_loadScreen = TheWindowManager->winCreateFromScript( layoutPath );
+	DEBUG_ASSERTCRASH(m_loadScreen, ("Can't initialize the %s loadscreen", layoutName));
 	m_loadScreen->winHide(FALSE);
 	m_loadScreen->winBringToTop();
-	m_mapPreview = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( "MultiplayerLoadScreen.wnd:WinMapPreview"));
+	m_windowPrefix.format( "%s.wnd:", layoutName );
+	m_mapPreview = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, "WinMapPreview" ) );
 	// getLocalSlotNum() is -1 when no slot in the list is the local player - a game watched from
 	// the observer camera rather than played - and getSlot(-1) hands back NULL.  Same guard the
 	// score screen already has.
@@ -1375,7 +1394,7 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 		// A fork faction has no GeneralPersona of its own yet, so it wears a portrait of its own: the
 		// Russia load portrait (a red star, RUSSIA, Generals Vanguard) rather than the base side's
 		// logo, which would show the China dragon and say nothing about who is loading.
-		if (pt->getName() == "FactionRussia")
+		if (pt->getBaseSide() == "Russia")
 			portrait = TheMappedImageCollection->findImageByName("SAFactionLogoLg_RU");
 		else if (pt->getBaseSide() == "USA")
 			portrait = TheMappedImageCollection->findImageByName("SAFactionLogoLg_US");
@@ -1388,12 +1407,19 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 
 		localName = pt->getDisplayName();
 	}
-	m_portraitLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( "MultiplayerLoadScreen.wnd:LocalGeneralPortrait"));
+	m_portraitLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, "LocalGeneralPortrait" ) );
 	m_portraitLocalGeneral->winSetEnabledImage( 0, portrait);
-	m_featuresLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( "MultiplayerLoadScreen.wnd:LocalGeneralFeatures"));
+	m_featuresLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, "LocalGeneralFeatures" ) );
 	AsciiString features = pt->getGeneralFeatures();
 	GadgetStaticTextSetText( m_featuresLocalGeneral, TheGameText->fetch( features.isEmpty() ? AsciiString( "GUI:PlayerObserver" ) : pt->getGeneralFeatures() ) );
-	m_nameLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( "MultiplayerLoadScreen.wnd:LocalGeneralName"));
+	/* The skirmish card names the map instead of repeating the army the plate already carries. */
+	if (skirmish)
+	{
+		const MapMetaData *mmd = TheMapCache->findMap( game->getMap() );
+		if (mmd != NULL && !mmd->m_displayName.isEmpty())
+			localName = mmd->m_displayName;
+	}
+	m_nameLocalGeneral = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, "LocalGeneralName" ) );
 	GadgetStaticTextSetText( m_nameLocalGeneral, localName );
 
 	AsciiString musicName = pt->getLoadScreenMusic();
@@ -1409,10 +1435,24 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 	}
 
 
-//	if(loadScreenImage)
-//		m_loadScreen->winSetEnabledImage(0, loadScreenImage);
-	//DEBUG_ASSERTCRASH(TheNetwork, ("Where the Heck is the Network!!!!"));
-	//DEBUG_LOG(("NumPlayers %d\n", TheNetwork->getNumPlayers()));
+	/* The plate.  PlayerTemplate.ini has carried LoadScreenImage since EA wrote it, but the only two
+	   places that would have read it were comments - until now the field was data nothing looked at.
+	   The six mapped images behind it are the fork's own plates, and a mod that names the same images
+	   keeps working.  Observer and civilian templates are not playable and keep the layout's own
+	   background. */
+	if (skirmish && pt->isPlayableSide())
+	{
+		const Image *plate = TheMappedImageCollection->findImageByName( pt->getLoadScreen() );
+		if (plate != NULL)
+		{
+			m_loadScreen->winSetEnabledImage( 0, plate );
+			DEBUG_LOG(("LoadScreen: the skirmish plate is %s (%s)\n", pt->getLoadScreen().str(), pt->getName().str()));
+		}
+		else
+		{
+			DEBUG_LOG(("LoadScreen: no image named %s for %s; the layout's background stays\n", pt->getLoadScreen().str(), pt->getName().str()));
+		}
+	}
 
 	GameWindow *teamWin[MAX_SLOTS];
 	// i is used after the loop; VC6 for-scope let it escape.
@@ -1428,30 +1468,30 @@ void MultiPlayerLoadScreen::init( GameInfo *game )
 	{
 		// Load the Progress Bar
 		AsciiString winName;
-		winName.format( "MultiplayerLoadScreen.wnd:ProgressLoad%d",i);
-		m_progressBars[i] = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( winName ));
+		winName.format( "ProgressLoad%d",i);
+		m_progressBars[i] = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, winName.str() ) );
 		DEBUG_ASSERTCRASH(m_progressBars[i], ("Can't initialize the progressbars for the Multiplayer loadscreen"));
 		// set the progressbar to zero
 		GadgetProgressBarSetProgress(m_progressBars[i], 0 );
 
 		// Load MapStart Positions
-		winName.format( "MultiplayerLoadScreen.wnd:ButtonMapStartPosition%d",i);
-		m_buttonMapStartPosition[i] = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( winName ));
+		winName.format( "ButtonMapStartPosition%d",i);
+		m_buttonMapStartPosition[i] = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, winName.str() ) );
 		DEBUG_ASSERTCRASH(m_buttonMapStartPosition[i], ("Can't initialize the MapStart Positions for the MultiplayerLoadScreen loadscreen"));
 
 
 		// Load the Player's name
-		winName.format( "MultiplayerLoadScreen.wnd:StaticTextPlayer%d",i);
-		m_playerNames[i] = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( winName ));
+		winName.format( "StaticTextPlayer%d",i);
+		m_playerNames[i] = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, winName.str() ) );
 		DEBUG_ASSERTCRASH(m_playerNames[i], ("Can't initialize the Names for the Multiplayer loadscreen"));
 		
 		// Load the Player's Side
-		winName.format( "MultiplayerLoadScreen.wnd:StaticTextSide%d",i);
-		m_playerSide[i] = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( winName ));
+		winName.format( "StaticTextSide%d",i);
+		m_playerSide[i] = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, winName.str() ) );
 		DEBUG_ASSERTCRASH(m_playerSide[i], ("Can't initialize the Sides for the Multiplayer loadscreen"));
 		
-		winName.format( "MultiplayerLoadScreen.wnd:StaticTextTeam%d",i);
-		teamWin[i] = TheWindowManager->winGetWindowFromId( m_loadScreen,TheNameKeyGenerator->nameToKey( winName ));
+		winName.format( "StaticTextTeam%d",i);
+		teamWin[i] = TheWindowManager->winGetWindowFromId( m_loadScreen, loadScreenWindowKey( m_windowPrefix, winName.str() ) );
 
 		// get the slot man!
 		GameSlot *slot = game->getSlot(i);
@@ -1536,6 +1576,20 @@ void MultiPlayerLoadScreen::reset( void )
 
 void MultiPlayerLoadScreen::update( Int percent )
 {
+	/* A harness's way to photograph the load screen.  -autoskirmish starts a match and this screen
+	   is replaced before the first logic frame, so a picture asked for by frame can never catch it;
+	   this takes one while it is still up.  A test hook, like -screenshot. */
+	static Bool loadScreenShotTaken = FALSE;
+	if (!loadScreenShotTaken && percent >= 15 && getenv("ZH_LOADSCREEN_SHOT") != NULL)
+	{
+		loadScreenShotTaken = TRUE;
+		TheDisplay->takeScreenShot();
+		// takeScreenShot defers the save to the end of the next draw; draw the screen once here so
+		// the picture is of the load screen and not of the first frame of the match after it.
+		TheDisplay->draw();
+		DEBUG_LOG(("LoadScreen: ZH_LOADSCREEN_SHOT took the %d%% picture\n", percent));
+	}
+
 	if (TheNetwork)
 	{
 		if(percent <= 100)
