@@ -205,8 +205,9 @@ mod paths, the update path and how a release is cut.
 
 ### macOS and Linux
 
-On macOS, download **VanguardLauncher-mac.dmg** from the [latest
-release](https://github.com/KuiseRapper/generals-vanguard/releases/latest), drag the launcher to
+On macOS, download **VanguardLauncher-mac.dmg** from
+[v0.5.18](https://github.com/KuiseRapper/generals-vanguard/releases/tag/v0.5.18) - 0.6.0 is the
+Windows front door, and the macOS package returns with the next Mac build. Drag the launcher to
 Applications, and point it at your Zero Hour folder with **Set Zero Hour folder**. It installs the
 macOS game app, runs it with `-root` pointing at that folder, and updates it from
 `launcher-mac.json`; [docs/launcher-macos.md](docs/launcher-macos.md) has the details.
