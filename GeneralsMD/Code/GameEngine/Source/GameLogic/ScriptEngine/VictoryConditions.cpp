@@ -52,6 +52,7 @@
 #include "GameLogic/GameLogic.h"
 #include "GameLogic/PartitionManager.h"
 #include "GameLogic/ScriptActions.h"
+#include "GameLogic/ScriptActions.h"
 #include "GameLogic/VictoryConditions.h"
 #include "GameNetwork/GameInfo.h"
 #include "GameNetwork/NetworkDefs.h"
@@ -107,6 +108,7 @@ private:
 	Bool					m_isDefeated[MAX_PLAYER_COUNT];
 	Bool					m_localPlayerDefeated;												///< prevents condition from being signaled each frame
 	Bool					m_singleAllianceRemaining;										///< prevents condition from being signaled each frame
+	Bool					m_endDeclared;																///< the engine declared a skirmish result (no map script did)
 	Bool					m_isObserver;
 };
 
@@ -141,6 +143,7 @@ void VictoryConditions::reset( void )
 
 	m_localPlayerDefeated = false;
 	m_singleAllianceRemaining = false;
+	m_endDeclared = false;
 	m_isObserver = false;
 	m_endFrame = 0;
 
@@ -244,6 +247,24 @@ void VictoryConditions::update( void )
 			TheRadar->forceOn(TRUE);
 			SetInGameChatType( INGAME_CHAT_EVERYONE ); // can't chat to allies after death.  Only to other observers.
 		}
+	}
+
+	/* A skirmish's result is normally declared by the map's own Victory/Defeat script.  A team game
+	   can leave every enemy marked defeated and still sit there because that script's condition never
+	   fires - a 4v4 on Twilight Flame did exactly that.  The last alliance is standing, which is the
+	   engine's own definition of the end, so declare the result here once.  Campaigns keep their
+	   objectives and LAN keeps its scripts; this is the skirmish fallback. */
+	if (!TheGlobalData->m_headless && m_singleAllianceRemaining && !m_endDeclared && m_endFrame > 1
+		&& TheScriptActions != NULL && TheGameLogic->isInSkirmishGame()
+		&& (TheGameInfo == NULL || !TheGameInfo->isSandbox()))
+	{
+		m_endDeclared = true;
+		Player *local = ThePlayerList->getLocalPlayer();
+		if (local == NULL || local->isPlayerObserver() || hasAchievedVictory(local))
+			TheScriptActions->doVictory();
+		else
+			TheScriptActions->doDefeat();
+		DEBUG_LOG(("VictoryConditions: last alliance standing at frame %d, declared the skirmish result\n", m_endFrame));
 	}
 }
 

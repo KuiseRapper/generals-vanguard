@@ -59,6 +59,10 @@ public:
 	virtual void executeAction( ScriptAction *pAction ) = 0; ///< execute a script action.
 	virtual void closeWindows( Bool suppressNewWindows ) = 0;
 
+	// The engine can declare a skirmish result when the map's script did not (see VictoryConditions).
+	virtual void doVictory( void ) = 0;
+	virtual void doDefeat( void ) = 0;
+
 	// Called by the script engine in postProcessLoad()
 	virtual void doEnableOrDisableObjectDifficultyBonuses(Bool enableBonuses) = 0;
 };  // end class ScriptActionsInterface
