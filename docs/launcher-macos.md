@@ -13,7 +13,7 @@ The launcher:
 - offers **Vanguard Combined**, **ShockWave 1.201** and **Rise of the Reds 1.8** in its **Mods** sheet,
   with nothing downloaded until you ask, and passes the selected one as `-mod`;
 - checks `launcher-mac.json` for a newer game and installs it after a SHA-256 check; a newer launcher
-  itself is downloaded as a DMG and opened for the usual drag-to-Applications step.
+  itself is downloaded as a zip and unpacked over the installed app.
 
 The macOS game app is built from the same tree as the Windows build; it contains the fork's data
 overlay and reads your own Zero Hour data, so no EA game files are redistributed.
