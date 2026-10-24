@@ -47,3 +47,11 @@ Tools/VanguardLauncher.Tests/obj/
 Tools/VanguardLauncherMac/build/
 Tools/VanguardLauncherMac/.swift-cache/
 Tools/VanguardLauncherMac/.tmp/
+
+# Local .NET SDK used to build the launcher without touching the machine-wide install
+.dotnet/
+.dotnet-home/
+.nuget/
+
+# Release staging: launcher publish output, game zip, setup exe and manifest
+dist/

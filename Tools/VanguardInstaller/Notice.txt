@@ -1,0 +1,20 @@
+Generals Vanguard
+for Command & Conquer: Generals Zero Hour
+
+EA has not endorsed and does not support this product.
+
+This installer installs the Generals Vanguard launcher only. It does not include
+Electronic Arts' game data, and it does not include any mod package. You need
+your own legitimate copy of Command & Conquer: Generals Zero Hour.
+
+The launcher will look for your Zero Hour folder, repair the per-user install
+path when it can, connect the base-game files Zero Hour shares, and then offer
+the game and three optional mods. Nothing large is downloaded until you choose
+it.
+
+The full licence is the GNU General Public License version 3 with Electronic
+Arts' additional terms, in LICENSE.md beside this installer and in the
+repository. Generals Vanguard is an unofficial, non-commercial fan project. It
+is not affiliated with, endorsed by or sponsored by Electronic Arts Inc.
+Command & Conquer, Generals and Zero Hour are trademarks of Electronic Arts Inc.
+or its licensors.
