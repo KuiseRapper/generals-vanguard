@@ -38,9 +38,9 @@ changelog has every number behind it.
 
 No game data ships here. You need your own copy of Zero Hour.
 
-**On Windows, the download is `VanguardSetup.exe`.** It installs the launcher, puts the shortcuts in
-place, finds your Zero Hour install, connects the files the game shares and offers the three mods.
-See [Play it](#play-it).
+**On Windows, the download is `VanguardLauncher.exe`.** Its first run installs the launcher, puts the
+shortcuts in place, finds your Zero Hour install, connects the files the game shares and offers the
+three mods. See [Play it](#play-it).
 
 ## Where it runs
 
@@ -182,27 +182,26 @@ played a full check match on a Steam Deck. A match between Windows and a Mac has
 ### Windows
 
 1. Have Zero Hour installed from Steam or the EA app. You need the expansion, not just base Generals.
-2. Download **VanguardSetup.exe** from the
+2. Download **VanguardLauncher.exe** from the
    [latest release](https://github.com/KuiseRapper/generals-vanguard/releases/latest) and run it.
-   It installs under `%LOCALAPPDATA%\Programs\Generals Vanguard`, which is writable so the launcher
-   can update itself, and creates the Start Menu and desktop shortcuts.
-3. Leave **Download and install the Generals Vanguard game now** ticked. The setup starts the launcher
-   with `--install`, which downloads the current game, checks its SHA-256, links the Zero Hour base
-   files and pointers into the game folder, and repairs the per-user Zero Hour install path if it
-   points at the wrong folder.
+   On its first run it installs itself under `%LOCALAPPDATA%\Programs\Generals Vanguard`, a writable
+   folder so it can replace its own exe when it updates, and creates the Start Menu and desktop
+   shortcuts. No installer and no administrator prompt.
+3. The installed launcher starts the game download at once: it fetches the current game, checks its
+   SHA-256, links the Zero Hour base files and pointers into the game folder, and repairs the per-user
+   Zero Hour install path if it points at the wrong folder.
 4. Press **Mods**. **Vanguard Combined**, **ShockWave 1.201** and **Rise of the Reds 1.8** are
    listed with nothing downloaded yet. Choose one and press **Download**, or leave all unticked to
    play vanilla Vanguard. Then press **Play**.
 
-The installer does not ship EA's game files, and it does not ship a mod. The game finds your Zero
-Hour install and reads its `*.big` where they are. A Steam copy still starts through Steam. If you
-build the game yourself, **Set game folder** points the launcher at the `generals.exe` in
-`GeneralsMD/Run`.
+Nothing in this download is EA's game data, and no mod is bundled. The game finds your Zero Hour
+install and reads its `*.big` where they are. A Steam copy still starts through Steam. If you build
+the game yourself, **Set game folder** points the launcher at the `generals.exe` in
+`GeneralsMD/Run`, and `--portable` keeps the launcher beside that build instead of installing itself.
 
-`VanguardLauncher.exe` is still on the release for anyone who would rather not run an installer;
-put it anywhere writable. The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, the
-installer's in `Tools/VanguardInstaller`, and [docs/launcher.md](docs/launcher.md) has the manifest,
-the mod paths, the update path and how a release is cut.
+The launcher is Windows x64. Its source is in `Tools/VanguardLauncher`, the optional Inno Setup
+script in `Tools/VanguardInstaller`, and [docs/launcher.md](docs/launcher.md) has the manifest, the
+mod paths, the update path and how a release is cut.
 
 ### macOS and Linux
 

@@ -27,22 +27,22 @@ shows *"Please start Generals Vanguard from its launcher."*
 
 ## Installing it
 
-The recommended download is **`VanguardSetup.exe`**, built by `Tools/VanguardInstaller/VanguardSetup.iss`
-with Inno Setup 6. It:
+The Windows download is **`VanguardLauncher.exe`**. It installs itself the first time it runs:
 
-1. installs the launcher in `%LOCALAPPDATA%\Programs\Generals Vanguard` - a writable folder, so the
-   launcher can replace its own exe when it updates;
-2. puts a Start Menu entry and, unless you untick it, a desktop shortcut in place;
-3. starts `VanguardLauncher.exe --install`, which downloads the current game, checks its SHA-256,
+1. it copies itself into `%LOCALAPPDATA%\Programs\Generals Vanguard` - a writable folder, so it can
+   replace its own exe when it updates;
+2. it creates a Start Menu entry and a desktop shortcut;
+3. the installed copy starts with `--install`, which downloads the current game, checks its SHA-256,
    connects the Zero Hour base files and cursors, repairs the per-user Zero Hour path, and leaves the
    launcher ready on its main screen.
 
-The installer installs **no game data and no mod**. It uses `PrivilegesRequired=lowest`, so it never
-asks for administrator rights, and the uninstaller removes the game folder it installed but leaves
-your downloaded mods in Documents alone.
+No administrator rights are needed and no separate installer is required. A developer build or a
+portable copy with its own `game` folder is left where it is; pass `--portable` to force that.
 
-`VanguardLauncher.exe` is still published on every release for anyone who would rather not run an
-installer. Put it anywhere writable; it keeps its game in a `game` folder beside itself.
+`Tools/VanguardInstaller/VanguardSetup.iss` is the optional Inno Setup 6 route for a packaged setup
+exe. It installs the same launcher in the same LocalAppData folder and starts it with `--install`;
+it installs no game data and no mod. It is not required for the release, because the launcher
+installs itself.
 
 ## The main screen
 
@@ -121,11 +121,11 @@ the next check.
 
 A newer launcher follows the same hash check. Windows will not let the launcher overwrite its own
 running image, so it downloads `VanguardLauncher.new.exe` and starts a small `cmd` helper that waits
-for the launcher to exit, moves the new file into place and restarts it. The installer's LocalAppData
+for the launcher to exit, moves the new file into place and restarts it. The LocalAppData install
 folder is writable for exactly this; a launcher copied into `Program Files` cannot update itself and
 says so.
 
-The exe and the installer are not code-signed, so Windows SmartScreen may ask before the first run:
+The exe is not code-signed, so Windows SmartScreen may ask before the first run:
 **More info** → **Run anyway**. The download is hashed against the release manifest, but the manifest
 itself is served over HTTPS from the same release, so the release account is the trust root.
 
@@ -144,13 +144,14 @@ The result is a single `VanguardLauncher.exe` (about 150 MB; the .NET runtime is
 cross-published from macOS or Linux with the same command; the project sets
 `EnableWindowsTargeting` for that.
 
-The installer is built from that publish output with Inno Setup 6:
+The optional setup exe is built from that publish output with Inno Setup 6:
 
 ```
 Tools\VanguardInstaller\build.ps1 -Version 0.6.0
 ```
 
-It writes `dist\VanguardSetup.exe`. The release workflow installs Inno Setup and runs the same script.
+It writes `dist\VanguardSetup.exe`. The release workflow currently publishes the launcher itself;
+the setup script is there for a packaging run that wants one.
 
 The update core is platform-neutral and has a self-contained test:
 
@@ -165,13 +166,12 @@ Windows.
 
 ## Cutting a release
 
-`.github/workflows/release.yml` builds the game, runs the launcher tests, publishes the launcher and
-the installer on `windows-2022`, and puts four assets on a GitHub release:
+`.github/workflows/release.yml` builds the game, runs the launcher tests and publishes the launcher
+on `windows-2022`, and puts three assets on a GitHub release:
 
 | Asset | What it is |
 |---|---|
-| `VanguardSetup.exe` | the one-click Windows installer; the download users want |
-| `VanguardLauncher.exe` | the launcher alone, for a manual install |
+| `VanguardLauncher.exe` | the one-click Windows download; it installs itself on first run |
 | `VanguardGame.zip` | the game build for a manual install |
 | `launcher.json` | the update manifest the launcher reads |
 
@@ -189,8 +189,8 @@ gh workflow run release.yml --ref develop -f version=v0.6.0
 ```
 
 The workflow needs **Read and write permissions** for `GITHUB_TOKEN` in the repository's
-**Settings → Actions → General**; it uploads the same four files as a workflow artifact as well, so a
-failed release step does not lose the build.
+**Settings → Actions → General**; it uploads the same three files as a workflow artifact as well, so
+a failed release step does not lose the build.
 
 The launcher's assembly version is in `Tools/VanguardLauncher/VanguardLauncher.csproj`; bump it with
 the tag so the self-update check has something to compare.
@@ -199,7 +199,7 @@ the tag so the self-update check has something to compare.
 
 - Windows x64 only. Windows on ARM64 can run it under emulation; there is no native ARM64 publish yet.
 - No delta patches: an update downloads the whole `VanguardGame.zip`.
-- Neither the launcher nor the installer is code-signed, so SmartScreen is expected to warn.
+- The launcher is not code-signed, so SmartScreen is expected to warn.
 - It does not install Zero Hour, and it cannot update EA's `*.big` files.
 - The game folder it manages is `game` beside the exe; a custom **Set game folder** build is played
   but never updated in place.

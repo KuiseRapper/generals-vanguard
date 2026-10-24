@@ -56,9 +56,10 @@ chooser UI instead, and it does not need the campaign pack. Say which and it is 
 (0.6.0) has a **Mods** screen that lists Vanguard Combined, ShockWave 1.201 and Rise of the Reds 1.8
 before anything is downloaded, downloads on request into
 `%USERPROFILE%\Documents\Generals Vanguard\Mods\<id>`, and passes `-mod` on Play. The Windows
-release now carries **`VanguardSetup.exe`**, an Inno Setup installer that puts the launcher in
-`%LOCALAPPDATA%\Programs\Generals Vanguard`, creates the shortcuts, and starts the launcher with
-`--install` so the game download and the Zero Hour path repair happen in one step.
+release now carries a launcher that installs itself: it copies itself into
+`%LOCALAPPDATA%\Programs\Generals Vanguard`, creates the shortcuts, and starts the installed copy
+with `--install`, so the game download and the Zero Hour path repair happen in one step. The Inno
+Setup script in `Tools/VanguardInstaller` can still build a packaged `VanguardSetup.exe`.
 
 ### Performance: a frame cap and a Vulkan option (separate pass)
 **VSync on by default is done** (0.5.12: `m_vsync = TRUE`, the debug line's ~118 fps on a 61 Hz panel

@@ -810,29 +810,10 @@ public sealed partial class MainForm : Form
         }
     }
 
-    private static bool TryCreateShortcut()
-    {
-        try
-        {
-            var shellType = Type.GetTypeFromProgID("WScript.Shell");
-            if (shellType is null)
-                return false;
-            dynamic shell = Activator.CreateInstance(shellType)!;
-            var path = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
-                "Generals Vanguard.lnk");
-            dynamic shortcut = shell.CreateShortcut(path);
-            shortcut.TargetPath = Environment.ProcessPath ?? Application.ExecutablePath;
-            shortcut.WorkingDirectory = AppContext.BaseDirectory;
-            shortcut.IconLocation = Environment.ProcessPath ?? Application.ExecutablePath;
-            shortcut.Save();
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
-    }
+    private static bool TryCreateShortcut() =>
+        Bootstrap.CreateShortcuts(
+            Environment.ProcessPath ?? Application.ExecutablePath,
+            AppContext.BaseDirectory);
 
     private void SetGameFolder()
     {

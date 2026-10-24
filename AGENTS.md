@@ -133,7 +133,7 @@ identity is a separate, riskier decision.
 | `Tools/` | Standalone tools: `PathLab` (pathfinding), `Balance`, `Chroma`, `ScbTool`, `RandomMapLab` |
 | `Tools/VanguardLauncher/` | the Windows launcher (WinForms, .NET 8), including the Mods screen |
 | `Tools/VanguardLauncher.Core/` | platform-neutral update and mod-store code, with its own tests |
-| `Tools/VanguardInstaller/` | Inno Setup 6 script and `build.ps1` for `VanguardSetup.exe` |
+| `Tools/VanguardInstaller/` | optional Inno Setup 6 script and `build.ps1` for `VanguardSetup.exe` |
 | `docs/porting/` | `windows-impact.md` is the verification ledger; `sanitizers.md` |
 | `*.ps1` at the root | Windows harnesses: `ai-batch.ps1`, `replay-check.ps1`, `windows-ci.ps1`, `tree-check.ps1`, `dx11-check.ps1`, `shadow-check.ps1`, `lan-play.ps1` |
 
@@ -203,8 +203,9 @@ but the Alt-Tab class of bug only exists on Windows, and no test can tell you wh
 - Branding (display name, credits, disclaimers) differs; keep the diff to those surfaces and leave
   upstream's data names and internal identifiers alone.
 - The GitHub default branch is `develop`, not `main`, so the repository home shows Vanguard's README.
-- The Windows download is `VanguardSetup.exe`, an Inno Setup installer that installs the launcher under
-  `%LOCALAPPDATA%` and starts it with `--install`; the standalone launcher and game zip stay published.
+- The Windows download is `VanguardLauncher.exe`, which installs itself under `%LOCALAPPDATA%` and
+  starts the installed copy with `--install`. `--portable` skips that. The Inno Setup script in
+  `Tools/VanguardInstaller` is an optional packaged-deployment path, not required by a release.
 - The launcher's Mods screen lists Vanguard Combined, ShockWave 1.201 and Rise of the Reds 1.8, but
   downloads none of them; each package stays in `Documents\Generals Vanguard\Mods` and is passed as
   `-mod`.

@@ -19,12 +19,13 @@ this line.  Upstream's own history is below, under its own title, and is not our
   challenge, faction pages, main-menu ruler, load pages, end banners, mission loads).
 ## 2026-10-24 - One click on Windows, and the mods are in the launcher
 
-- **`VanguardSetup.exe` is the Windows download.** An Inno Setup 6 installer puts the launcher under
+- **`VanguardLauncher.exe` installs itself on its first run.** It copies itself into
   `%LOCALAPPDATA%\Programs\Generals Vanguard` (writable, so self-update works), creates the Start
-  Menu and desktop shortcuts, and starts the launcher with `--install`. That path downloads the game,
-  checks its SHA-256, links the Zero Hour base files and pointers, and repairs the per-user Zero Hour
-  install path - all without administrator rights and without a manual folder move. The standalone
-  `VanguardLauncher.exe` and `VanguardGame.zip` stay on the release.
+  Menu and desktop shortcuts, and starts the installed copy with `--install`. That path downloads the
+  game, checks its SHA-256, links the Zero Hour base files and pointers, and repairs the per-user Zero
+  Hour install path - all without administrator rights and without a manual folder move. `--portable`
+  leaves a developer build alone. The optional Inno Setup script in `Tools/VanguardInstaller` can
+  still build a `VanguardSetup.exe`, but the release does not need it.
 - **The launcher has the Mods screen the Windows build was missing.** It lists **Vanguard Combined**,
   **ShockWave 1.201** and **Rise of the Reds 1.8** before anything is downloaded, with each package's
   size. Download is explicit; the package is unpacked into
@@ -32,9 +33,8 @@ this line.  Upstream's own history is below, under its own title, and is not our
   one plays it; ticking none plays vanilla Vanguard. A game update cannot remove a mod, because mods
   do not live in the launcher's `game` folder. Custom `.zip`/`.big` packages, Remove and Open mods
   folder are there too.
-- The launcher is 0.6.0. The release workflow runs the launcher's self-test, builds the installer and
-  publishes four assets (`VanguardSetup.exe`, `VanguardLauncher.exe`, `VanguardGame.zip`,
-  `launcher.json`).
+- The launcher is 0.6.0. The release workflow runs the launcher's self-test and publishes three
+  assets (`VanguardLauncher.exe`, `VanguardGame.zip`, `launcher.json`).
 - **The two visible "Reforged" strings are Vanguard's now:** the Classic Graphics tooltip says
   "Off is Vanguard" and the old-save message says "an older version of Vanguard", in English, German
   and Turkish. Internal data names (`*Reforged.ini`, `Reforged*.tga`, `Reforged*.big`) stay, because
