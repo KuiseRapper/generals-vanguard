@@ -29,8 +29,11 @@ internal static class Bootstrap
         var exe = Environment.ProcessPath;
         if (string.IsNullOrWhiteSpace(exe) || !File.Exists(exe))
             return false;
-        // A framework-dependent `dotnet run` points ProcessPath at dotnet itself; never copy that.
-        if (!Path.GetFileName(exe).Equals(ExeName, StringComparison.OrdinalIgnoreCase))
+        // A framework-dependent `dotnet run` or a test host points ProcessPath at its own binary;
+        // never copy that into the install folder. A renamed download is still the launcher.
+        var host = Path.GetFileNameWithoutExtension(exe);
+        if (host.Equals("dotnet", StringComparison.OrdinalIgnoreCase)
+            || host.Equals("testhost", StringComparison.OrdinalIgnoreCase))
             return false;
 
         var current = Path.GetFullPath(Path.GetDirectoryName(exe)!);
